@@ -1,0 +1,20 @@
+{
+    "action": {},
+    "content_scripts": [
+        {
+            "js": [
+                "content.js"
+            ],
+            "matches": [
+                "https://app.inv.tech/process/*",
+                "https://app.inv.tech/work/*"
+            ],
+            "run_at": "document_end",
+            "world": "MAIN"
+        }
+    ],
+    "description": "Assist with operations on Orochi",
+    "manifest_version": 3,
+    "name": "Orochi Helper",
+    "version": "0.2"
+}
