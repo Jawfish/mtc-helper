@@ -42,8 +42,8 @@ const getConversationSubmitButton = () => {
 
 const getResponseCode = () =>
     document.querySelector("div.rounded-xl pre code")?.textContent;
-const hasMultipleCodeBlocks = () =>
-    document.querySelectorAll("div.rounded-xl pre code")?.length > 1;
+// const hasMultipleCodeBlocks = () =>
+//     document.querySelectorAll("div.rounded-xl pre code")?.length > 1;
 
 /**
  * Get the snooze button from the page. Used as a cheap way to detect if a conversation
@@ -88,7 +88,8 @@ const handleConversationSubmit = (e) => {
         "Click OK to submit anyway or Cancel to cancel the submission.";
 
     if (messages.length > 0) {
-        if (confirm(prefix + messages.join("\n") + "\n\n" + suffix)) {
+        const formattedMessages = formatMessages(messages).join("");
+        if (confirm(prefix + formattedMessages + "\n" + suffix)) {
             const conversationButton = getConversationSubmitButton();
             conversationButton.removeEventListener(
                 "click",
@@ -112,27 +113,21 @@ const handleConversationSubmit = (e) => {
 // HELPERS
 
 /**
- * Check if the conversation window contains Python code. If any <p> element contains
- * the text "Python", then the code is Python in the onboarding process. If a <button>
- * element with the name attribute "Select Language" contains the text "Python", then
- * the code is Python in the live process.
- *
- * **NOTE:** This will return false positives if the text "Python" is present in the
- * user-submitted prompt.
+ * Check if the conversation window contains Python code.
  *
  * @returns {boolean} - True if the conversation window contains Python code.
  */
 const isPython = () => {
-    // Can be made more robust in the future by excluding the user prompt from the <p> element check.
-    const hasPythonInParagraphs = Array.from(
-        document.querySelectorAll("p"),
-    ).some((p) => p.textContent.includes("Python"));
+    const hasPythonInSpan =
+        Array.from(document.querySelectorAll("span"))
+            .find((span) => span.textContent.trim() === "Programming Language")
+            ?.parentElement?.textContent.split(":")[1] === "Python";
 
     const hasPythonInButton = Array.from(
-        document.querySelectorAll('button[name="Select Language"]'),
+        document.querySelectorAll("button"),
     ).some((button) => button.textContent.includes("Python"));
 
-    return hasPythonInParagraphs || hasPythonInButton;
+    return hasPythonInSpan || hasPythonInButton;
 };
 
 /**
@@ -152,10 +147,13 @@ const validatePython = (code, messages) => {
     const maxLineLength = 240;
 
     const lines = code.split("\n");
-    if (lines.length < 2) {
-        log("warn", "There are 2 or fewer lines in the bot response.");
-        messages.push("The bot response has suspiciously few lines.");
-    }
+
+    const truncateLine = (line) => {
+        const truncateLength = 32;
+        return line.length > truncateLength
+            ? `${line.slice(0, truncateLength)}...`
+            : line;
+    };
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -169,6 +167,8 @@ const validatePython = (code, messages) => {
         const isIndented = line.startsWith("    ");
         const isCommented = line.startsWith("#");
 
+        const shortenedLine = truncateLine(line);
+
         // Ignore empty lines
         if (line.trim().length === 0) {
             continue;
@@ -177,7 +177,7 @@ const validatePython = (code, messages) => {
         if (line.length > maxLineLength) {
             log("warn", `A line is suspiciously long: ${line}`);
             messages.push(
-                `A line in the bot response is suspiciously long: ${line.slice(0, 64)}...`,
+                `A line in the bot response is suspiciously long: ${shortenedLine}`,
             );
         }
 
@@ -195,7 +195,15 @@ const validatePython = (code, messages) => {
                 `Found non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${line}`,
             );
             messages.push(
-                `The bot response contains a non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${line}`,
+                `[PYTHON] The bot response contains a non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${shortenedLine}`,
+            );
+        }
+
+        if (line.includes("#") && !line.trim().startsWith("#")) {
+            const suspectedComment = line.split("#")[1].trim();
+            log("warn", `Found inline comment: ${line}`);
+            messages.push(
+                `[PYTHON] The bot response may contain an inline comment: ${suspectedComment}`,
             );
         }
     }
@@ -226,6 +234,16 @@ const checkForHtmlInCode = (code, messages) => {
 };
 
 /**
+ * Format the messages with a prefix and newline character.
+ *
+ * @param {string[]} messages - The messages to be formatted.
+ * @returns {string[]} The formatted messages.
+ */
+const formatMessages = (messages) => {
+    return messages.map((message, idx) => `${idx + 1}. ${message}\n`);
+};
+
+/**
  * Check if the bot response is invalid. This function checks for the following:
  * - The bot response is not found.
  * - The bot response does not contain a `<code>` element.
@@ -237,11 +255,11 @@ const checkForHtmlInCode = (code, messages) => {
  */
 const getResponseStatusMessages = () => {
     const messages = [];
-    const responseCode = getResponseCode();
+    const code = getResponseCode();
 
     checkAlignmentScore(85, messages);
 
-    if (!responseCode?.trim()) {
+    if (!code?.trim()) {
         log("error", "cannot find bot response");
         messages.push(
             "The code cannot be found in the response. Is it in a markdown block?",
@@ -249,7 +267,7 @@ const getResponseStatusMessages = () => {
         return messages;
     }
 
-    if (responseCode.includes("```")) {
+    if (code.includes("```")) {
         log(
             "warn",
             "The code does not appear to be in a properly-closed markdown code block.",
@@ -259,14 +277,20 @@ const getResponseStatusMessages = () => {
         );
     }
 
-    checkForHtmlInCode(responseCode, messages);
+    checkForHtmlInCode(code, messages);
+
+    console.log(code.split("\n").length);
+    if (code.split("\n").length <= 3) {
+        log("warn", "The bot response has suspiciously few lines.");
+        messages.push("The bot response has suspiciously few lines.");
+    }
 
     if (isPython()) {
         log("debug", "The code appears to be Python.");
-        validatePython(responseCode, messages);
+        validatePython(code, messages);
     }
 
-    return messages.map((idx, message) => `${idx}. ${message}`);
+    return messages;
 };
 
 /**
@@ -287,6 +311,10 @@ const checkAlignmentScore = (threshold, messages) => {
             element?.children?.length >= 2 &&
             element.children[2]?.textContent?.includes("Rework");
         const score = getAlignmentScore();
+        if (!score || score == -1) {
+            log("warn", "Alignment score not found.");
+            return;
+        }
 
         log(
             "debug",
@@ -294,7 +322,7 @@ const checkAlignmentScore = (threshold, messages) => {
         );
         if (score < threshold && !sendToRework) {
             messages.push(
-                `The alignment score is ${score} which is below the threshold of ${threshold}, but the conversation is not marked as a rework.`,
+                `The alignment score is ${score}, but the conversation is not marked as a rework.`,
             );
             return true;
         }
