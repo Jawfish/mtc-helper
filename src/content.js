@@ -81,23 +81,14 @@ const handleConversationSubmit = (e) => {
     e.stopImmediatePropagation();
     log("debug", "Attempting to submit conversation...");
 
-    const responseStatusMessages = getResponseStatusMessages();
+    const messages = getResponseStatusMessages();
+    const prefix =
+        "Are you sure you want to submit? The following issues were detected:\n\n";
+    const suffix =
+        "Click OK to submit anyway or Cancel to cancel the submission.";
 
-    if (isAlignmentScoreLow()) {
-        responseStatusMessages.push(
-            "The alignment score is below 85, but the conversation is not marked as a rework.",
-        );
-    }
-
-    if (responseStatusMessages) {
-        if (
-            confirm(
-                "Are you sure you want to submit? The following issues were detected:\n" +
-                    "- " +
-                    responseStatusMessages.join("\n") +
-                    "Click OK to submit anyway or Cancel to cancel the submission.",
-            )
-        ) {
+    if (messages.length > 0) {
+        if (confirm(prefix + messages.join("\n") + "\n\n" + suffix)) {
             const conversationButton = getConversationSubmitButton();
             conversationButton.removeEventListener(
                 "click",
@@ -144,37 +135,85 @@ const isPython = () => {
     return hasPythonInParagraphs || hasPythonInButton;
 };
 
-// TODO: make this return a message so that the alert can be more specific about what's
-// wrong with the bot response. Consider creating an object to provide context about the
-// result here. Alternatively, set a global variable that the alert can check to see
-// what's wrong.
 /**
- * Check if the bot response is invalid. This function checks for the following:
- * - The bot response is not found.
- * - The bot response does not contain a `<code>` element.
- * - The bot response contains a closing HTML tag.
- * - The bot response contains malformed Python.
+ * Validate the Python code in the bot response. This is a relatively naive check that
+ * performs the following validations:
  *
- * @returns An array of strings containing the issues found with the bot response.
+ * - Ensures the code has more than two lines.
+ * - Checks for excessively long lines of code.
+ * - Ensures non-indented lines are either constants, imports, function/class
+ *   definitions, or comments.
+ *
+ * @param {string} code - The Python code to validate.
+ * @param {string[]} messages - The array to which validation messages will be appended.
+ * @returns {void}
  */
-const getResponseStatusMessages = () => {
-    const messages = [];
+const validatePython = (code, messages) => {
     const maxLineLength = 240;
-    const responseCode = getResponseCode();
 
-    if (!responseCode?.trim()) {
-        log("error", "cannot find bot response");
-        return [
-            "The code cannot be found in the response. Is it in a markdown block?",
-        ];
+    const lines = code.split("\n");
+    if (lines.length < 2) {
+        log("warn", "There are 2 or fewer lines in the bot response.");
+        messages.push("The bot response has suspiciously few lines.");
     }
 
-    // Check for ending HTML tag, since that signifies a broken response. Will
-    // have false positives for any code that contains a closing HTML tag as
-    // part of the actual code, but the QA can just ignore the alert.
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const isConstant = /^[A-Z_]+/.test(line.split(" ")[0]);
+        const isFunctionOrClass =
+            line.startsWith("def ") ||
+            line.startsWith("class ") ||
+            line.startsWith("@") || // Account for decorators
+            line.startsWith("async def ");
+        const isImport = line.startsWith("import ") || line.startsWith("from ");
+        const isIndented = line.startsWith("    ");
+        const isCommented = line.startsWith("#");
+
+        // Ignore empty lines
+        if (line.trim().length === 0) {
+            continue;
+        }
+
+        if (line.length > maxLineLength) {
+            log("warn", `A line is suspiciously long: ${line}`);
+            messages.push(
+                `A line in the bot response is suspiciously long: ${line.slice(0, 64)}...`,
+            );
+        }
+
+        if (
+            !isConstant &&
+            !isImport &&
+            !isFunctionOrClass &&
+            !isIndented &&
+            !isCommented &&
+            line.trim().length > 0 && // Ignore empty lines
+            !line.startsWith(") ->") // For multi-line function definitions
+        ) {
+            log(
+                "warn",
+                `Found non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${line}`,
+            );
+            messages.push(
+                `The bot response contains a non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${line}`,
+            );
+        }
+    }
+};
+
+/**
+ * Check for ending HTML tag, since that signifies a broken response. Will have false
+ * positives for any code that contains a closing HTML tag as part of the actual code,
+ * but the QA can just ignore the alert.
+ *
+ * @param {string} code - The code to be checked for HTML tags.
+ * @param {string[]} messages - The array to which validation messages will be appended.
+ * @returns {void}
+ */
+const checkForHtmlInCode = (code, messages) => {
     try {
         const closingTagRegex = /<\/[^>]+>/;
-        if (closingTagRegex.test(responseCode)) {
+        if (closingTagRegex.test(code)) {
             log(
                 "warn",
                 "Something that appears to be a closing HTML tag was found in the bot response.",
@@ -184,82 +223,83 @@ const getResponseStatusMessages = () => {
     } catch (error) {
         log("error", "Error checking for closing HTML tag:", error);
     }
-
-    // Check for malformed Python. Relatively naive.
-    try {
-        if (!isPython()) {
-            log("debug", "The code does not appear to be Python.");
-        } else {
-            log("debug", "The code appears to be Python.");
-
-            const lines = responseCode.split("\n");
-            if (lines.length < 2) {
-                log("warn", "There are 2 or fewer lines in the bot response.");
-                messages.push("The bot response has suspiciously few lines.");
-            }
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                const isConstant = /^[A-Z_]+/.test(line.split(" ")[0]);
-                const isFunctionOrClass =
-                    line.startsWith("def ") ||
-                    line.startsWith("class ") ||
-                    line.startsWith("@") || // Account for decorators
-                    line.startsWith("async def ");
-                const isImport =
-                    line.startsWith("import ") || line.startsWith("from ");
-                const isIndented = line.startsWith("    ");
-                const isCommented = line.startsWith("#");
-
-                // Ignore empty lines
-                if (line.trim().length === 0) {
-                    continue;
-                }
-
-                if (line.length > maxLineLength) {
-                    log("warn", `A line is suspiciously long: ${line}`);
-                    messages.push(
-                        "A line in the bot response is suspiciously long.",
-                    );
-                }
-
-                if (
-                    !isConstant &&
-                    !isImport &&
-                    !isFunctionOrClass &&
-                    !isIndented &&
-                    !isCommented &&
-                    line.trim().length > 0 && // Ignore empty lines
-                    !line.startsWith(") ->") // For multi-line function definitions
-                ) {
-                    log(
-                        "warn",
-                        `Found non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${line}`,
-                    );
-                    messages.push(
-                        `The bot response contains a non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${line}`,
-                    );
-                }
-            }
-        }
-    } catch (error) {
-        log("error", "Error checking for malformed Python:", error);
-    }
-
-    return messages;
 };
 
-const isAlignmentScoreLow = () => {
+/**
+ * Check if the bot response is invalid. This function checks for the following:
+ * - The bot response is not found.
+ * - The bot response does not contain a `<code>` element.
+ * - The bot response contains a closing HTML tag.
+ * - The bot response contains malformed Python.
+ *
+ * @returns {string[]} An array of strings containing the issues found with the bot
+ * response.
+ */
+const getResponseStatusMessages = () => {
+    const messages = [];
+    const responseCode = getResponseCode();
+
+    checkAlignmentScore(85, messages);
+
+    if (!responseCode?.trim()) {
+        log("error", "cannot find bot response");
+        messages.push(
+            "The code cannot be found in the response. Is it in a markdown block?",
+        );
+        return messages;
+    }
+
+    if (responseCode.includes("```")) {
+        log(
+            "warn",
+            "The code does not appear to be in a properly-closed markdown code block.",
+        );
+        messages.push(
+            "The code does not appear to be in a properly-closed markdown code block.",
+        );
+    }
+
+    checkForHtmlInCode(responseCode, messages);
+
+    if (isPython()) {
+        log("debug", "The code appears to be Python.");
+        validatePython(responseCode, messages);
+    }
+
+    return messages.map((idx, message) => `${idx}. ${message}`);
+};
+
+/**
+ * Checks if the alignment score is considered low and if the bot response should be
+ * reworked.
+ *
+ * @param {number} threshold - The alignment score threshold below which the response
+ * @param {string[]} messages - The array to which validation messages will be appended.
+ *
+ * @returns {boolean} `true` if the alignment score is below the threshold and the
+ * response should not be sent to rework; `false` otherwise.
+ */
+const checkAlignmentScore = (threshold, messages) => {
     try {
+        log("debug", "Checking if alignment score is low...");
         const element = getQaFeedbackSection();
         const sendToRework =
             element?.children?.length >= 2 &&
             element.children[2]?.textContent?.includes("Rework");
+        const score = getAlignmentScore();
 
-        return getAlignmentScore() < 85 && !sendToRework;
+        log(
+            "debug",
+            `Alignment score: ${score}, send to rework: ${sendToRework}`,
+        );
+        if (score < threshold && !sendToRework) {
+            messages.push(
+                `The alignment score is ${score} which is below the threshold of ${threshold}, but the conversation is not marked as a rework.`,
+            );
+            return true;
+        }
     } catch (error) {
         log("error", "Error checking if alignment score is low:", error);
-        return false;
     }
 };
 
