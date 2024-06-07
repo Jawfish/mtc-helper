@@ -7,7 +7,7 @@ import "./listeners";
 import { injectListeners } from "./listeners";
 import "./selectors";
 import { getSnoozeButton } from "./selectors";
-import { responseContentStore, viewStore } from "./store";
+import { viewStore } from "./store";
 
 /**
  * Begin checking for the snooze button to appear in the DOM to determine when a new

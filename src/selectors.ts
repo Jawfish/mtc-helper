@@ -1,4 +1,5 @@
-import { cssStore } from "./store";
+import { log } from "./helpers";
+import { cssStore, viewStore } from "./store";
 
 export function getQaFeedbackSection(): HTMLElement | null {
     return getSendCaseButton()?.parentElement?.parentElement ?? null;
@@ -105,10 +106,25 @@ export async function getTabContent(
     tab: "edited" | "original",
     timeout: number = 10000,
 ): Promise<string | null> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         let intervalId: number;
 
         const checkContent = () => {
+            const conversationOpen = viewStore.getState().conversationOpen;
+
+            if (!conversationOpen) {
+                clearInterval(intervalId);
+                log(
+                    "debug",
+                    "Conversation is closed, cancelling diff tab insertion",
+                );
+                reject(
+                    new Error(
+                        "Conversation is closed, cancelling diff tab insertion",
+                    ),
+                );
+                return;
+            }
             const tabs = document.querySelectorAll("div[data-cy='tab']");
             const content =
                 tab === "edited"

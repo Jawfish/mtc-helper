@@ -8,6 +8,7 @@ import {
     getResponseEditButton,
 } from "./selectors";
 
+// TODO: make this async and replace retries with async timeouts
 export function injectListener(
     selector: () => HTMLElement | null,
     elementName: string,

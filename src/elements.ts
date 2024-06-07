@@ -15,6 +15,21 @@ export async function insertDiffTab(
         const insertTab = () => {
             const tabContainer = tabContainerSelector();
             const diffTabInserted = viewStore.getState().diffTabInserted;
+            const conversationOpen = viewStore.getState().conversationOpen;
+
+            if (!conversationOpen) {
+                clearInterval(intervalId);
+                log(
+                    "debug",
+                    "Conversation is closed, cancelling diff tab insertion",
+                );
+                reject(
+                    new Error(
+                        "Conversation is closed, cancelling diff tab insertion",
+                    ),
+                );
+                return;
+            }
 
             if (tabContainer && !diffTabInserted) {
                 clearInterval(intervalId);
@@ -81,7 +96,8 @@ ${editedContent}
             : part.removed
               ? "#F7E8E9"
               : "#f8f9fa";
-        const prefix = part.added ? "+" : part.removed ? "-" : "";
+
+        const prefix = part.added ? "➕" : part.removed ? "➖" : "";
         const style = document.createElement("style");
         const pre = document.createElement("pre");
 
