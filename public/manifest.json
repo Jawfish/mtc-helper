@@ -3,7 +3,7 @@
     "content_scripts": [
         {
             "js": [
-                "content.js"
+                "js/content_script.js"
             ],
             "matches": [
                 "https://app.inv.tech/process/*",

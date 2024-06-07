@@ -1,6 +1,9 @@
 let conversationOpen = false;
 
-function log(level, message) {
+function log(
+    level: "log" | "debug" | "info" | "warn" | "error",
+    message: string,
+) {
     const prefix = "%c[Orochi Helper]";
     const defaultStyle = "color: blue; font-weight: bold;";
     switch (level) {
@@ -29,43 +32,6 @@ log("info", "Orochi Helper starting...");
 
 // SELECTORS
 
-const getQaFeedbackSection = () =>
-    getSendCaseButton().parentElement.parentElement;
-
-const getConversationSubmitButton = () => {
-    const spans = document.querySelectorAll("span");
-    return Array.from(spans).find((span) => {
-        const spanText = span.textContent.trim();
-        return spanText.includes("Submit QA Task");
-    })?.parentElement;
-};
-
-const getResponseCode = () =>
-    document.querySelector("div.rounded-xl pre code")?.textContent;
-// const hasMultipleCodeBlocks = () =>
-//     document.querySelectorAll("div.rounded-xl pre code")?.length > 1;
-
-/**
- * Get the snooze button from the page. Used as a cheap way to detect if a conversation
- * is open.
- */
-const getSnoozeButton = () => document.querySelector("button[title='Snooze']");
-
-const getSendCaseButton = () =>
-    Array.from(document.querySelectorAll("button")).find(
-        (button) => button.textContent === "Send case to",
-    );
-
-/**
- * Get the alignment score from the page. Returns -1 if not found.
- */
-const getAlignmentScore = () =>
-    parseInt(
-        Array.from(document.querySelectorAll("span"))
-            .find((span) => span.textContent.trim() === "Alignment %")
-            ?.parentElement?.textContent.split(":")[1],
-    ) || -1;
-
 // LISTENERS
 
 const injectListeners = () => {
@@ -76,7 +42,7 @@ const injectListeners = () => {
 // HANDLERS
 
 // TODO: make this more specific by checking each case individually
-const handleConversationSubmit = (e) => {
+const handleConversationSubmit = (e: MouseEvent) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     log("debug", "Attempting to submit conversation...");
@@ -86,11 +52,16 @@ const handleConversationSubmit = (e) => {
         "Are you sure you want to submit? The following issues were detected:\n\n";
     const suffix =
         "Click OK to submit anyway or Cancel to cancel the submission.";
+    const conversationButton = getConversationSubmitButton();
+
+    if (!conversationButton) {
+        log("error", "Conversation submit button not found.");
+        return;
+    }
 
     if (messages.length > 0) {
         const formattedMessages = formatMessages(messages).join("");
         if (confirm(prefix + formattedMessages + "\n" + suffix)) {
-            const conversationButton = getConversationSubmitButton();
             conversationButton.removeEventListener(
                 "click",
                 handleConversationSubmit,
@@ -101,7 +72,6 @@ const handleConversationSubmit = (e) => {
         }
     } else {
         log("debug", "No issues detected, submitting conversation.");
-        const conversationButton = getConversationSubmitButton();
         conversationButton.removeEventListener(
             "click",
             handleConversationSubmit,
@@ -117,15 +87,17 @@ const handleConversationSubmit = (e) => {
  *
  * @returns {boolean} - True if the conversation window contains Python code.
  */
-const isPython = () => {
+const isPython = (): boolean => {
+    const span = Array.from(document.querySelectorAll("span")).find(
+        (span) => span.textContent?.trim() === "Programming Language",
+    );
+
     const hasPythonInSpan =
-        Array.from(document.querySelectorAll("span"))
-            .find((span) => span.textContent.trim() === "Programming Language")
-            ?.parentElement?.textContent.split(":")[1] === "Python";
+        span?.parentElement?.textContent?.split(":")[1]?.trim() === "Python";
 
     const hasPythonInButton = Array.from(
         document.querySelectorAll("button"),
-    ).some((button) => button.textContent.includes("Python"));
+    ).some((button) => button.textContent?.includes("Python"));
 
     return hasPythonInSpan || hasPythonInButton;
 };
@@ -143,12 +115,12 @@ const isPython = () => {
  * @param {string[]} messages - The array to which validation messages will be appended.
  * @returns {void}
  */
-const validatePython = (code, messages) => {
+const validatePython = (code: string, messages: string[]): void => {
     const maxLineLength = 240;
 
     const lines = code.split("\n");
 
-    const truncateLine = (line) => {
+    const truncateLine = (line: string): string => {
         const truncateLength = 32;
         return line.length > truncateLength
             ? `${line.slice(0, truncateLength)}...`
@@ -218,7 +190,7 @@ const validatePython = (code, messages) => {
  * @param {string[]} messages - The array to which validation messages will be appended.
  * @returns {void}
  */
-const checkForHtmlInCode = (code, messages) => {
+const checkForHtmlInCode = (code: string, messages: string[]): void => {
     try {
         const closingTagRegex = /<\/[^>]+>/;
         if (closingTagRegex.test(code)) {
@@ -229,7 +201,7 @@ const checkForHtmlInCode = (code, messages) => {
             messages.push("The bot response appears to contain HTML.");
         }
     } catch (error) {
-        log("error", "Error checking for closing HTML tag:", error);
+        log("error", `Error checking for closing HTML tag: ${error}`);
     }
 };
 
@@ -239,7 +211,7 @@ const checkForHtmlInCode = (code, messages) => {
  * @param {string[]} messages - The messages to be formatted.
  * @returns {string[]} The formatted messages.
  */
-const formatMessages = (messages) => {
+const formatMessages = (messages: string[]): string[] => {
     return messages.map((message, idx) => `${idx + 1}. ${message}\n`);
 };
 
@@ -253,8 +225,8 @@ const formatMessages = (messages) => {
  * @returns {string[]} An array of strings containing the issues found with the bot
  * response.
  */
-const getResponseStatusMessages = () => {
-    const messages = [];
+const getResponseStatusMessages = (): string[] => {
+    const messages: string[] = [];
     const code = getResponseCode();
 
     checkAlignmentScore(85, messages);
@@ -303,14 +275,16 @@ const getResponseStatusMessages = () => {
  * @returns {boolean} `true` if the alignment score is below the threshold and the
  * response should not be sent to rework; `false` otherwise.
  */
-const checkAlignmentScore = (threshold, messages) => {
+const checkAlignmentScore = (threshold: number, messages: string[]): void => {
     try {
         log("debug", "Checking if alignment score is low...");
         const element = getQaFeedbackSection();
         const sendToRework =
-            element?.children?.length >= 2 &&
-            element.children[2]?.textContent?.includes("Rework");
+            element?.children?.length &&
+            element.children.length >= 2 &&
+            element?.children[2]?.textContent?.includes("Rework");
         const score = getAlignmentScore();
+
         if (!score || score == -1) {
             log("warn", "Alignment score not found.");
             return;
@@ -324,10 +298,9 @@ const checkAlignmentScore = (threshold, messages) => {
             messages.push(
                 `The alignment score is ${score}, but the conversation is not marked as a rework.`,
             );
-            return true;
         }
     } catch (error) {
-        log("error", "Error checking if alignment score is low:", error);
+        log("error", `Error checking if alignment score is low: ${error}`);
     }
 };
 
