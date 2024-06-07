@@ -1,6 +1,6 @@
 import {
     insertDiffElement,
-    insertElements,
+    insertDiffTab,
     removeDiffElement,
 } from "./elements";
 import { formatMessages, getResponseStatusMessages, log } from "./helpers";
@@ -9,9 +9,10 @@ import {
     getConversationSubmitButton,
     getEditedTab,
     getOriginalTab,
+    getTabContainer,
     getTabContent,
 } from "./selectors";
-import { responseContentStore, viewStore } from "./store";
+import { cssStore, responseContentStore, viewStore } from "./store";
 
 // TODO: make this more specific by checking each case individually
 export function handleConversationSubmit(e: Event) {
@@ -63,8 +64,6 @@ export function handleResponseEditButtonClicked(e: Event) {
     // The edited tab is open by default
     const nullEvent = new Event("");
     handleTabClicked(nullEvent, "edited");
-
-    insertElements();
 }
 
 export async function handleTabClicked(e: Event, tab: "edited" | "original") {
@@ -81,19 +80,14 @@ export async function handleTabClicked(e: Event, tab: "edited" | "original") {
 
     if (!tabContent) {
         log("error", "Failed to get tab content.");
-    } else {
-        log(
-            "debug",
-            `Found content in ${tab === "edited" ? "edited" : "original"} tab.`,
+    } else if (tab === "original") {
+        viewStore.setState({ currentTab: "original" });
+        responseContentStore.getState().setOriginalContent(tabContent);
+        insertDiffTab(
+            getTabContainer,
+            cssStore.getState().tabCss,
+            handleDiffTabClicked,
         );
-
-        if (tab === "edited") {
-            viewStore.setState({ currentTab: "edited" });
-            responseContentStore.getState().setEditedContent(tabContent);
-        } else {
-            viewStore.setState({ currentTab: "original" });
-            responseContentStore.getState().setOriginalContent(tabContent);
-        }
     }
 }
 
@@ -117,4 +111,47 @@ export function handleDiffTabClicked(e: Event) {
     }
 
     insertDiffElement(originalContent, editedContent);
+}
+
+export async function handleConversationOpen() {
+    viewStore.setState({ conversationOpen: true });
+    responseContentStore.getState().reset();
+
+    // wait for the DOM element to be available
+    const getContent = async () => {
+        return new Promise<string>((resolve, reject) => {
+            let intervalId: number;
+
+            const checkElement = () => {
+                const element = document.querySelectorAll("div.rounded-xl")[1];
+                if (element) {
+                    clearInterval(intervalId);
+                    resolve(element.textContent || "");
+                }
+            };
+
+            // check immediately, then every 100ms
+            checkElement();
+            intervalId = setInterval(checkElement, 100);
+
+            setTimeout(() => {
+                clearInterval(intervalId);
+                reject(new Error("Element not found within timeout"));
+            }, 10000);
+        });
+    };
+
+    try {
+        let content = await getContent();
+        // remove very first character, which is the response number
+        content = content.slice(1);
+        responseContentStore.getState().setEditedContent(content);
+    } catch (error) {
+        console.error("Failed to get content:", error);
+    }
+}
+
+export async function handleConversationClose() {
+    viewStore.setState({ conversationOpen: false });
+    responseContentStore.getState().reset();
 }

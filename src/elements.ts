@@ -1,10 +1,9 @@
-import { diffWords } from "diff";
-import { handleDiffTabClicked } from "./handlers";
+import { diffLines } from "diff";
 import { log } from "./helpers";
-import { getTabContainer, getTabContentParentElement } from "./selectors";
-import { cssStore, viewStore } from "./store";
+import { getTabContentParentElement } from "./selectors";
+import { viewStore } from "./store";
 
-async function insertDiffTab(
+export async function insertDiffTab(
     tabContainerSelector: () => HTMLDivElement | null,
     styles: string,
     onClick: (e: Event) => void,
@@ -15,8 +14,9 @@ async function insertDiffTab(
 
         const insertTab = () => {
             const tabContainer = tabContainerSelector();
+            const diffTabInserted = viewStore.getState().diffTabInserted;
 
-            if (tabContainer) {
+            if (tabContainer && !diffTabInserted) {
                 clearInterval(intervalId);
 
                 log("debug", "Inserting diff tab");
@@ -24,12 +24,14 @@ async function insertDiffTab(
                 const diffTab = document.createElement("div");
 
                 diffTab.className = "tab hover:text-theme-main";
-                diffTab.textContent = "Diff";
+                diffTab.textContent = "Toggle Diff";
                 diffTab.style.cssText = styles;
                 diffTab.style.cursor = "pointer";
                 diffTab.addEventListener("click", onClick);
 
                 tabContainer.appendChild(diffTab);
+                viewStore.setState({ diffTabInserted: true });
+
                 resolve();
             }
         };
@@ -44,20 +46,6 @@ async function insertDiffTab(
             reject(new Error("Failed to insert diff tab"));
         }, timeout);
     });
-}
-
-export async function insertElements(): Promise<void> {
-    log("debug", "Inserting elements");
-
-    try {
-        await insertDiffTab(
-            getTabContainer,
-            cssStore.getState().tabCss,
-            handleDiffTabClicked,
-        );
-    } catch (error) {
-        log("error", "Failed to insert elements: " + (error as Error).message);
-    }
 }
 
 export function insertDiffElement(
@@ -82,15 +70,32 @@ ${editedContent}
 
     viewStore.setState({ diffOpen: true });
 
-    const diff = diffWords(originalContent, editedContent);
+    const diff = diffLines(originalContent, editedContent, {});
     const fragment = document.createDocumentFragment();
     const container = getTabContentParentElement();
 
     diff.forEach((part) => {
         const color = part.added ? "green" : part.removed ? "red" : "grey";
+        const bgColor = part.added
+            ? "#E3F4E4"
+            : part.removed
+              ? "#F7E8E9"
+              : "#f8f9fa";
+        const prefix = part.added ? "+" : part.removed ? "-" : "";
+        const style = document.createElement("style");
         const pre = document.createElement("pre");
+
         pre.style.color = color;
-        pre.textContent = part.value;
+        pre.style.backgroundColor = bgColor;
+        pre.textContent = prefix + part.value;
+        pre.classList.add("diff-pre");
+
+        style.textContent = `
+.diff-pre {
+    margin: 0 !important;
+}
+`;
+        document.head.append(style);
         fragment.appendChild(pre);
     });
 

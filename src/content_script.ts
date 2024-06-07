@@ -1,5 +1,6 @@
 import "./elements";
 import "./handlers";
+import { handleConversationClose, handleConversationOpen } from "./handlers";
 import "./helpers";
 import { log } from "./helpers";
 import "./listeners";
@@ -25,15 +26,13 @@ function initializeOrochiHelper(): void {
             );
             if (getSnoozeButton() && !viewStore.getState().conversationOpen) {
                 log("info", "New conversation detected.");
-                viewStore.setState({ conversationOpen: true });
-                responseContentStore.getState().resetContent();
+                handleConversationOpen();
                 injectListeners();
             } else if (
                 !getSnoozeButton() &&
                 viewStore.getState().conversationOpen
             ) {
-                log("debug", "No conversation detected.");
-                viewStore.setState({ conversationOpen: false });
+                handleConversationClose();
             }
         });
     });
