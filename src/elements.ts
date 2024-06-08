@@ -97,7 +97,7 @@ ${editedContent}
               ? "#F7E8E9"
               : "#f8f9fa";
 
-        const prefix = part.added ? "➕" : part.removed ? "➖" : "";
+        const prefix = part.added ? "-" : part.removed ? "+" : "";
         const style = document.createElement("style");
         const pre = document.createElement("pre");
 
