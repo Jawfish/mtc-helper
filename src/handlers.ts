@@ -19,7 +19,6 @@ import {
     viewStore,
 } from "./store";
 
-// TODO: make this more specific by checking each case individually
 export async function handleConversationSubmit(e: Event) {
     e.preventDefault();
     e.stopImmediatePropagation();

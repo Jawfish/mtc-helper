@@ -72,7 +72,7 @@ export const validatePython = (code: string, messages: string[]): void => {
     const lines = code.split("\n");
 
     const truncateLine = (line: string): string => {
-        const truncateLength = 32;
+        const truncateLength = 26;
         return line.length > truncateLength
             ? `${line.slice(0, truncateLength)}...`
             : line;
@@ -118,15 +118,14 @@ export const validatePython = (code: string, messages: string[]): void => {
                 `Found non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${line}`,
             );
             messages.push(
-                `[PYTHON] The bot response contains a non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${shortenedLine}`,
+                `The bot response contains a non-indented line: ${shortenedLine}`,
             );
         }
 
         if (line.includes("#") && !line.trim().startsWith("#")) {
-            const suspectedComment = line.split("#")[1].trim();
             log("warn", `Found inline comment: ${line}`);
             messages.push(
-                `[PYTHON] The bot response may contain an inline comment: ${suspectedComment}`,
+                `The bot response contains an inline comment: ${shortenedLine}`,
             );
         }
     }
@@ -163,7 +162,7 @@ export const checkForHtmlInCode = (code: string, messages: string[]): void => {
  * @returns {string[]} The formatted messages.
  */
 export const formatMessages = (messages: string[]): string[] => {
-    return messages.map((message, idx) => `${idx + 1}. ${message}\n`);
+    return messages.map((message, idx) => `${idx + 1}. ${message}\n\n`);
 };
 
 /**
@@ -180,7 +179,7 @@ export async function getResponseStatusMessages(): Promise<string[]> {
     const messages: string[] = [];
     const code = await getResponseCode();
 
-    checkAlignmentScore(85, messages);
+    await checkAlignmentScore(85, messages);
 
     if (!code?.trim()) {
         log("error", "cannot find bot response");
@@ -226,10 +225,10 @@ export async function getResponseStatusMessages(): Promise<string[]> {
  * @returns {boolean} `true` if the alignment score is below the threshold and the
  * response should not be sent to rework; `false` otherwise.
  */
-export function checkAlignmentScore(
+export async function checkAlignmentScore(
     threshold: number,
     messages: string[],
-): void {
+): Promise<void> {
     try {
         log("debug", "Checking if alignment score is low...");
         const element = getQaFeedbackSection();
@@ -237,7 +236,7 @@ export function checkAlignmentScore(
             element?.children?.length &&
             element.children.length >= 2 &&
             element?.children[2]?.textContent?.includes("Rework");
-        const score = getAlignmentScore();
+        const score = await getAlignmentScore();
 
         if (!score || score == -1) {
             log("warn", "Alignment score not found.");

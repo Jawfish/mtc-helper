@@ -12,6 +12,7 @@ export async function getConversationSubmitButton(
     timeout: number = 10000,
 ): Promise<HTMLButtonElement> {
     const findButton = async (): Promise<HTMLButtonElement | null> => {
+        log("debug", "Getting conversation submit button...");
         const span = Array.from(document.querySelectorAll("span")).find(
             (span) => span.textContent?.trim()?.includes("Submit QA Task"),
         );
@@ -31,10 +32,18 @@ export async function getResponseCode(
     timeout: number = 10000,
 ): Promise<string> {
     const findResponseCode = async (): Promise<string | null> => {
-        return (
-            document.querySelector("div.rounded-xl pre code")?.textContent ??
-            null
+        log("debug", "Getting response code...");
+        const contentElement: HTMLElement | null = document.querySelector(
+            "div.rounded-xl pre code",
         );
+
+        if (!contentElement) {
+            log("error", "Failed to get response code");
+            return null;
+        }
+
+        log("debug", `Found response code: ${contentElement.textContent}`);
+        return contentElement.textContent;
     };
 
     return poll(findResponseCode, 100, timeout);
@@ -62,18 +71,24 @@ function getSendCaseButton(): HTMLButtonElement | null {
 /**
  * Get the alignment score from the page. Returns -1 if not found.
  */
-export function getAlignmentScore(): number {
-    const span = Array.from(document.querySelectorAll("span")).find(
-        (span) => span.textContent?.trim() === "Alignment %",
-    );
+export async function getAlignmentScore(
+    timeout: number = 10000,
+): Promise<number | null> {
+    const findAlignmentScore = async (): Promise<number | null> => {
+        const span = Array.from(document.querySelectorAll("span")).find(
+            (span) => span.textContent?.trim() === "Alignment %",
+        );
 
-    if (!span) {
-        return -1;
-    }
+        if (!span) {
+            return null;
+        }
 
-    const scoreText =
-        span.parentElement?.textContent?.split(":")[1]?.trim() ?? "-1";
-    return parseInt(scoreText, 10);
+        const scoreText =
+            span.parentElement?.textContent?.split(":")[1]?.trim() ?? "-1";
+        return parseInt(scoreText, 10);
+    };
+
+    return poll(findAlignmentScore, 100, timeout);
 }
 
 /**

@@ -13,29 +13,17 @@ export async function injectListener(
     elementName: string,
     event: string,
     handler: (e: Event) => void,
-    timeout: number = 10000,
 ): Promise<void> {
     log("debug", `Adding ${event} listener for ${elementName}`);
+    const element = await selector();
 
-    try {
-        const element = await Promise.race([
-            selector(),
-            new Promise<HTMLElement>((_, reject) =>
-                setTimeout(() => reject(new Error(`Timeout waiting for element: ${elementName}`)), timeout)
-            )
-        ]);
-
-        if (!element) {
-            throw new Error(`Element not found: ${elementName}`);
-            }
-
-        element.addEventListener(event, handler);
-        log("debug", `${event} listener added for ${elementName}`);
-    } catch (error) {
-        log("error", `Failed to add ${event} listener for ${elementName}: ${(error as Error).message}`);
+    if (!element) {
+        throw new Error(`Element not found: ${elementName}`);
     }
-}
 
+    element.addEventListener(event, handler);
+    log("debug", `${event} listener added for ${elementName}`);
+}
 
 export function injectListeners() {
     injectListener(
