@@ -8,40 +8,34 @@ import {
     getResponseEditButton,
 } from "./selectors";
 
-// TODO: make this async and replace retries with async timeouts
-export function injectListener(
-    selector: () => HTMLElement | null,
+export async function injectListener(
+    selector: () => Promise<HTMLElement | null>,
     elementName: string,
     event: string,
     handler: (e: Event) => void,
-    retries = 10,
-    timeBetweenRetries = 1000,
-) {
-    const element = selector();
+    timeout: number = 10000,
+): Promise<void> {
+    log("debug", `Adding ${event} listener for ${elementName}`);
 
-    if (!element) {
-        log("warn", `${elementName} element not found`);
-        setTimeout(() => {
-            if (retries > 0) {
-                injectListener(
-                    selector,
-                    elementName,
-                    event,
-                    handler,
-                    retries - 1,
-                    timeBetweenRetries,
-                );
+    try {
+        const element = await Promise.race([
+            selector(),
+            new Promise<HTMLElement>((_, reject) =>
+                setTimeout(() => reject(new Error(`Timeout waiting for element: ${elementName}`)), timeout)
+            )
+        ]);
+
+        if (!element) {
+            throw new Error(`Element not found: ${elementName}`);
             }
-        }, timeBetweenRetries);
-    } else {
-        log("debug", `Adding ${event} listener for ${elementName}`);
-        element.addEventListener(event, handler);
-    }
 
-    if (retries === 0) {
-        log("error", `Failed to add ${event} listener for ${elementName}`);
+        element.addEventListener(event, handler);
+        log("debug", `${event} listener added for ${elementName}`);
+    } catch (error) {
+        log("error", `Failed to add ${event} listener for ${elementName}: ${(error as Error).message}`);
     }
 }
+
 
 export function injectListeners() {
     injectListener(

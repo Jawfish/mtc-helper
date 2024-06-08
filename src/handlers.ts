@@ -12,20 +12,25 @@ import {
     getTabContainer,
     getTabContent,
 } from "./selectors";
-import { cssStore, responseContentStore, viewStore } from "./store";
+import {
+    cssStore,
+    responseContentStore,
+    signalStore,
+    viewStore,
+} from "./store";
 
 // TODO: make this more specific by checking each case individually
-export function handleConversationSubmit(e: Event) {
+export async function handleConversationSubmit(e: Event) {
     e.preventDefault();
     e.stopImmediatePropagation();
     log("debug", "Attempting to submit conversation...");
 
-    const messages = getResponseStatusMessages();
+    const messages = await getResponseStatusMessages();
     const prefix =
         "Are you sure you want to submit? The following issues were detected:\n\n";
     const suffix =
         "Click OK to submit anyway or Cancel to cancel the submission.";
-    const conversationButton = getConversationSubmitButton();
+    const conversationButton = await getConversationSubmitButton();
 
     if (!conversationButton) {
         log("error", "Conversation submit button not found.");
@@ -83,11 +88,7 @@ export async function handleTabClicked(e: Event, tab: "edited" | "original") {
     } else if (tab === "original") {
         viewStore.setState({ currentTab: "original" });
         responseContentStore.getState().setOriginalContent(tabContent);
-        insertDiffTab(
-            getTabContainer,
-            cssStore.getState().tabCss,
-            handleDiffTabClicked,
-        );
+        insertDiffTab(getTabContainer, handleDiffTabClicked);
     }
 }
 
@@ -116,6 +117,7 @@ export function handleDiffTabClicked(e: Event) {
 export async function handleConversationOpen() {
     viewStore.setState({ conversationOpen: true });
     responseContentStore.getState().reset();
+    signalStore.getState().reset();
 
     // wait for the DOM element to be available
     const getContent = async () => {
@@ -152,6 +154,7 @@ export async function handleConversationOpen() {
 }
 
 export async function handleConversationClose() {
-    viewStore.setState({ conversationOpen: false });
+    viewStore.getState().reset();
     responseContentStore.getState().reset();
+    signalStore.getState().abortController.abort();
 }

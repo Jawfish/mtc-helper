@@ -3,6 +3,7 @@ import {
     getQaFeedbackSection,
     getResponseCode,
 } from "./selectors";
+import { signalStore } from "./store";
 
 export function log(
     level: "log" | "debug" | "info" | "warn" | "error",
@@ -175,9 +176,9 @@ export const formatMessages = (messages: string[]): string[] => {
  * @returns {string[]} An array of strings containing the issues found with the bot
  * response.
  */
-export function getResponseStatusMessages(): string[] {
+export async function getResponseStatusMessages(): Promise<string[]> {
     const messages: string[] = [];
-    const code = getResponseCode();
+    const code = await getResponseCode();
 
     checkAlignmentScore(85, messages);
 
@@ -255,4 +256,47 @@ export function checkAlignmentScore(
     } catch (error) {
         log("error", `Error checking if alignment score is low: ${error}`);
     }
+}
+
+/**
+ * Polls a function until it returns a truthy value, the timeout is reached, or the operation is aborted.
+ * @param {() => Promise<T | null>} fn - The function to poll.
+ * @param {number} interval - The interval in milliseconds between polls.
+ * @param {number} timeout - The timeout in milliseconds.
+ * @returns {Promise<T>} A promise that resolves with the result of the function or rejects with a timeout or abort error.
+ */
+export async function poll<T>(
+    fn: () => Promise<T | null>,
+    interval: number,
+    timeout: number,
+): Promise<T> {
+    log(
+        "debug",
+        `Polling with interval ${interval} and timeout ${timeout} for ${fn.name}`,
+    );
+
+    const endTime = Date.now() + timeout;
+    // capture the state of the abort signal at the time of the call this is because
+    // when a new conversation window is opened, the signal is reset so old promises
+    // need to retain a reference to the old signal so they can be aborted
+    const abortSignal = signalStore.getState().getAbortSignal();
+
+    return new Promise<T>((resolve, reject) => {
+        const checkCondition = async () => {
+            if (abortSignal.aborted) {
+                return reject(new Error("Operation aborted"));
+            }
+
+            const result = await fn();
+            if (result) {
+                resolve(result);
+            } else if (Date.now() < endTime) {
+                setTimeout(checkCondition, interval);
+            } else {
+                reject(new Error("Timeout waiting for condition"));
+            }
+        };
+
+        checkCondition();
+    });
 }

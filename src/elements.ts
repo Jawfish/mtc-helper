@@ -1,66 +1,50 @@
 import { diffLines } from "diff";
-import { log } from "./helpers";
+import { log, poll } from "./helpers";
 import { getTabContentParentElement } from "./selectors";
 import { viewStore } from "./store";
 
 export async function insertDiffTab(
-    tabContainerSelector: () => HTMLDivElement | null,
-    styles: string,
+    tabContainerSelector: () => Promise<HTMLDivElement | null>,
     onClick: (e: Event) => void,
     timeout: number = 10000,
 ): Promise<void> {
-    return new Promise((resolve, reject) => {
-        let intervalId: number;
+    const insertTab = async (): Promise<boolean> => {
+        const tabContainer = await tabContainerSelector();
+        const diffTabInserted = viewStore.getState().diffTabInserted;
+        const conversationOpen = viewStore.getState().conversationOpen;
 
-        const insertTab = () => {
-            const tabContainer = tabContainerSelector();
-            const diffTabInserted = viewStore.getState().diffTabInserted;
-            const conversationOpen = viewStore.getState().conversationOpen;
+        if (!conversationOpen) {
+            log("error", "No conversation, cancelling diff tab insertion");
+            throw new Error("No conversation, cancelling diff tab insertion");
+        }
+        if (!tabContainer) {
+            log("error", "No tab container, cancelling diff tab insertion");
+            throw new Error("No tab container, cancelling diff tab insertion");
+        }
+        if (diffTabInserted) {
+            log("warn", "Diff tab already inserted");
+            return true;
+        }
 
-            if (!conversationOpen) {
-                clearInterval(intervalId);
-                log(
-                    "debug",
-                    "Conversation is closed, cancelling diff tab insertion",
-                );
-                reject(
-                    new Error(
-                        "Conversation is closed, cancelling diff tab insertion",
-                    ),
-                );
-                return;
-            }
+        log("debug", "Inserting diff tab");
+        const diffTab = document.createElement("div");
 
-            if (tabContainer && !diffTabInserted) {
-                clearInterval(intervalId);
+        diffTab.className = "tab hover:text-theme-main";
+        diffTab.textContent = "Toggle Diff";
+        diffTab.style.cursor = "pointer";
+        diffTab.addEventListener("click", onClick);
 
-                log("debug", "Inserting diff tab");
+        tabContainer.appendChild(diffTab);
+        viewStore.setState({ diffTabInserted: true });
+        return true;
+    };
 
-                const diffTab = document.createElement("div");
-
-                diffTab.className = "tab hover:text-theme-main";
-                diffTab.textContent = "Toggle Diff";
-                diffTab.style.cssText = styles;
-                diffTab.style.cursor = "pointer";
-                diffTab.addEventListener("click", onClick);
-
-                tabContainer.appendChild(diffTab);
-                viewStore.setState({ diffTabInserted: true });
-
-                resolve();
-            }
-        };
-
-        // check immediately, then every 100ms
-        insertTab();
-        intervalId = setInterval(insertTab, 100);
-
-        setTimeout(() => {
-            clearInterval(intervalId);
-            log("error", "Failed to insert diff tab");
-            reject(new Error("Failed to insert diff tab"));
-        }, timeout);
-    });
+    try {
+        await poll(insertTab, 100, timeout);
+        console.log("Diff tab insertion completed.");
+    } catch (error) {
+        console.error("Failed to insert diff tab:", error);
+    }
 }
 
 export function insertDiffElement(
@@ -97,7 +81,7 @@ ${editedContent}
               ? "#F7E8E9"
               : "#f8f9fa";
 
-        const prefix = part.added ? "-" : part.removed ? "+" : "";
+        const prefix = part.added ? "+" : part.removed ? "-" : "";
         const style = document.createElement("style");
         const pre = document.createElement("pre");
 

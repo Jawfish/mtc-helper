@@ -1,4 +1,4 @@
-import { log } from "./helpers";
+import { log, poll } from "./helpers";
 import { cssStore, viewStore } from "./store";
 
 export function getQaFeedbackSection(): HTMLElement | null {
@@ -8,23 +8,38 @@ export function getQaFeedbackSection(): HTMLElement | null {
 /**
  * Get the conversation submit button from a QA task. Returns null if not found.
  */
-export function getConversationSubmitButton(): HTMLButtonElement | null {
-    const span = Array.from(document.querySelectorAll("span")).find((span) =>
-        span.textContent?.trim()?.includes("Submit QA Task"),
-    );
+export async function getConversationSubmitButton(
+    timeout: number = 10000,
+): Promise<HTMLButtonElement> {
+    const findButton = async (): Promise<HTMLButtonElement | null> => {
+        const span = Array.from(document.querySelectorAll("span")).find(
+            (span) => span.textContent?.trim()?.includes("Submit QA Task"),
+        );
 
-    if (!span) {
-        return null;
-    }
+        return span?.parentElement as HTMLButtonElement | null;
+    };
 
-    return span.parentElement as HTMLButtonElement | null;
+    return poll(findButton, 100, timeout);
 }
 
-export function getResponseCode(): string | null {
-    return (
-        document.querySelector("div.rounded-xl pre code")?.textContent ?? null
-    );
+/**
+ * Get the response code from the QA task. Throws an error if not found within the timeout.
+ * @param {number} timeout - The timeout in milliseconds.
+ * @returns {string} A promise that resolves with the response code as a string.
+ */
+export async function getResponseCode(
+    timeout: number = 10000,
+): Promise<string> {
+    const findResponseCode = async (): Promise<string | null> => {
+        return (
+            document.querySelector("div.rounded-xl pre code")?.textContent ??
+            null
+        );
+    };
+
+    return poll(findResponseCode, 100, timeout);
 }
+
 // const hasMultipleCodeBlocks = () =>
 //     document.querySelectorAll("div.rounded-xl pre code")?.length > 1;
 
@@ -61,45 +76,67 @@ export function getAlignmentScore(): number {
     return parseInt(scoreText, 10);
 }
 
-export function getResponseEditButton(): HTMLButtonElement | null {
-    return (
-        (Array.from(
+/**
+ * Get the response edit button. Throws an error if not found within the timeout.
+ * @param {number} [timeout=10000] - The timeout in milliseconds.
+ * @returns {Promise<HTMLButtonElement>} A promise that resolves with the response edit button.
+ */
+export async function getResponseEditButton(
+    timeout: number = 10000,
+): Promise<HTMLButtonElement> {
+    const findEditButton = async (): Promise<HTMLButtonElement | null> => {
+        const buttons = Array.from(
             document.querySelectorAll("button[title='Edit']"),
-        )[1] as HTMLButtonElement) ?? null
-    );
+        );
+        return (buttons[1] as HTMLButtonElement) ?? null;
+    };
+
+    return poll(findEditButton, 100, timeout);
 }
 
-export function getTabContainer(): HTMLDivElement | null {
-    return (
+export async function getTabContainer(
+    timeout: number = 10000,
+): Promise<HTMLDivElement | null> {
+    const findTabContainer = async (): Promise<HTMLDivElement | null> =>
         (Array.from(
             document.querySelectorAll("div[data-cy='tabsHeaderContainer']"),
-        )[1] as HTMLDivElement) ?? null
-    );
+        )[1] as HTMLDivElement) ?? null;
+
+    return poll(findTabContainer, 100, timeout);
 }
 
-export function getEditedTab(): HTMLDivElement | null {
-    const element = (document.getElementById("1") as HTMLDivElement) ?? null;
-    if (!element) {
-        return null;
-    }
+/**
+ * Get the edited tab. Throws an error if not found within the timeout.
+ * @param {number} [timeout=10000] - The timeout in milliseconds.
+ * @returns {Promise<HTMLDivElement>} A promise that resolves with the edited tab.
+ */
+export async function getEditedTab(
+    timeout: number = 10000,
+): Promise<HTMLDivElement> {
+    const findEditedTab = async (): Promise<HTMLDivElement | null> => {
+        const element =
+            (document.getElementById("1") as HTMLDivElement) ?? null;
+        return element;
+    };
 
-    cssStore.setState({ tabCss: element.style.cssText });
-
-    return element;
+    return poll(findEditedTab, 100, timeout);
 }
 
-export function getOriginalTab(): HTMLDivElement | null {
-    return (document.getElementById("2") as HTMLDivElement) ?? null;
-}
+/**
+ * Get the original tab. Throws an error if not found within the timeout.
+ * @param {number} [timeout=10000] - The timeout in milliseconds.
+ * @returns {Promise<HTMLDivElement>} A promise that resolves with the original tab.
+ */
+export async function getOriginalTab(
+    timeout: number = 10000,
+): Promise<HTMLDivElement> {
+    const findOriginalTab = async (): Promise<HTMLDivElement | null> => {
+        const element =
+            (document.getElementById("2") as HTMLDivElement) ?? null;
+        return element;
+    };
 
-function editedTabSelected(): boolean {
-    return getEditedTab()?.firstChild?.textContent === "Edited";
-}
-
-function originalTabSelected(): boolean {
-    return (
-        getOriginalTab()?.classList.contains("hover:text-theme-main") ?? false
-    );
+    return poll(findOriginalTab, 100, timeout);
 }
 
 export async function getTabContent(
