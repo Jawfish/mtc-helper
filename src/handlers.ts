@@ -19,30 +19,35 @@ import {
     viewStore,
 } from "./store";
 
-export async function handleConversationSubmit(e: Event) {
+export function handleConversationSubmit(e: Event) {
     e.preventDefault();
     e.stopImmediatePropagation();
     log("debug", "Attempting to submit conversation...");
 
-    const messages = await getResponseStatusMessages();
+    const messages = getResponseStatusMessages();
+    log("debug", `Found ${messages.length} issues.`);
     const prefix =
         "Are you sure you want to submit? The following issues were detected:\n\n";
     const suffix =
         "Click OK to submit anyway or Cancel to cancel the submission.";
-    const conversationButton = await getConversationSubmitButton();
+    const conversationButton = getConversationSubmitButton();
 
     if (!conversationButton) {
         log("error", "Conversation submit button not found.");
         return;
     }
 
+    log("debug", "Conversation submit button found.");
+
     if (messages.length > 0) {
         const formattedMessages = formatMessages(messages).join("");
-        if (confirm(prefix + formattedMessages + "\n" + suffix)) {
+        if (confirm(prefix + formattedMessages + suffix)) {
+            log("debug", "Conversation submit confirmed. Removing listener.");
             conversationButton.removeEventListener(
                 "click",
                 handleConversationSubmit,
             );
+            log("debug", "Clicking conversation submit button.");
             conversationButton.click();
         } else {
             log("debug", "Conversation submit cancelled.");

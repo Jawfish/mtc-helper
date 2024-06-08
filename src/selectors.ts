@@ -8,7 +8,16 @@ export function getQaFeedbackSection(): HTMLElement | null {
 /**
  * Get the conversation submit button from a QA task. Returns null if not found.
  */
-export async function getConversationSubmitButton(
+export function getConversationSubmitButton(): HTMLButtonElement | null {
+    log("debug", "Getting conversation submit button...");
+    const span = Array.from(document.querySelectorAll("span")).find((span) =>
+        span.textContent?.trim()?.includes("Submit QA Task"),
+    );
+
+    return span?.parentElement as HTMLButtonElement | null;
+}
+
+export async function getConversationSubmitButtonAsync(
     timeout: number = 10000,
 ): Promise<HTMLButtonElement> {
     const findButton = async (): Promise<HTMLButtonElement | null> => {
@@ -25,28 +34,21 @@ export async function getConversationSubmitButton(
 
 /**
  * Get the response code from the QA task. Throws an error if not found within the timeout.
- * @param {number} timeout - The timeout in milliseconds.
  * @returns {string} A promise that resolves with the response code as a string.
  */
-export async function getResponseCode(
-    timeout: number = 10000,
-): Promise<string> {
-    const findResponseCode = async (): Promise<string | null> => {
-        log("debug", "Getting response code...");
-        const contentElement: HTMLElement | null = document.querySelector(
-            "div.rounded-xl pre code",
-        );
+export function getResponseCode(): string | null {
+    log("debug", "Getting response code...");
+    const contentElement: HTMLElement | null = document.querySelector(
+        "div.rounded-xl pre code",
+    );
 
-        if (!contentElement) {
-            log("error", "Failed to get response code");
-            return null;
-        }
+    if (!contentElement) {
+        log("error", "Failed to get response code");
+        return null;
+    }
 
-        log("debug", `Found response code: ${contentElement.textContent}`);
-        return contentElement.textContent;
-    };
-
-    return poll(findResponseCode, 100, timeout);
+    log("debug", `Found response code: ${contentElement.textContent}`);
+    return contentElement.textContent;
 }
 
 // const hasMultipleCodeBlocks = () =>
@@ -69,26 +71,20 @@ function getSendCaseButton(): HTMLButtonElement | null {
 }
 
 /**
- * Get the alignment score from the page. Returns -1 if not found.
+ * Get the alignment score from the page.
  */
-export async function getAlignmentScore(
-    timeout: number = 10000,
-): Promise<number | null> {
-    const findAlignmentScore = async (): Promise<number | null> => {
-        const span = Array.from(document.querySelectorAll("span")).find(
-            (span) => span.textContent?.trim() === "Alignment %",
-        );
+export function getAlignmentScore(): number | null {
+    const span = Array.from(document.querySelectorAll("span")).find(
+        (span) => span.textContent?.trim() === "Alignment %",
+    );
 
-        if (!span) {
-            return null;
-        }
+    if (!span) {
+        return null;
+    }
 
-        const scoreText =
-            span.parentElement?.textContent?.split(":")[1]?.trim() ?? "-1";
-        return parseInt(scoreText, 10);
-    };
-
-    return poll(findAlignmentScore, 100, timeout);
+    const scoreText =
+        span.parentElement?.textContent?.split(":")[1]?.trim() ?? "-1";
+    return parseInt(scoreText, 10);
 }
 
 /**

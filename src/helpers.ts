@@ -175,14 +175,14 @@ export const formatMessages = (messages: string[]): string[] => {
  * @returns {string[]} An array of strings containing the issues found with the bot
  * response.
  */
-export async function getResponseStatusMessages(): Promise<string[]> {
+export function getResponseStatusMessages(): string[] {
     const messages: string[] = [];
-    const code = await getResponseCode();
+    const code = getResponseCode();
 
-    await checkAlignmentScore(85, messages);
+    checkAlignmentScore(85, messages);
 
     if (!code?.trim()) {
-        log("error", "cannot find bot response");
+        log("error", "Cannot find bot response");
         messages.push(
             "The code cannot be found in the response. Is it in a markdown block?",
         );
@@ -225,10 +225,10 @@ export async function getResponseStatusMessages(): Promise<string[]> {
  * @returns {boolean} `true` if the alignment score is below the threshold and the
  * response should not be sent to rework; `false` otherwise.
  */
-export async function checkAlignmentScore(
+export function checkAlignmentScore(
     threshold: number,
     messages: string[],
-): Promise<void> {
+): void {
     try {
         log("debug", "Checking if alignment score is low...");
         const element = getQaFeedbackSection();
@@ -236,7 +236,7 @@ export async function checkAlignmentScore(
             element?.children?.length &&
             element.children.length >= 2 &&
             element?.children[2]?.textContent?.includes("Rework");
-        const score = await getAlignmentScore();
+        const score = getAlignmentScore();
 
         if (!score || score == -1) {
             log("warn", "Alignment score not found.");

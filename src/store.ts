@@ -13,14 +13,14 @@ export const signalStore = createStore<SignalState>((set, get) => ({
     abortController: new AbortController(),
     setAbortSignal: () => {
         const newController = new AbortController();
-        console.log("debug", "Setting signal in the store");
+        log("debug", "Setting signal in the store");
         set({ abortController: newController });
     },
     getAbortSignal: () => {
         return get().abortController.signal;
     },
     reset: () => {
-        console.log("debug", "Resetting signal store");
+        log("debug", "Resetting signal store");
         const newController = new AbortController();
         set({ abortController: newController });
     },

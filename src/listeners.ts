@@ -4,7 +4,7 @@ import {
 } from "./handlers";
 import { log } from "./helpers";
 import {
-    getConversationSubmitButton,
+    getConversationSubmitButtonAsync,
     getResponseEditButton,
 } from "./selectors";
 
@@ -27,7 +27,7 @@ export async function injectListener(
 
 export function injectListeners() {
     injectListener(
-        getConversationSubmitButton,
+        getConversationSubmitButtonAsync,
         "conversation button",
         "click",
         handleConversationSubmit,
