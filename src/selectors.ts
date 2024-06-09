@@ -1,5 +1,5 @@
 import { log, poll } from "./helpers";
-import { cssStore, viewStore } from "./store";
+import { viewStore } from "./store";
 
 export function getQaFeedbackSection(): HTMLElement | null {
     return getSendCaseButton()?.parentElement?.parentElement ?? null;
@@ -20,14 +20,8 @@ export function getConversationSubmitButton(): HTMLButtonElement | null {
 export async function getConversationSubmitButtonAsync(
     timeout: number = 10000,
 ): Promise<HTMLButtonElement> {
-    const findButton = async (): Promise<HTMLButtonElement | null> => {
-        log("debug", "Getting conversation submit button...");
-        const span = Array.from(document.querySelectorAll("span")).find(
-            (span) => span.textContent?.trim()?.includes("Submit QA Task"),
-        );
-
-        return span?.parentElement as HTMLButtonElement | null;
-    };
+    const findButton = async (): Promise<HTMLButtonElement | null> =>
+        getConversationSubmitButton();
 
     return poll(findButton, 100, timeout);
 }

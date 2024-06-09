@@ -64,19 +64,6 @@ ${content}`,
     }),
 );
 
-interface CssState {
-    tabCss: string;
-    setTabCss: (css: string) => void;
-}
-
-export const cssStore = createStore<CssState>((set) => ({
-    tabCss: "",
-    setTabCss: (css: string) => {
-        log("debug", `Setting tab CSS in the store: ${css}`);
-        set({ tabCss: css });
-    },
-}));
-
 type Tab = "edited" | "original";
 
 interface ViewState {

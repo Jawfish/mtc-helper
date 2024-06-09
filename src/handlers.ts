@@ -12,12 +12,7 @@ import {
     getTabContainer,
     getTabContent,
 } from "./selectors";
-import {
-    cssStore,
-    responseContentStore,
-    signalStore,
-    viewStore,
-} from "./store";
+import { responseContentStore, signalStore, viewStore } from "./store";
 
 export function handleConversationSubmit(e: Event) {
     e.preventDefault();
