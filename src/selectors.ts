@@ -1,29 +1,29 @@
-import { log, poll } from "./helpers";
-import { viewStore } from "./store";
+import { log, poll } from './helpers';
+import { getConversationOpen } from './store';
 
 export function getQaFeedbackSection(): HTMLElement | null {
-    return getSendCaseButton()?.parentElement?.parentElement ?? null;
+  return getSendCaseButton()?.parentElement?.parentElement ?? null;
 }
 
 /**
  * Get the conversation submit button from a QA task. Returns null if not found.
  */
 export function getConversationSubmitButton(): HTMLButtonElement | null {
-    log("debug", "Getting conversation submit button...");
-    const span = Array.from(document.querySelectorAll("span")).find((span) =>
-        span.textContent?.trim()?.includes("Submit QA Task"),
-    );
+  log('debug', 'Getting conversation submit button...');
+  const span = Array.from(document.querySelectorAll('span')).find(span =>
+    span.textContent?.trim()?.includes('Submit QA Task')
+  );
 
-    return span?.parentElement as HTMLButtonElement | null;
+  return span?.parentElement as HTMLButtonElement | null;
 }
 
 export async function getConversationSubmitButtonAsync(
-    timeout: number = 10000,
+  timeout: number = 10000
 ): Promise<HTMLButtonElement> {
-    const findButton = async (): Promise<HTMLButtonElement | null> =>
-        getConversationSubmitButton();
+  const findButton = async (): Promise<HTMLButtonElement | null> =>
+    getConversationSubmitButton();
 
-    return poll(findButton, 100, timeout);
+  return poll(findButton, 100, timeout);
 }
 
 /**
@@ -31,18 +31,18 @@ export async function getConversationSubmitButtonAsync(
  * @returns {string} A promise that resolves with the response code as a string.
  */
 export function getResponseCode(): string | null {
-    log("debug", "Getting response code...");
-    const contentElement: HTMLElement | null = document.querySelector(
-        "div.rounded-xl pre code",
-    );
+  log('debug', 'Getting response code...');
+  const contentElement: HTMLElement | null = document.querySelector(
+    'div.rounded-xl pre code'
+  );
 
-    if (!contentElement) {
-        log("error", "Failed to get response code");
-        return null;
-    }
+  if (!contentElement) {
+    log('error', 'Failed to get response code');
+    return null;
+  }
 
-    log("debug", `Found response code: ${contentElement.textContent}`);
-    return contentElement.textContent;
+  log('debug', `Found response code: ${contentElement.textContent}`);
+  return contentElement.textContent;
 }
 
 // const hasMultipleCodeBlocks = () =>
@@ -53,32 +53,31 @@ export function getResponseCode(): string | null {
  * is open.
  */
 export function getSnoozeButton(): HTMLButtonElement | null {
-    return document.querySelector("button[title='Snooze']") ?? null;
+  return document.querySelector("button[title='Snooze']") ?? null;
 }
 
 function getSendCaseButton(): HTMLButtonElement | null {
-    return (
-        Array.from(document.querySelectorAll("button")).find(
-            (button) => button.textContent === "Send case to",
-        ) ?? null
-    );
+  return (
+    Array.from(document.querySelectorAll('button')).find(
+      button => button.textContent === 'Send case to'
+    ) ?? null
+  );
 }
 
 /**
  * Get the alignment score from the page.
  */
 export function getAlignmentScore(): number | null {
-    const span = Array.from(document.querySelectorAll("span")).find(
-        (span) => span.textContent?.trim() === "Alignment %",
-    );
+  const span = Array.from(document.querySelectorAll('span')).find(
+    span => span.textContent?.trim() === 'Alignment %'
+  );
 
-    if (!span) {
-        return null;
-    }
+  if (!span) {
+    return null;
+  }
 
-    const scoreText =
-        span.parentElement?.textContent?.split(":")[1]?.trim() ?? "-1";
-    return parseInt(scoreText, 10);
+  const scoreText = span.parentElement?.textContent?.split(':')[1]?.trim() ?? '-1';
+  return parseInt(scoreText, 10);
 }
 
 /**
@@ -87,27 +86,25 @@ export function getAlignmentScore(): number | null {
  * @returns {Promise<HTMLButtonElement>} A promise that resolves with the response edit button.
  */
 export async function getResponseEditButton(
-    timeout: number = 10000,
+  timeout: number = 10000
 ): Promise<HTMLButtonElement> {
-    const findEditButton = async (): Promise<HTMLButtonElement | null> => {
-        const buttons = Array.from(
-            document.querySelectorAll("button[title='Edit']"),
-        );
-        return (buttons[1] as HTMLButtonElement) ?? null;
-    };
+  const findEditButton = async (): Promise<HTMLButtonElement | null> => {
+    const buttons = Array.from(document.querySelectorAll("button[title='Edit']"));
+    return (buttons[1] as HTMLButtonElement) ?? null;
+  };
 
-    return poll(findEditButton, 100, timeout);
+  return poll(findEditButton, 100, timeout);
 }
 
 export async function getTabContainer(
-    timeout: number = 10000,
+  timeout: number = 10000
 ): Promise<HTMLDivElement | null> {
-    const findTabContainer = async (): Promise<HTMLDivElement | null> =>
-        (Array.from(
-            document.querySelectorAll("div[data-cy='tabsHeaderContainer']"),
-        )[1] as HTMLDivElement) ?? null;
+  const findTabContainer = async (): Promise<HTMLDivElement | null> =>
+    (Array.from(
+      document.querySelectorAll("div[data-cy='tabsHeaderContainer']")
+    )[1] as HTMLDivElement) ?? null;
 
-    return poll(findTabContainer, 100, timeout);
+  return poll(findTabContainer, 100, timeout);
 }
 
 /**
@@ -115,16 +112,13 @@ export async function getTabContainer(
  * @param {number} [timeout=10000] - The timeout in milliseconds.
  * @returns {Promise<HTMLDivElement>} A promise that resolves with the edited tab.
  */
-export async function getEditedTab(
-    timeout: number = 10000,
-): Promise<HTMLDivElement> {
-    const findEditedTab = async (): Promise<HTMLDivElement | null> => {
-        const element =
-            (document.getElementById("1") as HTMLDivElement) ?? null;
-        return element;
-    };
+export async function getEditedTab(timeout: number = 10000): Promise<HTMLDivElement> {
+  const findEditedTab = async (): Promise<HTMLDivElement | null> => {
+    const element = (document.getElementById('1') as HTMLDivElement) ?? null;
+    return element;
+  };
 
-    return poll(findEditedTab, 100, timeout);
+  return poll(findEditedTab, 100, timeout);
 }
 
 /**
@@ -132,66 +126,51 @@ export async function getEditedTab(
  * @param {number} [timeout=10000] - The timeout in milliseconds.
  * @returns {Promise<HTMLDivElement>} A promise that resolves with the original tab.
  */
-export async function getOriginalTab(
-    timeout: number = 10000,
-): Promise<HTMLDivElement> {
-    const findOriginalTab = async (): Promise<HTMLDivElement | null> => {
-        const element =
-            (document.getElementById("2") as HTMLDivElement) ?? null;
-        return element;
-    };
+export async function getOriginalTab(timeout: number = 10000): Promise<HTMLDivElement> {
+  const findOriginalTab = async (): Promise<HTMLDivElement | null> => {
+    const element = (document.getElementById('2') as HTMLDivElement) ?? null;
+    return element;
+  };
 
-    return poll(findOriginalTab, 100, timeout);
+  return poll(findOriginalTab, 100, timeout);
 }
 
 export async function getTabContent(
-    tab: "edited" | "original",
-    timeout: number = 10000,
+  tab: 'edited' | 'original',
+  timeout: number = 10000
 ): Promise<string | null> {
-    return new Promise((resolve, reject) => {
-        let intervalId: number;
+  return new Promise((resolve, reject) => {
+    let intervalId: number;
 
-        const checkContent = () => {
-            const conversationOpen = viewStore.getState().conversationOpen;
+    const checkContent = () => {
+      if (!getConversationOpen()) {
+        clearInterval(intervalId);
+        log('debug', 'Conversation is closed, cancelling diff tab insertion');
+        reject(new Error('Conversation is closed, cancelling diff tab insertion'));
+        return;
+      }
+      const tabs = document.querySelectorAll("div[data-cy='tab']");
+      const content =
+        tab === 'edited'
+          ? document.querySelector("div[contenteditable='true']")?.textContent
+          : tabs[tabs.length - 1].textContent;
+      if (content) {
+        clearInterval(intervalId);
+        resolve(content);
+      }
+    };
 
-            if (!conversationOpen) {
-                clearInterval(intervalId);
-                log(
-                    "debug",
-                    "Conversation is closed, cancelling diff tab insertion",
-                );
-                reject(
-                    new Error(
-                        "Conversation is closed, cancelling diff tab insertion",
-                    ),
-                );
-                return;
-            }
-            const tabs = document.querySelectorAll("div[data-cy='tab']");
-            const content =
-                tab === "edited"
-                    ? document.querySelector("div[contenteditable='true']")
-                          ?.textContent
-                    : tabs[tabs.length - 1].textContent;
-            if (content) {
-                clearInterval(intervalId);
-                resolve(content);
-            }
-        };
+    // check immediately, then every 100ms
+    // checkContent();
+    intervalId = setInterval(checkContent, 100);
 
-        // check immediately, then every 100ms
-        // checkContent();
-        intervalId = setInterval(checkContent, 100);
-
-        setTimeout(() => {
-            clearInterval(intervalId);
-            resolve(null);
-        }, timeout);
-    });
+    setTimeout(() => {
+      clearInterval(intervalId);
+      resolve(null);
+    }, timeout);
+  });
 }
 
 export function getTabContentParentElement() {
-    return document.querySelectorAll(
-        "div[data-cy='tab']",
-    )[1] as HTMLDivElement | null;
+  return document.querySelectorAll("div[data-cy='tab']")[1] as HTMLDivElement | null;
 }
