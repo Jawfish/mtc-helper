@@ -91,6 +91,7 @@ ${editedContent}
     const pre = document.createElement('pre');
 
     pre.style.color = color;
+    pre.style.whiteSpace = 'pre-wrap';
     pre.style.backgroundColor = bgColor;
     pre.textContent = prefix + part.value;
     pre.classList.add('diff-pre');
