@@ -242,40 +242,49 @@ export function checkAlignmentScore(threshold: number, messages: string[]): void
 }
 
 /**
- * Polls a function until it returns a truthy value, the timeout is reached, or the operation is aborted.
- * @param {() => Promise<T | null>} fn - The function to poll.
- * @param {number} interval - The interval in milliseconds between polls.
- * @param {number} timeout - The timeout in milliseconds.
- * @returns {Promise<T>} A promise that resolves with the result of the function or rejects with a timeout or abort error.
+ * Retries a synchronous operation (fn) until no error is thrown, the timeout is
+ * reached, or the operation is aborted.
+ * @param {string} purpose - The purpose of the operation for logging purposes.
+ * @param {() => T} fn - The function to poll.
+ * @param {number} [interval=100] - The interval in milliseconds between polls.
+ * @param {number} [timeout=5000] - The timeout in milliseconds before the operation is
+ * aborted.
+ * @returns {Promise<T>} A promise that resolves with the result of the function or
+ * rejects with a timeout or abort error.
  */
-export async function poll<T>(
-  fn: () => Promise<T | null>,
-  interval: number,
-  timeout: number
-): Promise<T> {
+export async function retry<T>(
+  purpose: string,
+  fn: () => T,
+  interval: number = 100,
+  timeout: number = 5000
+): Promise<T | null> {
   log(
     'debug',
-    `Polling with interval ${interval} and timeout ${timeout} for ${fn.name}`
+    `Polling with interval ${interval} and timeout ${timeout} for ${purpose}`
   );
 
   const endTime = Date.now() + timeout;
-  // capture the state of the abort signal at the time of the call this is because
-  // when a new conversation window is opened, the signal is reset so old promises
-  // need to retain a reference to the old signal so they can be aborted
+  const abortSignal = getAbortSignal();
 
-  return new Promise<T>((resolve, reject) => {
-    const checkCondition = async () => {
-      if (getAbortSignal().aborted) {
-        return reject(new Error('Operation aborted'));
+  return new Promise<T | null>((resolve, reject) => {
+    const checkCondition = () => {
+      if (abortSignal.aborted) {
+        return reject(
+          new Error(
+            'Abort signal sent to store (probably because conversation window closed), polling operation aborted'
+          )
+        );
       }
 
-      const result = await fn();
-      if (result) {
+      try {
+        const result = fn();
         resolve(result);
-      } else if (Date.now() < endTime) {
-        setTimeout(checkCondition, interval);
-      } else {
-        reject(new Error('Timeout waiting for condition'));
+      } catch (error) {
+        if (Date.now() < endTime) {
+          setTimeout(checkCondition, interval);
+        } else {
+          resolve(null);
+        }
       }
     };
 

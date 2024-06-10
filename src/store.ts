@@ -1,7 +1,7 @@
 import { createStore } from 'zustand/vanilla';
 import { log } from './helpers';
 
-type Tab = 'edited' | 'original';
+export type Tab = 'edited' | 'original';
 
 type StoreState = {
   abortController: AbortController;
@@ -42,6 +42,10 @@ const store = createStore<StoreState>(() => ({
   editedContent: initialState.editedContent,
   originalContent: initialState.originalContent
 }));
+
+// These could be achieved through store.getState() and store.setState(), but I have
+// chosen to abstract them to make things easier to change in the future and to allow
+// for easier processing/logging/etc. in the middle.
 
 // Store getters
 export const getAbortSignal = () => {

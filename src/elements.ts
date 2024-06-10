@@ -1,6 +1,6 @@
 import { diffLines } from 'diff';
-import { log } from './helpers';
-import { getTabContentParentElement } from './selectors';
+import { log, retry } from './helpers';
+import { getConversationTabContainer, getTabContentParentElement } from './selectors';
 import {
   getConversationOpen,
   getDiffTabInserted,
@@ -8,38 +8,43 @@ import {
   setDiffTabInserted
 } from './store';
 
-export async function insertDiffTab(
-  tabContainerSelector: () => Promise<HTMLDivElement | null>,
-  onClick: (e: Event) => void
-): Promise<void> {
-  const tabContainer = await tabContainerSelector();
-  if (!tabContainer) {
-    log('error', 'No tab container found, cancelling diff tab insertion');
-    throw new Error('No tab container found, cancelling diff tab insertion');
-  }
-
-  if (!getConversationOpen()) {
-    log('error', 'No conversation, cancelling diff tab insertion');
-    throw new Error('No conversation, cancelling diff tab insertion');
-  }
-  if (!tabContainer) {
-    log('error', 'No tab container, cancelling diff tab insertion');
-    throw new Error('No tab container, cancelling diff tab insertion');
-  }
+export async function insertDiffTab(onClick: (e: Event) => void): Promise<void> {
   if (getDiffTabInserted()) {
     log('warn', 'Diff tab already inserted');
+    return;
   }
 
-  log('debug', 'Inserting diff tab');
-  const diffTab = document.createElement('div');
+  try {
+    const tabContainer = await retry(
+      'retrieving conversation tab container while inserting diff tab',
+      () => getConversationTabContainer()
+    );
+    if (!tabContainer) {
+      log('error', 'Tab container not found, cancelling diff tab insertion');
+      throw new Error('Tab container not found, cancelling diff tab insertion');
+    }
 
-  diffTab.className = 'tab hover:text-theme-main';
-  diffTab.textContent = 'Toggle Diff';
-  diffTab.style.cursor = 'pointer';
-  diffTab.addEventListener('click', onClick);
+    if (!getConversationOpen()) {
+      log('error', 'No conversation, cancelling diff tab insertion');
+      throw new Error('No conversation, cancelling diff tab insertion');
+    }
 
-  tabContainer.appendChild(diffTab);
-  setDiffTabInserted(true);
+    log('debug', 'Inserting diff tab');
+    const diffTab = document.createElement('div');
+
+    diffTab.className = 'tab hover:text-theme-main';
+    diffTab.textContent = 'Toggle Diff';
+    diffTab.style.cursor = 'pointer';
+    diffTab.addEventListener('click', onClick);
+
+    tabContainer.appendChild(diffTab);
+    setDiffTabInserted(true);
+  } catch (error) {
+    log(
+      'error',
+      `Error getting tab container during diff tab insertion: ${(error as Error).message}`
+    );
+  }
 }
 
 export function insertDiffElement(
@@ -68,7 +73,16 @@ ${editedContent}
   const fragment = document.createDocumentFragment();
   const container = getTabContentParentElement();
 
+  if (!container) {
+    log('error', 'Tab content element not found, unable to insert diff element');
+    return;
+  }
+
   diff.forEach(part => {
+    if (part.value === '\n' || part.value.trim() === '') {
+      return;
+    }
+
     const color = part.added ? 'green' : part.removed ? 'red' : 'grey';
     const bgColor = part.added ? '#E3F4E4' : part.removed ? '#F7E8E9' : '#f8f9fa';
 
@@ -81,11 +95,6 @@ ${editedContent}
     pre.textContent = prefix + part.value;
     pre.classList.add('diff-pre');
 
-    style.textContent = `
-.diff-pre {
-    margin: 0 !important;
-}
-`;
     document.head.append(style);
     fragment.appendChild(pre);
   });
@@ -93,7 +102,7 @@ ${editedContent}
   const diffView = document.createElement('div');
   diffView.id = 'diffView';
   diffView.appendChild(fragment);
-  container?.prepend(diffView);
+  container.prepend(diffView);
 }
 
 export function removeDiffElement(): void {

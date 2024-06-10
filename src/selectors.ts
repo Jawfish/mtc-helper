@@ -1,44 +1,83 @@
-import { log, poll } from './helpers';
-import { getConversationOpen } from './store';
+/**
+ * @file selectors.ts
+ * @description This file contains functions that are used to select elements from the
+ * DOM. These are the lowest-level synchronous functions that are used to retrieve
+ * elements from the page.
+ *
+ * The convention for the selectors within this file is to return the element if found
+ * and throw an error if not found.
+ */
 
-export function getQaFeedbackSection(): HTMLElement | null {
-  return getSendCaseButton()?.parentElement?.parentElement ?? null;
+import { log } from './helpers';
+import { getConversationOpen, Tab } from './store';
+
+/**
+ * Get the send case button from the page. Throws an error if not found.
+ * @returns {HTMLButtonElement} The send case button.
+ */
+export function getQaFeedbackSection(): HTMLElement {
+  try {
+    const element = getSendCaseButton()?.parentElement?.parentElement;
+    if (!element) {
+      throw new Error('QA feedback section not found');
+    }
+    return element;
+  } catch (error) {
+    throw new Error(`Failed to get QA feedback section: ${error}`);
+  }
 }
 
 /**
- * Get the conversation submit button from a QA task. Returns null if not found.
+ * Get the conversation submit button from a QA task. Throws an error if not found.
+ * @returns {HTMLButtonElement} The conversation submit button.
  */
-export function getConversationSubmitButton(): HTMLButtonElement | null {
+export function getConversationSubmitButton(): HTMLButtonElement {
   log('debug', 'Getting conversation submit button...');
   const span = Array.from(document.querySelectorAll('span')).find(span =>
     span.textContent?.trim()?.includes('Submit QA Task')
   );
 
-  return span?.parentElement as HTMLButtonElement | null;
-}
+  const button = span?.parentElement as HTMLButtonElement;
 
-export async function getConversationSubmitButtonAsync(
-  timeout: number = 10000
-): Promise<HTMLButtonElement> {
-  const findButton = async (): Promise<HTMLButtonElement | null> =>
-    getConversationSubmitButton();
+  if (!button) {
+    throw new Error('Submit QA Task button not found');
+  }
 
-  return poll(findButton, 100, timeout);
+  return button;
 }
 
 /**
- * Get the response code from the QA task. Throws an error if not found within the timeout.
- * @returns {string} A promise that resolves with the response code as a string.
+ * Get the conversation content from a QA task. Throws an error if not found.
+ * @returns {string} The conversation content as a string.
  */
-export function getResponseCode(): string | null {
+export function getConversationContent(): string {
+  const element = document.querySelectorAll('div.rounded-xl')[1];
+  if (!element) {
+    throw new Error('Conversation element not found');
+  }
+  if (!element.textContent) {
+    throw new Error('Conversation element was found but the content is empty');
+  }
+
+  // remove the first character which is the number of the response
+  return element.textContent.slice(1);
+}
+
+/**
+ * Get the response code from the QA task. Throws an error if not found.
+ * @returns {string} The response code as a string.
+ */
+export function getResponseCode(): string {
   log('debug', 'Getting response code...');
   const contentElement: HTMLElement | null = document.querySelector(
-    'div.rounded-xl pre code'
+    'div.rounded-xl.bg-pink-100 pre code'
   );
 
   if (!contentElement) {
-    log('error', 'Failed to get response code');
-    return null;
+    throw new Error('Response code not found');
+  }
+  if (!contentElement.textContent) {
+    throw new Error('Response code element was found but the content is empty');
   }
 
   log('debug', `Found response code: ${contentElement.textContent}`);
@@ -48,129 +87,145 @@ export function getResponseCode(): string | null {
 // const hasMultipleCodeBlocks = () =>
 //     document.querySelectorAll("div.rounded-xl pre code")?.length > 1;
 
-/**
- * Get the snooze button from the page. Used as a cheap way to detect if a conversation
- * is open.
- */
-export function getSnoozeButton(): HTMLButtonElement | null {
-  return document.querySelector("button[title='Snooze']") ?? null;
-}
+function getSendCaseButton(): HTMLButtonElement {
+  const buttons = document.querySelectorAll('button');
+  if (buttons.length === 0) {
+    throw new Error('No buttons found when trying to get send case button');
+  }
 
-function getSendCaseButton(): HTMLButtonElement | null {
-  return (
-    Array.from(document.querySelectorAll('button')).find(
-      button => button.textContent === 'Send case to'
-    ) ?? null
+  const sendCaseButton = Array.from(buttons).find(
+    button => button.textContent === 'Send case to'
   );
+  if (!sendCaseButton) {
+    throw new Error('Send case button not found');
+  }
+
+  return buttons[0];
 }
 
 /**
- * Get the alignment score from the page.
+ * Get the alignment score from the page. Throws an error if not found.
+ * @returns {number} The alignment score as a number.
  */
-export function getAlignmentScore(): number | null {
+export function getAlignmentScore(): number {
   const span = Array.from(document.querySelectorAll('span')).find(
     span => span.textContent?.trim() === 'Alignment %'
   );
 
   if (!span) {
-    return null;
+    throw new Error('Alignment score element not found');
   }
 
-  const scoreText = span.parentElement?.textContent?.split(':')[1]?.trim() ?? '-1';
+  const scoreText = span.parentElement?.textContent?.split(':')[1]?.trim();
+  if (!scoreText) {
+    throw new Error(
+      'Alignment score element was found but the score was not found in its content'
+    );
+  }
+
   return parseInt(scoreText, 10);
 }
 
 /**
- * Get the response edit button. Throws an error if not found within the timeout.
- * @param {number} [timeout=10000] - The timeout in milliseconds.
- * @returns {Promise<HTMLButtonElement>} A promise that resolves with the response edit button.
+ * Get the response edit button. Throws an error if not found.
+ * @returns {HTMLButtonElement} The response edit button.
  */
-export async function getResponseEditButton(
-  timeout: number = 10000
-): Promise<HTMLButtonElement> {
-  const findEditButton = async (): Promise<HTMLButtonElement | null> => {
-    const buttons = Array.from(document.querySelectorAll("button[title='Edit']"));
-    return (buttons[1] as HTMLButtonElement) ?? null;
-  };
+export function getResponseEditButton(): HTMLButtonElement {
+  const buttons: HTMLButtonElement[] = Array.from(
+    document.querySelectorAll("button[title='Edit']")
+  );
 
-  return poll(findEditButton, 100, timeout);
-}
+  if (buttons.length < 2) {
+    throw new Error('Response edit button not found');
+  }
 
-export async function getTabContainer(
-  timeout: number = 10000
-): Promise<HTMLDivElement | null> {
-  const findTabContainer = async (): Promise<HTMLDivElement | null> =>
-    (Array.from(
-      document.querySelectorAll("div[data-cy='tabsHeaderContainer']")
-    )[1] as HTMLDivElement) ?? null;
-
-  return poll(findTabContainer, 100, timeout);
+  return buttons[1];
 }
 
 /**
- * Get the edited tab. Throws an error if not found within the timeout.
- * @param {number} [timeout=10000] - The timeout in milliseconds.
- * @returns {Promise<HTMLDivElement>} A promise that resolves with the edited tab.
+ * Get the container for the tabs within the conversation window. Throws an error if not found.
+ * @returns {HTMLDivElement} The tab container.
  */
-export async function getEditedTab(timeout: number = 10000): Promise<HTMLDivElement> {
-  const findEditedTab = async (): Promise<HTMLDivElement | null> => {
-    const element = (document.getElementById('1') as HTMLDivElement) ?? null;
-    return element;
-  };
+export function getConversationTabContainer(): HTMLDivElement {
+  const tabContainers = document.querySelectorAll("div[data-cy='tabsHeaderContainer']");
 
-  return poll(findEditedTab, 100, timeout);
+  if (!tabContainers) {
+    throw new Error('No tab containers found');
+  }
+
+  if (tabContainers.length < 2) {
+    throw new Error('Not enough tab containers found');
+  }
+
+  return tabContainers[1] as HTMLDivElement;
 }
 
 /**
- * Get the original tab. Throws an error if not found within the timeout.
- * @param {number} [timeout=10000] - The timeout in milliseconds.
- * @returns {Promise<HTMLDivElement>} A promise that resolves with the original tab.
+ * Get the edited content's tab element. Throws an error if not found.
+ * @returns {HTMLDivElement} The tab for the edited conversation content.
  */
-export async function getOriginalTab(timeout: number = 10000): Promise<HTMLDivElement> {
-  const findOriginalTab = async (): Promise<HTMLDivElement | null> => {
-    const element = (document.getElementById('2') as HTMLDivElement) ?? null;
-    return element;
-  };
+export function getEditedTab(): HTMLDivElement {
+  const element = document.getElementById('1');
 
-  return poll(findOriginalTab, 100, timeout);
+  if (!element) {
+    throw new Error('Edited tab not found');
+  }
+
+  return element as HTMLDivElement;
 }
 
-export async function getTabContent(
-  tab: 'edited' | 'original',
-  timeout: number = 10000
-): Promise<string | null> {
-  return new Promise((resolve, reject) => {
-    let intervalId: number;
+/**
+ * Get the original content's tab element. Throws an error if not found.
+ * @returns {HTMLDivElement} The tab for the original conversation content.
+ */
+export function getOriginalTab(): HTMLDivElement {
+  const element = document.getElementById('2');
 
-    const checkContent = () => {
-      if (!getConversationOpen()) {
-        clearInterval(intervalId);
-        log('debug', 'Conversation is closed, cancelling diff tab insertion');
-        reject(new Error('Conversation is closed, cancelling diff tab insertion'));
-        return;
-      }
-      const tabs = document.querySelectorAll("div[data-cy='tab']");
-      const content =
-        tab === 'edited'
-          ? document.querySelector("div[contenteditable='true']")?.textContent
-          : tabs[tabs.length - 1].textContent;
-      if (content) {
-        clearInterval(intervalId);
-        resolve(content);
-      }
-    };
+  if (!element) {
+    throw new Error('Original tab not found');
+  }
 
-    // check immediately, then every 100ms
-    // checkContent();
-    intervalId = setInterval(checkContent, 100);
-
-    setTimeout(() => {
-      clearInterval(intervalId);
-      resolve(null);
-    }, timeout);
-  });
+  return element as HTMLDivElement;
 }
 
-export function getTabContentParentElement() {
-  return document.querySelectorAll("div[data-cy='tab']")[1] as HTMLDivElement | null;
+/**
+ * Get the tab content for the specified tab. Throws an error if the conversation is
+ * closed, the tabs can't be found, or the tab content is empty.
+ * @returns {string} The content of the tab.
+ */
+export function getOriginalTabContent(): string {
+  const element = document.querySelector("div[data-cy='tab'] > div");
+
+  if (!element) {
+    throw new Error('Original tab content not found');
+  }
+  if (element?.getAttribute('contenteditable') === 'true') {
+    throw new Error(
+      'Tried to get original tab content but found an editable field, indicating that it is not from the original tab'
+    );
+  }
+  if (!element.textContent) {
+    throw new Error('Original tab content was found but the content is empty');
+  }
+
+  return element.textContent;
+}
+
+/**
+ * Get the parent element for the tab content. Throws an error if not found.
+ * @returns {HTMLDivElement} The parent element for the tab content.
+ */
+export function getTabContentParentElement(): HTMLDivElement {
+  const tabs = document.querySelectorAll("div[data-cy='tab']");
+
+  if (!tabs) {
+    throw new Error('No tabs found when trying to get tab content parent element');
+  }
+  if (tabs.length < 2) {
+    throw new Error(
+      'Not enough tabs found when trying to get tab content parent element'
+    );
+  }
+
+  return tabs[tabs.length - 1] as HTMLDivElement;
 }

@@ -1,15 +1,14 @@
 import { handleConversationSubmit, handleResponseEditButtonClicked } from './handlers';
-import { log } from './helpers';
-import { getConversationSubmitButtonAsync, getResponseEditButton } from './selectors';
+import { log, retry } from './helpers';
+import { getConversationSubmitButton, getResponseEditButton } from './selectors';
 
 export async function injectListener(
-  selector: () => Promise<HTMLElement | null>,
+  element: HTMLElement,
   elementName: string,
   event: string,
   handler: (e: Event) => void
 ): Promise<void> {
   log('debug', `Adding ${event} listener for ${elementName}`);
-  const element = await selector();
 
   if (!element) {
     throw new Error(`Element not found: ${elementName}`);
@@ -20,14 +19,30 @@ export async function injectListener(
 }
 
 export async function injectListeners() {
+  const conversationSubmitButton = await retry(
+    'retrieving conversation submit button',
+    () => getConversationSubmitButton()
+  );
+  const responseEditButton = await retry('retrieving response edit button', () =>
+    getResponseEditButton()
+  );
+
+  if (!conversationSubmitButton || !responseEditButton) {
+    log(
+      'error',
+      'Failed to retrieve elements for injecting listeners on the conversation submit button and response edit button.'
+    );
+    return;
+  }
+
   injectListener(
-    getConversationSubmitButtonAsync,
+    conversationSubmitButton,
     'conversation button',
     'click',
     handleConversationSubmit
   );
   injectListener(
-    getResponseEditButton,
+    responseEditButton,
     'response edit button',
     'click',
     handleResponseEditButtonClicked

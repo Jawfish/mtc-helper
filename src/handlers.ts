@@ -1,23 +1,23 @@
 import { insertDiffElement, insertDiffTab, removeDiffElement } from './elements';
-import { formatMessages, getResponseStatusMessages, log } from './helpers';
+import { formatMessages, getResponseStatusMessages, log, retry } from './helpers';
 import { injectListener, injectListeners } from './listeners';
 import {
+  getConversationContent,
   getConversationSubmitButton,
   getEditedTab,
   getOriginalTab,
-  getTabContainer,
-  getTabContent
+  getOriginalTabContent
 } from './selectors';
 import {
   getDiffOpen,
-  getDiffTabInserted,
   getEditedContent,
   getOriginalContent,
   resetStore,
   setConversationOpen,
   setCurrentTab,
   setEditedContent,
-  setOriginalContent
+  setOriginalContent,
+  Tab
 } from './store';
 
 export function handleConversationSubmit(e: Event) {
@@ -56,11 +56,22 @@ export function handleConversationSubmit(e: Event) {
   }
 }
 
-export function handleResponseEditButtonClicked(e: Event) {
-  injectListener(getEditedTab, 'Edited response tab', 'click', e =>
+export async function handleResponseEditButtonClicked(e: Event) {
+  const editedTab = await retry('retrieving edited tab', () => getEditedTab());
+  const originalTab = await retry('retrieving original tab', () => getOriginalTab());
+
+  if (!editedTab || !originalTab) {
+    log(
+      'error',
+      'Failed to retrieve tab elements while handling response edit button click.'
+    );
+    return;
+  }
+
+  injectListener(editedTab, 'Edited response tab', 'click', e =>
     handleTabClicked(e, 'edited')
   );
-  injectListener(getOriginalTab, 'Original response tab', 'click', e =>
+  injectListener(originalTab, 'Original response tab', 'click', e =>
     handleTabClicked(e, 'original')
   );
 
@@ -69,75 +80,67 @@ export function handleResponseEditButtonClicked(e: Event) {
   handleTabClicked(nullEvent, 'edited');
 }
 
-export async function handleTabClicked(e: Event, tab: 'edited' | 'original') {
+export async function handleTabClicked(e: Event, tab: Tab) {
   if (e.type === 'click') {
     log('debug', tab === 'edited' ? 'Edited tab clicked.' : 'Original tab clicked.');
+    setCurrentTab(tab);
   }
 
   removeDiffElement();
 
-  const tabContent = await getTabContent(tab);
+  if (tab === 'edited') {
+    return;
+  }
 
-  if (!tabContent) {
-    log('error', 'Failed to get tab content.');
-  } else if (tab === 'original') {
-    setCurrentTab('original');
-    setOriginalContent(tabContent);
-    if (!getDiffTabInserted()) {
-      insertDiffTab(getTabContainer, handleDiffTabClicked);
+  try {
+    // TODO: this can be replaced with a mutation observer to check for when the content changes
+    const tabContent = await retry(
+      'retrieving tab content after the original content tab has been clicked',
+      () => getOriginalTabContent()
+    );
+    if (!tabContent) {
+      throw new Error('No tab content found');
     }
+    setOriginalContent(tabContent);
+    insertDiffTab(handleDiffTabClicked);
+  } catch (error) {
+    log('error', `Failed to get tab content: ${(error as Error).message}`);
   }
 }
 
 export function handleDiffTabClicked(e: Event) {
-  if (!getOriginalContent() || !getEditedContent()) {
-    log(
-      'error',
-      `Failed to get content for diff tab. Missing ${getOriginalContent() ? (getEditedContent() ? 'both' : 'edited') : 'original'} content.`
-    );
-    return;
-  }
-
   if (getDiffOpen()) {
     removeDiffElement();
     return;
   }
 
-  insertDiffElement(getOriginalContent(), getEditedContent());
+  const originalContent = getOriginalContent();
+  const editedContent = getEditedContent();
+
+  if (!editedContent || !originalContent) {
+    log(
+      'error',
+      `Failed to get content for diff tab. Missing ${editedContent ? (originalContent ? 'both' : 'edited') : 'original'} content.`
+    );
+    return;
+  }
+
+  insertDiffElement(originalContent, editedContent);
 }
 
 export async function handleConversationOpen() {
   log('info', 'New conversation detected.');
   setConversationOpen(true);
 
-  // wait for the DOM element to be available
-  const getContent = async () => {
-    return new Promise<string>((resolve, reject) => {
-      let intervalId: number;
-
-      const checkElement = () => {
-        const element = document.querySelectorAll('div.rounded-xl')[1];
-        if (element) {
-          clearInterval(intervalId);
-          resolve(element.textContent || '');
-        }
-      };
-
-      // check immediately, then every 100ms
-      checkElement();
-      intervalId = setInterval(checkElement, 100);
-
-      setTimeout(() => {
-        clearInterval(intervalId);
-        reject(new Error('Element not found within timeout'));
-      }, 10000);
-    });
-  };
-
   try {
-    let content = await getContent();
-    // remove very first character, which is the response number
-    content = content.slice(1);
+    let content = await retry(
+      'retrieving conversation content while handing conversation open event',
+      () => getConversationContent()
+    );
+    if (!content) {
+      throw new Error('No conversation content found');
+    }
+
     setEditedContent(content);
   } catch (error) {
     console.error('Failed to get content:', error);
