@@ -1,5 +1,5 @@
 import { insertDiffElement, insertDiffTab, removeDiffElement } from './elements';
-import { formatMessages, getResponseStatusMessages, log, retry } from './helpers';
+import { formatMessages, determineWarnings, log, retry } from './helpers';
 import { injectListener, injectListeners } from './listeners';
 import {
   getConversationContent,
@@ -25,7 +25,7 @@ export function handleConversationSubmit(e: Event) {
   e.stopImmediatePropagation();
   log('debug', 'Attempting to submit conversation...');
 
-  const messages = getResponseStatusMessages();
+  const messages = determineWarnings();
   log('debug', `Found ${messages.length} issues.`);
   const prefix =
     'Are you sure you want to submit? The following issues were detected:\n\n';
@@ -150,5 +150,6 @@ export async function handleConversationOpen() {
 }
 
 export async function handleConversationClose() {
+  log('info', 'Conversation closed.');
   resetStore();
 }

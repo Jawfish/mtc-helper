@@ -165,44 +165,42 @@ export const formatMessages = (messages: string[]): string[] => {
  * @returns {string[]} An array of strings containing the issues found with the bot
  * response.
  */
-export function getResponseStatusMessages(): string[] {
+export function determineWarnings(): string[] {
   const messages: string[] = [];
-  const code = getResponseCode();
+  try {
+    const code = getResponseCode();
+    checkAlignmentScore(85, messages);
 
-  checkAlignmentScore(85, messages);
+    if (code.includes('```')) {
+      log(
+        'warn',
+        'The code does not appear to be in a properly-closed markdown code block.'
+      );
+      messages.push(
+        'The code does not appear to be in a properly-closed markdown code block.'
+      );
+    }
 
-  if (!code?.trim()) {
-    log('error', 'Cannot find bot response');
+    checkForHtmlInCode(code, messages);
+
+    if (code.split('\n').length <= 3) {
+      log('warn', 'The bot response has suspiciously few lines.');
+      messages.push('The bot response has suspiciously few lines.');
+    }
+
+    if (isPython()) {
+      log('debug', 'The code appears to be Python.');
+      validatePython(code, messages);
+    }
+
+    return messages;
+  } catch (error) {
+    log('error', `Error getting messages for response warnings: ${error}`);
     messages.push(
       'The code cannot be found in the response. Is it in a markdown block?'
     );
     return messages;
   }
-
-  if (code.includes('```')) {
-    log(
-      'warn',
-      'The code does not appear to be in a properly-closed markdown code block.'
-    );
-    messages.push(
-      'The code does not appear to be in a properly-closed markdown code block.'
-    );
-  }
-
-  checkForHtmlInCode(code, messages);
-
-  console.log(code.split('\n').length);
-  if (code.split('\n').length <= 3) {
-    log('warn', 'The bot response has suspiciously few lines.');
-    messages.push('The bot response has suspiciously few lines.');
-  }
-
-  if (isPython()) {
-    log('debug', 'The code appears to be Python.');
-    validatePython(code, messages);
-  }
-
-  return messages;
 }
 
 /**
@@ -271,7 +269,7 @@ export async function retry<T>(
       if (abortSignal.aborted) {
         return reject(
           new Error(
-            'Abort signal sent to store (probably because conversation window closed), polling operation aborted'
+            `Abort signal sent to store (probably because conversation window closed), polling operation aborted for ${purpose}`
           )
         );
       }

@@ -19,32 +19,45 @@ export async function injectListener(
 }
 
 export async function injectListeners() {
-  const conversationSubmitButton = await retry(
-    'retrieving conversation submit button',
-    () => getConversationSubmitButton()
-  );
-  const responseEditButton = await retry('retrieving response edit button', () =>
-    getResponseEditButton()
-  );
-
-  if (!conversationSubmitButton || !responseEditButton) {
+  try {
+    const conversationSubmitButton = await retry(
+      'retrieving conversation submit button',
+      () => getConversationSubmitButton()
+    );
+    if (!conversationSubmitButton) {
+      throw new Error('Failed to retrieve button element to injecting listener on.');
+    }
+    injectListener(
+      conversationSubmitButton,
+      'conversation button',
+      'click',
+      handleConversationSubmit
+    );
+  } catch (error) {
     log(
       'error',
-      'Failed to retrieve elements for injecting listeners on the conversation submit button and response edit button.'
+      `Error injecting listener for conversation submit button: ${(error as Error).message}`
     );
-    return;
   }
+  try {
+    const responseEditButton = await retry('retrieving response edit button', () =>
+      getResponseEditButton()
+    );
 
-  injectListener(
-    conversationSubmitButton,
-    'conversation button',
-    'click',
-    handleConversationSubmit
-  );
-  injectListener(
-    responseEditButton,
-    'response edit button',
-    'click',
-    handleResponseEditButtonClicked
-  );
+    if (!responseEditButton) {
+      throw new Error('Failed to retrieve button element to injecting listener on.');
+    }
+
+    injectListener(
+      responseEditButton,
+      'response edit button',
+      'click',
+      handleResponseEditButtonClicked
+    );
+  } catch (error) {
+    log(
+      'error',
+      `Error injecting listeners for response edit button: ${(error as Error).message}`
+    );
+  }
 }
