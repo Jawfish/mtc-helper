@@ -247,7 +247,7 @@ export function checkAlignmentScore(threshold: number, messages: string[]): void
  * @param {string} purpose - The purpose of the operation for logging purposes.
  * @param {() => T} fn - The function to poll.
  * @param {number} [interval=100] - The interval in milliseconds between polls.
- * @param {number} [timeout=5000] - The timeout in milliseconds before the operation is
+ * @param {number} [timeout=10000] - The timeout in milliseconds before the operation is
  * aborted.
  * @returns {Promise<T>} A promise that resolves with the result of the function or
  * rejects with a timeout or abort error.
@@ -256,7 +256,7 @@ export async function retry<T>(
   purpose: string,
   fn: () => T,
   interval: number = 100,
-  timeout: number = 5000
+  timeout: number = 10000
 ): Promise<T | null> {
   log(
     'debug',
