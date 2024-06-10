@@ -167,9 +167,10 @@ export const formatMessages = (messages: string[]): string[] => {
  */
 export function determineWarnings(): string[] {
   const messages: string[] = [];
+  checkAlignmentScore(85, messages);
+
   try {
     const code = getResponseCode();
-    checkAlignmentScore(85, messages);
 
     if (code.includes('```')) {
       log(
@@ -192,15 +193,14 @@ export function determineWarnings(): string[] {
       log('debug', 'The code appears to be Python.');
       validatePython(code, messages);
     }
-
-    return messages;
   } catch (error) {
     log('error', `Error getting messages for response warnings: ${error}`);
     messages.push(
       'The code cannot be found in the response. Is it in a markdown block?'
     );
-    return messages;
   }
+
+  return messages;
 }
 
 /**
