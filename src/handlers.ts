@@ -10,6 +10,7 @@ import {
   resetStore,
   setConversationOpen,
   setCurrentTab,
+  setDiffTabInserted,
   setDiffViewState,
   setEditedContent,
   setOriginalContent,
@@ -54,23 +55,30 @@ export function handleConversationSubmit(e: Event) {
 }
 
 export async function handleResponseEditButtonClicked(e: Event) {
+  log('debug', 'Response edit button clicked.');
   const editedTab = await waitForElement(
     () => elementStore.getState().editedTabElement
   );
   const originalTab = await waitForElement(
     () => elementStore.getState().originalTabElement
   );
-
-  if (!editedTab || !originalTab) {
-    log(
-      'error',
-      'Failed to retrieve tab elements while handling response edit button click.'
-    );
-    return;
-  }
+  const saveButton = await waitForElement(
+    () => elementStore.getState().saveButtonElement
+  );
 
   editedTab.addEventListener('click', e => handleTabClicked(e, 'edited'));
   originalTab.addEventListener('click', e => handleTabClicked(e, 'original'));
+  // when the save button is clicked, the edit view closes, so we need to reset the
+  // state of the diff tab as well as re-add the listener for the edit button that is
+  // re-added to the DOM
+  saveButton.addEventListener('click', async e => {
+    setDiffTabInserted(false);
+    setDiffViewState(DiffViewState.CLOSED);
+    const newResponseEditButton = await waitForElement(
+      () => elementStore.getState().editButtonElement
+    );
+    newResponseEditButton.addEventListener('click', handleResponseEditButtonClicked);
+  });
 
   // The edited tab is open by default
   const nullEvent = new Event('');

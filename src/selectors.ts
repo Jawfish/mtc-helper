@@ -171,3 +171,11 @@ export function selectTabContentParentelement(): Element | undefined {
  */
 export const selectSnoozeButtonElement = (): Element | undefined =>
   document.querySelector("button[title='Snooze']") || undefined;
+
+export const selectSaveButtonElement = (): HTMLButtonElement | undefined => {
+  const element = Array.from(document.querySelectorAll('span')).find(
+    span => span.textContent === 'Save'
+  )?.parentElement;
+
+  return (element as HTMLButtonElement) || undefined;
+};

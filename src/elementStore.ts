@@ -11,9 +11,9 @@ import {
   selectReturnTargetElement,
   selectScoreElement,
   selectEditButton,
-  selectTabContentParentelement as selectTabContentParentElement
+  selectTabContentParentelement as selectTabContentParentElement,
+  selectSaveButtonElement
 } from './selectors';
-import { log } from './helpers';
 
 type ElementStoreState = {
   snoozeButtonElement: Element | undefined;
@@ -29,6 +29,7 @@ type ElementStoreState = {
   scoreElement: HTMLElement | undefined;
   metadataElement: HTMLElement | undefined;
   tabContentParentElement: Element | undefined;
+  saveButtonElement: HTMLButtonElement | undefined;
 };
 
 const initialElementStoreState: ElementStoreState = {
@@ -44,7 +45,8 @@ const initialElementStoreState: ElementStoreState = {
   returnTargetElement: undefined,
   scoreElement: undefined,
   metadataElement: undefined,
-  tabContentParentElement: undefined
+  tabContentParentElement: undefined,
+  saveButtonElement: undefined
 };
 
 export const elementStore = createStore<ElementStoreState>(() => ({
@@ -65,7 +67,8 @@ export function updateElementStore() {
     returnTargetElement: selectReturnTargetElement(),
     scoreElement: selectScoreElement(),
     metadataElement: document.querySelector('h4')?.parentElement || undefined,
-    tabContentParentElement: selectTabContentParentElement()
+    tabContentParentElement: selectTabContentParentElement(),
+    saveButtonElement: selectSaveButtonElement()
   });
 
   const metadataElement = elementStore.getState().metadataElement;
