@@ -31,7 +31,7 @@ const initialState: StoreState = {
   intervals: []
 };
 
-const store = createStore<StoreState>(() => ({
+export const store = createStore<StoreState>(() => ({
   conversationOpen: initialState.conversationOpen,
   currentTab: initialState.currentTab,
   diffView: initialState.diffView,

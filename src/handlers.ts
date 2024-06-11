@@ -1,6 +1,10 @@
 import { insertDiffElement, insertDiffToggles, removeDiffElement } from './elements';
 import { formatMessages, determineWarnings, log, waitForElement } from './helpers';
-import { addResponseEditButtonListener, addSubmitButtonListener } from './listeners';
+import {
+  observeResponseEditButton,
+  observeEditedContent,
+  observeSubmitButton
+} from './observers';
 
 import {
   DiffViewState,
@@ -17,6 +21,8 @@ import {
   Tab
 } from './store';
 import { elementStore } from './elementStore';
+import { observerStore, resetObserverStore } from './observerStore';
+import { resetListenerStore } from './listenerStore';
 
 export function handleConversationSubmit(e: Event) {
   e.preventDefault();
@@ -85,7 +91,7 @@ export async function handleResponseEditButtonClicked(e: Event) {
   handleTabClicked(nullEvent, 'edited');
 }
 
-export async function handleTabClicked(e: Event, tab: Tab) {
+async function handleTabClicked(e: Event, tab: Tab) {
   if (e.type === 'click') {
     log('debug', tab === 'edited' ? 'Edited tab clicked.' : 'Original tab clicked.');
     setCurrentTab(tab);
@@ -97,7 +103,6 @@ export async function handleTabClicked(e: Event, tab: Tab) {
     return;
   }
 
-  // TODO: this can be replaced with a mutation observer to check for when the content changes
   const tabElement = await waitForElement(
     () => elementStore.getState().originalTabContentElement
   );
@@ -139,25 +144,26 @@ export function handleDiffToggleClicked(e: Event, state: DiffViewState) {
   insertDiffElement(originalContent, editedContent, state);
 }
 
+function addObservers() {
+  const addObserver = observerStore.getState().addObserver;
+
+  addObserver(observeSubmitButton);
+  addObserver(observeResponseEditButton);
+  addObserver(observeEditedContent);
+}
+
 export async function handleConversationOpen() {
   log('info', 'New conversation detected.');
+
   setConversationOpen(true);
-  addSubmitButtonListener();
-  addResponseEditButtonListener();
-
-  let contentElement = await waitForElement(
-    () => elementStore.getState().responseElement
-  );
-
-  if (!contentElement.textContent) {
-    log('error', 'Failed to retrieve conversation content.');
-  } else {
-    const content = contentElement.textContent?.slice(1);
-    setEditedContent(content);
-  }
+  addObservers();
 }
 
 export async function handleConversationClose() {
   log('info', 'Conversation closed.');
+
+  resetObserverStore();
+  resetListenerStore();
   resetStore();
+  setConversationOpen(false);
 }

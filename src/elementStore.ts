@@ -12,7 +12,8 @@ import {
   selectScoreElement,
   selectEditButton,
   selectTabContentParentelement as selectTabContentParentElement,
-  selectSaveButtonElement
+  selectSaveButtonElement,
+  selectMetadataSectionElement
 } from './selectors';
 
 type ElementStoreState = {
@@ -53,6 +54,11 @@ export const elementStore = createStore<ElementStoreState>(() => ({
   ...initialElementStoreState
 }));
 
+// TODO: pub/sub - Have a list of listeners that are called when the DOM is updated. Those listeners
+// can then conditionally check elements specific to them, do what they need to do if they haven't
+// done it already, and unsubscribe themselves if they don't need to listen anymore. This would
+// improve performance by not having to check all elements on every update. Also consider switching
+// to a state machine, since so much stuff relies on the state of the conversation window.
 export function updateElementStore() {
   elementStore.setState({
     snoozeButtonElement: selectSnoozeButtonElement(),
@@ -66,17 +72,10 @@ export function updateElementStore() {
     responseCodeElement: selectResponseCodeElement(),
     returnTargetElement: selectReturnTargetElement(),
     scoreElement: selectScoreElement(),
-    metadataElement: document.querySelector('h4')?.parentElement || undefined,
+    metadataElement: selectMetadataSectionElement(),
     tabContentParentElement: selectTabContentParentElement(),
     saveButtonElement: selectSaveButtonElement()
   });
-
-  const metadataElement = elementStore.getState().metadataElement;
-
-  // remove the useless metadata with the useless save button
-  if (metadataElement) {
-    metadataElement.remove();
-  }
 }
 
 export function resetElementStore() {
