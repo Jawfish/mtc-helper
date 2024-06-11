@@ -1,5 +1,5 @@
-import { getAlignmentScore, getQaFeedbackSection, getResponseCode } from './selectors';
-import { getAbortSignal } from './store';
+import { elementStore } from './elementStore';
+import { addInterval } from './store';
 
 export function log(
   level: 'log' | 'debug' | 'info' | 'warn' | 'error',
@@ -169,35 +169,34 @@ export function determineWarnings(): string[] {
   const messages: string[] = [];
   checkAlignmentScore(85, messages);
 
-  try {
-    const code = getResponseCode();
+  const code = elementStore.getState().responseCodeElement?.textContent;
 
-    if (code.includes('```')) {
-      log(
-        'warn',
-        'The code does not appear to be in a properly-closed markdown code block.'
-      );
-      messages.push(
-        'The code does not appear to be in a properly-closed markdown code block.'
-      );
-    }
+  if (!code) {
+    log('warn', 'The code cannot be found in the response.');
+    messages.push('The code cannot be found in the response.');
+    return messages;
+  }
 
-    checkForHtmlInCode(code, messages);
-
-    if (code.split('\n').length <= 3) {
-      log('warn', 'The bot response has suspiciously few lines.');
-      messages.push('The bot response has suspiciously few lines.');
-    }
-
-    if (isPython()) {
-      log('debug', 'The code appears to be Python.');
-      validatePython(code, messages);
-    }
-  } catch (error) {
-    log('error', `Error getting messages for response warnings: ${error}`);
-    messages.push(
-      'The code cannot be found in the response. Is it in a markdown block?'
+  if (code.includes('```')) {
+    log(
+      'warn',
+      'The code does not appear to be in a properly-closed markdown code block.'
     );
+    messages.push(
+      'The code does not appear to be in a properly-closed markdown code block.'
+    );
+  }
+
+  checkForHtmlInCode(code, messages);
+
+  if (code.split('\n').length <= 3) {
+    log('warn', 'The bot response has suspiciously few lines.');
+    messages.push('The bot response has suspiciously few lines.');
+  }
+
+  if (isPython()) {
+    log('debug', 'The code appears to be Python.');
+    validatePython(code, messages);
   }
 
   return messages;
@@ -216,20 +215,22 @@ export function determineWarnings(): string[] {
 export function checkAlignmentScore(threshold: number, messages: string[]): void {
   try {
     log('debug', 'Checking if alignment score is low...');
-    const element = getQaFeedbackSection();
-    const sendToRework =
-      element?.children?.length &&
-      element.children.length >= 2 &&
-      element?.children[2]?.textContent?.includes('Rework');
-    const score = getAlignmentScore();
-
-    if (!score || score == -1) {
+    const sendToRework = elementStore
+      .getState()
+      .returnTargetElement?.textContent?.includes('Rework');
+    const scoreText = elementStore
+      .getState()
+      .scoreElement?.textContent?.split(':')[1]
+      ?.trim();
+    if (!scoreText) {
       log('warn', 'Alignment score not found.');
       return;
     }
 
+    const score = parseInt(scoreText, 10);
+
     log('debug', `Alignment score: ${score}, send to rework: ${sendToRework}`);
-    if (score < threshold && !sendToRework) {
+    if (score < threshold && sendToRework === false) {
       messages.push(
         `The alignment score is ${score}, but the conversation is not marked as a rework.`
       );
@@ -239,53 +240,16 @@ export function checkAlignmentScore(threshold: number, messages: string[]): void
   }
 }
 
-/**
- * Retries a synchronous operation (fn) until no error is thrown, the timeout is
- * reached, or the operation is aborted.
- * @param {string} purpose - The purpose of the operation for logging purposes.
- * @param {() => T} fn - The function to poll.
- * @param {number} [interval=100] - The interval in milliseconds between polls.
- * @param {number} [timeout=10000] - The timeout in milliseconds before the operation is
- * aborted.
- * @returns {Promise<T>} A promise that resolves with the result of the function or
- * rejects with a timeout or abort error.
- */
-export async function retry<T>(
-  purpose: string,
-  fn: () => T,
-  interval: number = 100,
-  timeout: number = 10000
-): Promise<T | null> {
-  log(
-    'debug',
-    `Polling with interval ${interval} and timeout ${timeout} for ${purpose}`
-  );
-
-  const endTime = Date.now() + timeout;
-  const abortSignal = getAbortSignal();
-
-  return new Promise<T | null>((resolve, reject) => {
-    const checkCondition = () => {
-      if (abortSignal.aborted) {
-        return reject(
-          new Error(
-            `Abort signal sent to store (probably because conversation window closed), polling operation aborted for ${purpose}`
-          )
-        );
+export function waitForElement(elementGetter: () => any): Promise<Element> {
+  return new Promise(resolve => {
+    const intervalId = setInterval(() => {
+      const element = elementGetter();
+      if (element !== undefined) {
+        clearInterval(intervalId);
+        resolve(element);
       }
+    }, 100);
 
-      try {
-        const result = fn();
-        resolve(result);
-      } catch (error) {
-        if (Date.now() < endTime) {
-          setTimeout(checkCondition, interval);
-        } else {
-          resolve(null);
-        }
-      }
-    };
-
-    checkCondition();
+    addInterval(intervalId);
   });
 }

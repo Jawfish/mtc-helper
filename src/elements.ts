@@ -1,24 +1,25 @@
 import { diffLines } from 'diff';
-import { log, retry } from './helpers';
-import { getConversationTabContainer, getTabContentParentElement } from './selectors';
+import { log, waitForElement } from './helpers';
+
 import {
   getConversationOpen,
-  getDiffTabInserted,
-  setDiffOpen,
-  setDiffTabInserted
+  getDiffTabInserted as getDiffTogglesInserted,
+  setDiffViewState,
+  setDiffTabInserted as setDiffTogglesInserted,
+  DiffViewState,
+  getDiffViewState
 } from './store';
+import { elementStore } from './elementStore';
+import { handleDiffToggleClicked } from './handlers';
 
-export async function insertDiffTab(onClick: (e: Event) => void): Promise<void> {
-  if (getDiffTabInserted()) {
-    log('warn', 'Diff tab already inserted');
+export function insertDiffToggles() {
+  if (getDiffTogglesInserted()) {
+    log('warn', 'Diff toggles already inserted');
     return;
   }
 
   try {
-    const tabContainer = await retry(
-      'retrieving conversation tab container while inserting diff tab',
-      () => getConversationTabContainer()
-    );
+    const tabContainer = elementStore.getState().tabContainerElement;
     if (!tabContainer) {
       log('error', 'Tab container not found, cancelling diff tab insertion');
       throw new Error('Tab container not found, cancelling diff tab insertion');
@@ -29,16 +30,29 @@ export async function insertDiffTab(onClick: (e: Event) => void): Promise<void> 
       throw new Error('No conversation, cancelling diff tab insertion');
     }
 
-    log('debug', 'Inserting diff tab');
-    const diffTab = document.createElement('div');
+    log('debug', 'Inserting diff toggles');
+    const diffLineToggle = document.createElement('div');
+    const diffBlockToggle = document.createElement('div');
 
-    diffTab.className = 'tab hover:text-theme-main';
-    diffTab.textContent = 'Toggle Diff';
-    diffTab.style.cursor = 'pointer';
-    diffTab.addEventListener('click', onClick);
+    diffLineToggle.className = 'tab hover:text-theme-main';
+    diffBlockToggle.className = 'tab hover:text-theme-main';
 
-    tabContainer.appendChild(diffTab);
-    setDiffTabInserted(true);
+    diffLineToggle.textContent = 'Toggle Diff (Lines)';
+    diffBlockToggle.textContent = 'Toggle Diff (Blocks)';
+
+    diffLineToggle.style.cursor = 'pointer';
+    diffBlockToggle.style.cursor = 'pointer';
+
+    diffLineToggle.addEventListener('click', e =>
+      handleDiffToggleClicked(e, DiffViewState.LINES)
+    );
+    diffBlockToggle.addEventListener('click', e =>
+      handleDiffToggleClicked(e, DiffViewState.BLOCKS)
+    );
+
+    tabContainer.appendChild(diffLineToggle);
+    tabContainer.appendChild(diffBlockToggle);
+    setDiffTogglesInserted(true);
   } catch (error) {
     log(
       'error',
@@ -49,7 +63,8 @@ export async function insertDiffTab(onClick: (e: Event) => void): Promise<void> 
 
 export function insertDiffElement(
   originalContent: string,
-  editedContent: string
+  editedContent: string,
+  state: DiffViewState
 ): void {
   log(
     'debug',
@@ -67,11 +82,20 @@ ${editedContent}
 `
   );
 
-  setDiffOpen(true);
+  const diffViewState = getDiffViewState();
 
-  const diff = diffLines(originalContent, editedContent, {});
+  if (diffViewState === state) {
+    log('warn', `Diff element already inserted with state ${state}`);
+    return;
+  }
+
+  setDiffViewState(state);
+
+  const diff = diffLines(originalContent, editedContent, {
+    newlineIsToken: state === DiffViewState.LINES
+  });
   const fragment = document.createDocumentFragment();
-  const container = getTabContentParentElement();
+  const container = elementStore.getState().tabContentParentElement;
 
   if (!container) {
     log('error', 'Tab content element not found, unable to insert diff element');
@@ -79,24 +103,22 @@ ${editedContent}
   }
 
   diff.forEach(part => {
-    if (part.value === '\n' || part.value.trim() === '') {
+    if (part.value.trim() === '') {
       return;
     }
+
+    part.value = part.value.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g, '');
 
     const color = part.added ? 'green' : part.removed ? 'red' : 'grey';
     const bgColor = part.added ? '#E3F4E4' : part.removed ? '#F7E8E9' : '#f8f9fa';
 
-    const prefix = part.added ? '+ ' : part.removed ? '- ' : '';
-    const style = document.createElement('style');
     const pre = document.createElement('pre');
 
     pre.style.color = color;
     pre.style.whiteSpace = 'pre-wrap';
     pre.style.backgroundColor = bgColor;
-    pre.textContent = prefix + part.value;
-    pre.classList.add('diff-pre');
+    pre.textContent = part.value;
 
-    document.head.append(style);
     fragment.appendChild(pre);
   });
 
@@ -108,7 +130,7 @@ ${editedContent}
 
 export function removeDiffElement(): void {
   log('debug', 'Removing diff element');
-  setDiffOpen(false);
+  setDiffViewState(DiffViewState.CLOSED);
   const diffView = document.getElementById('diffView');
   diffView?.parentNode?.removeChild(diffView);
 }

@@ -3,44 +3,43 @@ import { log } from './helpers';
 
 export type Tab = 'edited' | 'original';
 
+export enum DiffViewState {
+  LINES = 'lines',
+  BLOCKS = 'blocks',
+  CLOSED = 'closed'
+}
+
 type StoreState = {
-  abortController: AbortController;
   conversationOpen: boolean;
   currentTab: Tab;
-  diffOpen: boolean;
+  diffView: DiffViewState;
   diffTabInserted: boolean;
   editedContent: string;
   originalContent: string;
+  timeouts: Array<number>;
+  intervals: Array<number>;
 };
 
-type InitialState = {
-  abortController: () => AbortController;
-  conversationOpen: boolean;
-  currentTab: Tab;
-  diffOpen: boolean;
-  diffTabInserted: boolean;
-  editedContent: string;
-  originalContent: string;
-};
-
-const initialState: InitialState = {
-  abortController: () => new AbortController(),
+const initialState: StoreState = {
   conversationOpen: false,
   currentTab: 'edited',
-  diffOpen: false,
+  diffView: DiffViewState.CLOSED,
   diffTabInserted: false,
   editedContent: '',
-  originalContent: ''
+  originalContent: '',
+  timeouts: [],
+  intervals: []
 };
 
 const store = createStore<StoreState>(() => ({
-  abortController: initialState.abortController(),
   conversationOpen: initialState.conversationOpen,
   currentTab: initialState.currentTab,
-  diffOpen: initialState.diffOpen,
+  diffView: initialState.diffView,
   diffTabInserted: initialState.diffTabInserted,
   editedContent: initialState.editedContent,
-  originalContent: initialState.originalContent
+  originalContent: initialState.originalContent,
+  timeouts: initialState.timeouts,
+  intervals: initialState.intervals
 }));
 
 // These could be achieved through store.getState() and store.setState(), but I have
@@ -48,22 +47,14 @@ const store = createStore<StoreState>(() => ({
 // for easier processing/logging/etc. in the middle.
 
 // Store getters
-export const getAbortSignal = () => {
-  const signal = store.getState().abortController.signal;
-  log('debug', `Getting abort signal from the store: ${signal}`);
-
-  return signal;
-};
-
 export const getConversationOpen = () => {
   const open = store.getState().conversationOpen;
-  log('debug', `Getting conversation open from the store: ${open}`);
 
   return open;
 };
 
-export const getDiffOpen = () => {
-  const open = store.getState().diffOpen;
+export const getDiffViewState = () => {
+  const open = store.getState().diffView;
   log('debug', `Getting diff open from the store: ${open}`);
 
   return open;
@@ -97,15 +88,29 @@ export const getCurrentTab = () => {
   return tab;
 };
 
+export const getTimeouts = () => {
+  const timers = store.getState().timeouts;
+  log('debug', `Getting timers from the store: ${timers}`);
+
+  return timers;
+};
+
+export const getIntervals = () => {
+  const timers = store.getState().intervals;
+  log('debug', `Getting intervals from the store: ${timers}`);
+
+  return timers;
+};
+
 // Store setters
 export const setConversationOpen = (open: boolean) => {
   log('debug', `Setting conversation open in the store: ${open}`);
   store.setState({ conversationOpen: open });
 };
 
-export function setDiffOpen(open: boolean) {
-  log('debug', `Setting diff open in the store: ${open}`);
-  store.setState({ diffOpen: open });
+export function setDiffViewState(view: DiffViewState) {
+  log('debug', `Changing diff view from ${store.getState().diffView} to ${view}`);
+  store.setState({ diffView: view });
 }
 
 export function setDiffTabInserted(inserted: boolean) {
@@ -128,16 +133,31 @@ export function setCurrentTab(tab: Tab) {
   store.setState({ currentTab: tab });
 }
 
+export function addTimeout(timeout: number) {
+  log('debug', `Adding timer to the store: ${timeout}`);
+  store.setState({ timeouts: [...store.getState().timeouts, timeout] });
+}
+
+export function addInterval(interval: number) {
+  log('debug', `Adding interval to the store: ${interval}`);
+  store.setState({ intervals: [...store.getState().intervals, interval] });
+}
+
 export function resetStore() {
   log('debug', 'Resetting store to initial state');
-  store.getState().abortController.abort();
+  log('debug', `Clearing timers: ${getTimeouts()}`);
+  getTimeouts().forEach(timer => clearTimeout(timer));
+  log('debug', `Clearing intervals: ${getIntervals()}`);
+  getIntervals().forEach(timer => clearInterval(timer));
   store.setState({
-    abortController: initialState.abortController(),
     conversationOpen: initialState.conversationOpen,
     currentTab: initialState.currentTab,
-    diffOpen: initialState.diffOpen,
+    diffView: initialState.diffView,
     diffTabInserted: initialState.diffTabInserted,
     editedContent: initialState.editedContent,
-    originalContent: initialState.originalContent
+    originalContent: initialState.originalContent,
+    timeouts: initialState.timeouts,
+    intervals: initialState.intervals
   });
+  log('debug', 'Store reset complete');
 }

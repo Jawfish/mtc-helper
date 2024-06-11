@@ -1,63 +1,21 @@
 import { handleConversationSubmit, handleResponseEditButtonClicked } from './handlers';
-import { log, retry } from './helpers';
-import { getConversationSubmitButton, getResponseEditButton } from './selectors';
+import { log, waitForElement } from './helpers';
+import { elementStore } from './elementStore';
 
-export async function injectListener(
-  element: HTMLElement,
-  elementName: string,
-  event: string,
-  handler: (e: Event) => void
-): Promise<void> {
-  log('debug', `Adding ${event} listener for ${elementName}`);
-
-  if (!element) {
-    throw new Error(`Element not found: ${elementName}`);
-  }
-
-  element.addEventListener(event, handler);
-  log('debug', `${event} listener added for ${elementName}`);
+export async function addSubmitButtonListener() {
+  log('debug', 'Waiting for conversation submit button...');
+  const submitButton = await waitForElement(
+    () => elementStore.getState().submitButtonElement
+  );
+  submitButton.addEventListener('click', handleConversationSubmit);
+  log('info', 'Conversation submit button listener added.');
 }
 
-export async function injectListeners() {
-  try {
-    const conversationSubmitButton = await retry(
-      'retrieving conversation submit button',
-      () => getConversationSubmitButton()
-    );
-    if (!conversationSubmitButton) {
-      throw new Error('Failed to retrieve button element to injecting listener on.');
-    }
-    injectListener(
-      conversationSubmitButton,
-      'conversation button',
-      'click',
-      handleConversationSubmit
-    );
-  } catch (error) {
-    log(
-      'error',
-      `Error injecting listener for conversation submit button: ${(error as Error).message}`
-    );
-  }
-  try {
-    const responseEditButton = await retry('retrieving response edit button', () =>
-      getResponseEditButton()
-    );
-
-    if (!responseEditButton) {
-      throw new Error('Failed to retrieve button element to injecting listener on.');
-    }
-
-    injectListener(
-      responseEditButton,
-      'response edit button',
-      'click',
-      handleResponseEditButtonClicked
-    );
-  } catch (error) {
-    log(
-      'error',
-      `Error injecting listeners for response edit button: ${(error as Error).message}`
-    );
-  }
+export async function addResponseEditButtonListener() {
+  log('debug', 'Waiting for response edit button...');
+  const responseButton = await waitForElement(
+    () => elementStore.getState().editButtonElement
+  );
+  responseButton.addEventListener('click', handleResponseEditButtonClicked);
+  log('info', 'Response edit button listener added.');
 }

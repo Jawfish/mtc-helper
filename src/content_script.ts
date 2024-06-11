@@ -1,11 +1,16 @@
+// import all the files that are needed to run the content script so that webpack can bundle them
 import './elements';
+import './elementStore';
 import './handlers';
-import { handleConversationClose, handleConversationOpen } from './handlers';
 import './helpers';
-import { log } from './helpers';
 import './listeners';
 import './selectors';
+
+import { handleConversationClose, handleConversationOpen } from './handlers';
 import { getConversationOpen } from './store';
+import { updateElementStore } from './elementStore';
+import { elementStore } from './elementStore';
+import { log } from './helpers';
 
 /**
  * Initializes the Orochi Helper by setting up a MutationObserver that checks for the
@@ -14,28 +19,26 @@ import { getConversationOpen } from './store';
  *
  * The MutationObserver callback uses a forEach loop to handle each mutation
  * synchronously. This is because the callback is triggered on each DOM change, so there
- * is no need to use `retry` or any other asynchronous operation.
+ * is no need to use any asynchronous operations.
  * @returns {void}
  */
 function initializeOrochiHelper(): void {
+  log('info', 'Orochi Helper initializing...');
+
   const observer = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
       const convoOpen = getConversationOpen();
-      const snoozeButton = document.querySelector("button[title='Snooze']");
+      updateElementStore();
+      const snoozeButtonState = elementStore.getState().snoozeButtonElement;
 
-      if (!snoozeButton) {
+      if (!snoozeButtonState) {
         if (convoOpen) {
           handleConversationClose();
           return;
         }
 
-        log(
-          'debug',
-          'Snooze button not found and no conversation was open, ignoring DOM change.'
-        );
         return;
       }
-
       if (!convoOpen) {
         handleConversationOpen();
         return;
@@ -47,6 +50,7 @@ function initializeOrochiHelper(): void {
     childList: true,
     subtree: true
   });
+  log('info', 'Orochi Helper initialized.');
 }
 
 initializeOrochiHelper();

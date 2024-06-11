@@ -1,6 +1,6 @@
 {
   "name": "orochi-helper-chrome",
-  "version": "0.3",
+  "version": "0.5",
   "main": "content.js",
   "keywords": [],
   "author": "",

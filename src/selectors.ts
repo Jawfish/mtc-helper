@@ -5,227 +5,169 @@
  * elements from the page.
  *
  * The convention for the selectors within this file is to return the element if found
- * and throw an error if not found.
+ * or undefined if not found.
  */
 
 import { log } from './helpers';
-import { getConversationOpen, Tab } from './store';
 
 /**
- * Get the send case button from the page. Throws an error if not found.
- * @returns {HTMLButtonElement} The send case button.
+ * Select the QA feedback section element (the section that contains the feedback, send case button, submit QA result button, etc.)
+ * @returns {(HTMLElement|undefined)} The send case button if found, otherwise `undefined`.
  */
-export function getQaFeedbackSection(): HTMLElement {
-  try {
-    const element = getSendCaseButton()?.parentElement?.parentElement;
-    if (!element) {
-      throw new Error('QA feedback section not found');
-    }
-    return element;
-  } catch (error) {
-    throw new Error(`Failed to get QA feedback section: ${error}`);
+export const selectFeedbackSectionElement = (): HTMLElement | undefined =>
+  Array.from(document.querySelectorAll('button')).find(
+    button => button.textContent === 'Send case to'
+  )?.parentElement?.parentElement || undefined;
+
+/**
+ * Select the return target element from the feedback section, i.e. the Rework dropdown.
+ * @returns {(Element|undefined)} The return element if found, otherwise `undefined`.
+ */
+export const selectReturnTargetElement = (): Element | undefined => {
+  const feedbackSection = selectFeedbackSectionElement();
+  if (!feedbackSection) {
+    return undefined;
   }
-}
+  const children = feedbackSection.children;
+  if (children.length < 3) {
+    log('debug', 'Feedback section does not contain a return target');
+    return undefined;
+  }
+
+  return children[2];
+};
 
 /**
- * Get the conversation submit button from a QA task. Throws an error if not found.
- * @returns {HTMLButtonElement} The conversation submit button.
+ * Select the main conversation submission button element from a QA task.
+ * @returns {(HTMLButtonElement|undefined)} The conversation submit button.
  */
-export function getConversationSubmitButton(): HTMLButtonElement {
-  log('debug', 'Getting conversation submit button...');
-  const span = Array.from(document.querySelectorAll('span')).find(span =>
+export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
+  const element = Array.from(document.querySelectorAll('span')).find(span =>
     span.textContent?.trim()?.includes('Submit QA Task')
-  );
+  )?.parentElement;
 
-  const button = span?.parentElement as HTMLButtonElement;
-
-  if (!button) {
-    throw new Error('Submit QA Task button not found');
-  }
-
-  return button;
-}
+  return element instanceof HTMLButtonElement ? element : undefined;
+};
 
 /**
- * Get the conversation content from a QA task. Throws an error if not found.
- * @returns {string} The conversation content as a string.
+ * Select the conversation's response element.
+ * @returns {(Element|undefined)} The conversation response element.
  */
-export function getConversationContent(): string {
-  const element = document.querySelectorAll('div.rounded-xl')[1];
-  if (!element) {
-    throw new Error('Conversation element not found');
-  }
-  if (!element.textContent) {
-    throw new Error('Conversation element was found but the content is empty');
+export const selectResponseElement = (): Element | undefined => {
+  const conversationElements = Array.from(document.querySelectorAll('div.rounded-xl'));
+
+  if (conversationElements.length < 2) {
+    return undefined;
   }
 
-  // remove the first character which is the number of the response
-  return element.textContent.slice(1);
-}
+  return conversationElements[1];
+};
 
 /**
- * Get the response code from the QA task. Throws an error if not found.
- * @returns {string} The response code as a string.
+ * Get the response code element from the QA task.
+ * @returns {(Element|undefined)} The response code element.
  */
-export function getResponseCode(): string {
-  log('debug', 'Getting response code...');
-  const contentElement: HTMLElement | null = document.querySelector(
-    'div.rounded-xl.bg-pink-100 pre code'
-  );
-
-  if (!contentElement) {
-    throw new Error('Response code not found');
-  }
-  if (!contentElement.textContent) {
-    throw new Error('Response code element was found but the content is empty');
-  }
-
-  log('debug', `Found response code: ${contentElement.textContent}`);
-  return contentElement.textContent;
-}
+export const selectResponseCodeElement = (): Element | undefined =>
+  document.querySelector('div.rounded-xl.bg-pink-100 pre code') || undefined;
 
 // const hasMultipleCodeBlocks = () =>
 //     document.querySelectorAll("div.rounded-xl pre code")?.length > 1;
 
-function getSendCaseButton(): HTMLButtonElement {
-  const buttons = document.querySelectorAll('button');
-  if (buttons.length === 0) {
-    throw new Error('No buttons found when trying to get send case button');
-  }
-
-  const sendCaseButton = Array.from(buttons).find(
-    button => button.textContent === 'Send case to'
-  );
-  if (!sendCaseButton) {
-    throw new Error('Send case button not found');
-  }
-
-  return buttons[0];
-}
-
 /**
- * Get the alignment score from the page. Throws an error if not found.
- * @returns {number} The alignment score as a number.
+ * Get the alignment score element from the page.
+ * @returns {(HTMLElement|undefined)} The alignment score element.
  */
-export function getAlignmentScore(): number {
-  const span = Array.from(document.querySelectorAll('span')).find(
+export const selectScoreElement = (): HTMLElement | undefined =>
+  Array.from(document.querySelectorAll('span')).find(
     span => span.textContent?.trim() === 'Alignment %'
-  );
-
-  if (!span) {
-    throw new Error('Alignment score element not found');
-  }
-
-  const scoreText = span.parentElement?.textContent?.split(':')[1]?.trim();
-  if (!scoreText) {
-    throw new Error(
-      'Alignment score element was found but the score was not found in its content'
-    );
-  }
-
-  return parseInt(scoreText, 10);
-}
+  )?.parentElement || undefined;
 
 /**
- * Get the response edit button. Throws an error if not found.
- * @returns {HTMLButtonElement} The response edit button.
+ * Select the response edit button.
+ * @returns {(HTMLButtonElement|undefined)} The response edit button.
  */
-export function getResponseEditButton(): HTMLButtonElement {
+export function selectEditButton(): HTMLButtonElement | undefined {
   const buttons: HTMLButtonElement[] = Array.from(
     document.querySelectorAll("button[title='Edit']")
   );
 
   if (buttons.length < 2) {
-    throw new Error('Response edit button not found');
+    return undefined;
   }
 
   return buttons[1];
 }
 
 /**
- * Get the container for the tabs within the conversation window. Throws an error if not found.
+ * Get the container for the tabs within the conversation window.
  * @returns {HTMLDivElement} The tab container.
  */
-export function getConversationTabContainer(): HTMLDivElement {
-  const tabContainers = document.querySelectorAll("div[data-cy='tabsHeaderContainer']");
+export function selectTabContainerElement(): HTMLDivElement | undefined {
+  const tabContainers: NodeListOf<HTMLDivElement> = document.querySelectorAll(
+    "div[data-cy='tabsHeaderContainer']"
+  );
 
-  if (!tabContainers) {
-    throw new Error('No tab containers found');
+  if (!tabContainers || tabContainers.length < 2) {
+    return undefined;
   }
 
-  if (tabContainers.length < 2) {
-    throw new Error('Not enough tab containers found');
-  }
-
-  return tabContainers[1] as HTMLDivElement;
+  return tabContainers[1];
 }
 
 /**
- * Get the edited content's tab element. Throws an error if not found.
- * @returns {HTMLDivElement} The tab for the edited conversation content.
+ * Get the edited content's tab element.
+ * @returns  The tab for the edited conversation content.
  */
-export function getEditedTab(): HTMLDivElement {
-  const element = document.getElementById('1');
-
-  if (!element) {
-    throw new Error('Edited tab not found');
-  }
-
-  return element as HTMLDivElement;
-}
+export const selectEditedTabElement = (): HTMLElement | undefined =>
+  document.getElementById('1') || undefined;
 
 /**
- * Get the original content's tab element. Throws an error if not found.
- * @returns {HTMLDivElement} The tab for the original conversation content.
+ * Get the original content's tab element.
+ * @returns {HTMLElement} The tab for the original conversation content.
  */
-export function getOriginalTab(): HTMLDivElement {
-  const element = document.getElementById('2');
-
-  if (!element) {
-    throw new Error('Original tab not found');
-  }
-
-  return element as HTMLDivElement;
-}
+export const selectOriginalTabElement = (): HTMLElement | undefined =>
+  document.getElementById('2') || undefined;
 
 /**
  * Get the tab content for the specified tab. Throws an error if the conversation is
  * closed, the tabs can't be found, or the tab content is empty.
- * @returns {string} The content of the tab.
+ * @returns  The content of the tab.
  */
-export function getOriginalTabContent(): string {
+export function selectOriginalTabContentElement(): Element | undefined {
   const element = document.querySelector("div[data-cy='tab'] > div");
 
   if (!element) {
-    throw new Error('Original tab content not found');
-  }
-  if (element?.getAttribute('contenteditable') === 'true') {
-    throw new Error(
-      'Tried to get original tab content but found an editable field, indicating that it is not from the original tab'
-    );
-  }
-  if (!element.textContent) {
-    throw new Error('Original tab content was found but the content is empty');
+    return undefined;
   }
 
-  return element.textContent;
+  // if the content is editable, then it's the edited tab, not the original tab
+  if (element.getAttribute('contenteditable') === 'true') {
+    return undefined;
+  }
+
+  return element;
 }
 
 /**
  * Get the parent element for the tab content. Throws an error if not found.
- * @returns {HTMLDivElement} The parent element for the tab content.
+ * @returns The parent element for the tab content.
  */
-export function getTabContentParentElement(): HTMLDivElement {
+export function selectTabContentParentelement(): Element | undefined {
   const tabs = document.querySelectorAll("div[data-cy='tab']");
 
   if (!tabs) {
-    throw new Error('No tabs found when trying to get tab content parent element');
+    return undefined;
   }
   if (tabs.length < 2) {
-    throw new Error(
-      'Not enough tabs found when trying to get tab content parent element'
-    );
+    return undefined;
   }
 
-  return tabs[tabs.length - 1] as HTMLDivElement;
+  return tabs[tabs.length - 1];
 }
+
+/**
+ * Select the snooze button element.
+ * @returns {(Element|undefined)} The snooze button element.
+ */
+export const selectSnoozeButtonElement = (): Element | undefined =>
+  document.querySelector("button[title='Snooze']") || undefined;
