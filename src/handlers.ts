@@ -59,6 +59,10 @@ export function handleConversationSubmit(e: Event) {
 export async function handleResponseEditButtonClicked(e: Event) {
   const editedTab = await retry('retrieving edited tab', () => getEditedTab());
   const originalTab = await retry('retrieving original tab', () => getOriginalTab());
+  await retry(
+    'removing metadata element in the conversation edit window after response button clicked',
+    () => document.querySelector('h4')?.parentElement?.remove()
+  );
 
   if (!editedTab || !originalTab) {
     log(
