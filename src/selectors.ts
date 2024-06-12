@@ -12,7 +12,7 @@ import { log } from './helpers';
 
 /**
  * Select the QA feedback section element (the section that contains the feedback, send case button, submit QA result button, etc.)
- * @returns {(HTMLElement|undefined)} The send case button if found, otherwise `undefined`.
+ * @returns The send case button if found, otherwise `undefined`.
  */
 export const selectFeedbackSectionElement = (): HTMLElement | undefined =>
   Array.from(document.querySelectorAll('button')).find(
@@ -21,7 +21,7 @@ export const selectFeedbackSectionElement = (): HTMLElement | undefined =>
 
 /**
  * Select the return target element from the feedback section, i.e. the Rework dropdown.
- * @returns {(Element|undefined)} The return element if found, otherwise `undefined`.
+ * @returns The return element if found, otherwise `undefined`.
  */
 export const selectReturnTargetElement = (): Element | undefined => {
   const feedbackSection = selectFeedbackSectionElement();
@@ -39,7 +39,7 @@ export const selectReturnTargetElement = (): Element | undefined => {
 
 /**
  * Select the main conversation submission button element from a QA task.
- * @returns {(HTMLButtonElement|undefined)} The conversation submit button.
+ * @returns The conversation submit button.
  */
 export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
   const element = Array.from(document.querySelectorAll('span')).find(span =>
@@ -51,7 +51,7 @@ export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
 
 /**
  * Select the conversation's response element.
- * @returns {(Element|undefined)} The conversation response element.
+ * @returns The conversation response element.
  */
 export const selectResponseElement = (): Element | undefined => {
   const conversationElements = Array.from(document.querySelectorAll('div.rounded-xl'));
@@ -65,7 +65,7 @@ export const selectResponseElement = (): Element | undefined => {
 
 /**
  * Get the response code element from the QA task.
- * @returns {(Element|undefined)} The response code element.
+ * @returns The response code element.
  */
 export const selectResponseCodeElement = (): Element | undefined =>
   document.querySelector('div.rounded-xl.bg-pink-100 pre code') || undefined;
@@ -75,7 +75,7 @@ export const selectResponseCodeElement = (): Element | undefined =>
 
 /**
  * Get the alignment score element from the page.
- * @returns {(HTMLElement|undefined)} The alignment score element.
+ * @returns The alignment score element.
  */
 export const selectScoreElement = (): HTMLElement | undefined =>
   Array.from(document.querySelectorAll('span')).find(
@@ -84,7 +84,7 @@ export const selectScoreElement = (): HTMLElement | undefined =>
 
 /**
  * Select the response edit button.
- * @returns {(HTMLButtonElement|undefined)} The response edit button.
+ * @returns The response edit button.
  */
 export function selectEditButton(): HTMLButtonElement | undefined {
   const buttons: HTMLButtonElement[] = Array.from(
@@ -100,7 +100,7 @@ export function selectEditButton(): HTMLButtonElement | undefined {
 
 /**
  * Get the container for the tabs within the conversation window.
- * @returns {HTMLDivElement} The tab container.
+ * @returns The tab container.
  */
 export function selectTabContainerElement(): HTMLDivElement | undefined {
   const tabContainers: NodeListOf<HTMLDivElement> = document.querySelectorAll(
@@ -123,7 +123,7 @@ export const selectEditedTabElement = (): HTMLElement | undefined =>
 
 /**
  * Get the original content's tab element.
- * @returns {HTMLElement} The tab for the original conversation content.
+ * @returns The tab for the original conversation content.
  */
 export const selectOriginalTabElement = (): HTMLElement | undefined =>
   document.getElementById('2') || undefined;
@@ -167,7 +167,7 @@ export function selectTabContentParentelement(): Element | undefined {
 
 /**
  * Select the snooze button element.
- * @returns {(Element|undefined)} The snooze button element.
+ * @returns The snooze button element.
  */
 export const selectSnoozeButtonElement = (): Element | undefined =>
   document.querySelector("button[title='Snooze']") || undefined;

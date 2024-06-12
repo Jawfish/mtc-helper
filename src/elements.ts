@@ -1,64 +1,44 @@
 import { diffLines } from 'diff';
-import { log, waitForElement } from './helpers';
-
 import {
-  getConversationOpen,
-  getDiffTabInserted as getDiffTogglesInserted,
-  setDiffViewState,
-  setDiffTabInserted as setDiffTogglesInserted,
-  DiffViewState,
-  getDiffViewState
-} from './store';
-import { elementStore } from './elementStore';
+  checkAlignmentScore,
+  copyConversation,
+  copyEmail,
+  copyId,
+  determineWarnings,
+  log,
+  logDiff
+} from './helpers';
+
 import { handleDiffToggleClicked } from './handlers';
+import {
+  selectSubmitButtonElement,
+  selectTabContentParentelement as selectTabContentParentElement
+} from './selectors';
+import { DiffViewState, store } from './store';
 
-export function insertDiffToggles() {
-  if (getDiffTogglesInserted()) {
-    log('warn', 'Diff toggles already inserted');
-    return;
-  }
+export function insertDiffToggles(tabContainer: HTMLElement): void {
+  log('debug', 'Inserting diff toggles');
+  const diffLineToggle = document.createElement('div');
+  const diffBlockToggle = document.createElement('div');
 
-  try {
-    const tabContainer = elementStore.getState().tabContainerElement;
-    if (!tabContainer) {
-      log('error', 'Tab container not found, cancelling diff tab insertion');
-      throw new Error('Tab container not found, cancelling diff tab insertion');
-    }
+  diffLineToggle.className = 'tab hover:text-theme-main';
+  diffBlockToggle.className = 'tab hover:text-theme-main';
 
-    if (!getConversationOpen()) {
-      log('error', 'No conversation, cancelling diff tab insertion');
-      throw new Error('No conversation, cancelling diff tab insertion');
-    }
+  diffLineToggle.textContent = 'Toggle Diff (Lines)';
+  diffBlockToggle.textContent = 'Toggle Diff (Blocks)';
 
-    log('debug', 'Inserting diff toggles');
-    const diffLineToggle = document.createElement('div');
-    const diffBlockToggle = document.createElement('div');
+  diffLineToggle.style.cursor = 'pointer';
+  diffBlockToggle.style.cursor = 'pointer';
 
-    diffLineToggle.className = 'tab hover:text-theme-main';
-    diffBlockToggle.className = 'tab hover:text-theme-main';
+  diffLineToggle.addEventListener('click', e =>
+    handleDiffToggleClicked(e, DiffViewState.LINES)
+  );
+  diffBlockToggle.addEventListener('click', e =>
+    handleDiffToggleClicked(e, DiffViewState.BLOCKS)
+  );
 
-    diffLineToggle.textContent = 'Toggle Diff (Lines)';
-    diffBlockToggle.textContent = 'Toggle Diff (Blocks)';
-
-    diffLineToggle.style.cursor = 'pointer';
-    diffBlockToggle.style.cursor = 'pointer';
-
-    diffLineToggle.addEventListener('click', e =>
-      handleDiffToggleClicked(e, DiffViewState.LINES)
-    );
-    diffBlockToggle.addEventListener('click', e =>
-      handleDiffToggleClicked(e, DiffViewState.BLOCKS)
-    );
-
-    tabContainer.appendChild(diffLineToggle);
-    tabContainer.appendChild(diffBlockToggle);
-    setDiffTogglesInserted(true);
-  } catch (error) {
-    log(
-      'error',
-      `Error getting tab container during diff tab insertion: ${(error as Error).message}`
-    );
-  }
+  tabContainer.appendChild(diffLineToggle);
+  tabContainer.appendChild(diffBlockToggle);
 }
 
 export function insertDiffElement(
@@ -66,36 +46,22 @@ export function insertDiffElement(
   editedContent: string,
   state: DiffViewState
 ): void {
-  log(
-    'debug',
-    `Inserting diff element
-Original content:
+  logDiff(originalContent, editedContent);
 
-${originalContent}
-
---------------------------------------------------------------------------------------
-
-Edited content:
-${editedContent}
-
---------------------------------------------------------------------------------------
-`
-  );
-
-  const diffViewState = getDiffViewState();
+  const diffViewState = store.getState().diffView;
 
   if (diffViewState === state) {
     log('warn', `Diff element already inserted with state ${state}`);
     return;
   }
 
-  setDiffViewState(state);
+  store.setState({ diffView: state });
 
   const diff = diffLines(originalContent, editedContent, {
     newlineIsToken: state === DiffViewState.LINES
   });
   const fragment = document.createDocumentFragment();
-  const container = elementStore.getState().tabContentParentElement;
+  const container = selectTabContentParentElement();
 
   if (!container) {
     log('error', 'Tab content element not found, unable to insert diff element');
@@ -130,7 +96,77 @@ ${editedContent}
 
 export function removeDiffElement(): void {
   log('debug', 'Removing diff element');
-  setDiffViewState(DiffViewState.CLOSED);
+  store.setState({ diffView: DiffViewState.CLOSED });
   const diffView = document.getElementById('diffView');
   diffView?.parentNode?.removeChild(diffView);
+}
+
+// TODO: These buttons are ported functionality from bookmarklets. They're a bit hacked-together right now and the code can be cleaned up, but they work fine.
+export function insertCheckButton(): void {
+  log('debug', 'Inserting check button');
+  const checkButton = document.createElement('button');
+  const submitButton = selectSubmitButtonElement();
+  const span = document.createElement('span');
+
+  span.textContent = 'Check Task';
+  checkButton.className = submitButton?.className || '';
+  checkButton.addEventListener('click', () => {
+    log('debug', 'Check button clicked');
+    const messages = determineWarnings();
+    if (messages.length === 0) {
+      alert('No issues detected.');
+      return;
+    }
+    alert(messages.join('\n'));
+  });
+  submitButton?.parentElement?.prepend(checkButton);
+  checkButton.appendChild(span);
+}
+
+export function insertConvoCopyButton(): void {
+  log('debug', 'Inserting conversation copy button');
+  const copyButton = document.createElement('button');
+  const submitButton = selectSubmitButtonElement();
+  const span = document.createElement('span');
+
+  span.textContent = 'Copy Conversation';
+  copyButton.className = submitButton?.className || '';
+  copyButton.addEventListener('click', () => {
+    log('debug', 'Copy button clicked');
+    copyConversation();
+  });
+  submitButton?.parentElement?.prepend(copyButton);
+  copyButton.appendChild(span);
+}
+
+export function insertCopyIdButton(): void {
+  log('debug', 'Inserting copy ID button');
+  const copyIdButton = document.createElement('button');
+  const submitButton = selectSubmitButtonElement();
+  const span = document.createElement('span');
+
+  span.textContent = 'Copy ID';
+  copyIdButton.className = submitButton?.className || '';
+  copyIdButton.addEventListener('click', () => {
+    log('debug', 'Copy ID button clicked');
+    copyId();
+  });
+  submitButton?.parentElement?.prepend(copyIdButton);
+  copyIdButton.appendChild(span);
+}
+
+export function insertCopyEmailButton(): void {
+  log('debug', 'Inserting copy email button');
+  const copyEmailButton = document.createElement('button');
+  const submitButton = selectSubmitButtonElement();
+  const span = document.createElement('span');
+
+  span.textContent = 'Copy Email';
+  copyEmailButton.className = submitButton?.className || '';
+  copyEmailButton.addEventListener('click', () => {
+    log('debug', 'Copy email button clicked');
+    copyEmail();
+  });
+  submitButton?.parentElement?.prepend(copyEmailButton);
+  copyEmailButton.appendChild(span);
 }

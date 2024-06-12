@@ -1,5 +1,8 @@
-import { elementStore } from './elementStore';
-import { addInterval } from './store';
+import {
+  selectResponseCodeElement,
+  selectReturnTargetElement,
+  selectScoreElement
+} from './selectors';
 
 export function log(
   level: 'log' | 'debug' | 'info' | 'warn' | 'error',
@@ -32,7 +35,7 @@ export function log(
 /**
  * Check if the conversation window contains Python code.
  *
- * @returns {boolean} - True if the conversation window contains Python code.
+ * @returns - True if the conversation window contains Python code.
  */
 export const isPython = (): boolean => {
   const span = Array.from(document.querySelectorAll('span')).find(
@@ -58,9 +61,9 @@ export const isPython = (): boolean => {
  * - Ensures non-indented lines are either constants, imports, function/class
  *   definitions, or comments.
  *
- * @param {string} code - The Python code to validate.
- * @param {string[]} messages - The array to which validation messages will be appended.
- * @returns {void}
+ * @param code - The Python code to validate.
+ * @param messages - The array to which validation messages will be appended.
+ * @returns
  */
 export const validatePython = (code: string, messages: string[]): void => {
   const maxLineLength = 240;
@@ -126,9 +129,9 @@ export const validatePython = (code: string, messages: string[]): void => {
  * positives for any code that contains a closing HTML tag as part of the actual code,
  * but the QA can just ignore the alert.
  *
- * @param {string} code - The code to be checked for HTML tags.
- * @param {string[]} messages - The array to which validation messages will be appended.
- * @returns {void}
+ * @param code - The code to be checked for HTML tags.
+ * @param messages - The array to which validation messages will be appended.
+ * @returns
  */
 export const checkForHtmlInCode = (code: string, messages: string[]): void => {
   try {
@@ -148,8 +151,8 @@ export const checkForHtmlInCode = (code: string, messages: string[]): void => {
 /**
  * Format the messages with a prefix and newline character.
  *
- * @param {string[]} messages - The messages to be formatted.
- * @returns {string[]} The formatted messages.
+ * @param messages - The messages to be formatted.
+ * @returns The formatted messages.
  */
 export const formatMessages = (messages: string[]): string[] => {
   return messages.map((message, idx) => `${idx + 1}. ${message}\n\n`);
@@ -162,14 +165,14 @@ export const formatMessages = (messages: string[]): string[] => {
  * - The bot response contains a closing HTML tag.
  * - The bot response contains malformed Python.
  *
- * @returns {string[]} An array of strings containing the issues found with the bot
+ * @returns An array of strings containing the issues found with the bot
  * response.
  */
 export function determineWarnings(): string[] {
   const messages: string[] = [];
   checkAlignmentScore(85, messages);
 
-  const code = elementStore.getState().responseCodeElement?.textContent;
+  const code = selectResponseCodeElement()?.textContent;
 
   if (!code) {
     log('warn', 'The code cannot be found in the response.');
@@ -206,22 +209,17 @@ export function determineWarnings(): string[] {
  * Checks if the alignment score is considered low and if the bot response should be
  * reworked.
  *
- * @param {number} threshold - The alignment score threshold below which the response
- * @param {string[]} messages - The array to which validation messages will be appended.
+ * @param threshold - The alignment score threshold below which the response
+ * @param messages - The array to which validation messages will be appended.
  *
- * @returns {boolean} `true` if the alignment score is below the threshold and the
+ * @returns `true` if the alignment score is below the threshold and the
  * response should not be sent to rework; `false` otherwise.
  */
 export function checkAlignmentScore(threshold: number, messages: string[]): void {
   try {
     log('debug', 'Checking if alignment score is low...');
-    const sendToRework = elementStore
-      .getState()
-      .returnTargetElement?.textContent?.includes('Rework');
-    const scoreText = elementStore
-      .getState()
-      .scoreElement?.textContent?.split(':')[1]
-      ?.trim();
+    const sendToRework = selectReturnTargetElement()?.textContent?.includes('Rework');
+    const scoreText = selectScoreElement()?.textContent?.split(':')[1]?.trim();
     if (!scoreText) {
       log('warn', 'Alignment score not found.');
       return;
@@ -240,16 +238,131 @@ export function checkAlignmentScore(threshold: number, messages: string[]): void
   }
 }
 
-export function waitForElement(elementGetter: () => any): Promise<Element> {
-  return new Promise(resolve => {
-    const intervalId = setInterval(() => {
-      const element = elementGetter();
-      if (element !== undefined) {
-        clearInterval(intervalId);
-        resolve(element);
-      }
-    }, 100);
+export function logDiff(originalContent: string, editedContent: string) {
+  log(
+    'debug',
+    `Inserting diff element
+Original content:
 
-    addInterval(intervalId);
-  });
+${originalContent}
+
+--------------------------------------------------------------------------------------
+
+Edited content:
+${editedContent}
+
+--------------------------------------------------------------------------------------
+`
+  );
+}
+
+declare global {
+  interface Window {
+    monaco: any;
+  }
+}
+
+// TODO: this is ported from a bookmarklet, so the code is a bit messy
+export function copyConversation() {
+  function getEditorContent() {
+    console.log('Checking for editor content...');
+    if (window.monaco && window.monaco.editor) {
+      return window.monaco.editor.getEditors()[0].getValue();
+    } else {
+      return '';
+    }
+  }
+  function getTextFromElement(element: HTMLElement | null): string {
+    let text = '';
+    if (element) {
+      element.childNodes.forEach((child: Node) => {
+        if (child.nodeType === Node.TEXT_NODE) {
+          if (element.tagName === 'P') {
+            text += `${child.nodeValue}`;
+          } else if (element.tagName === 'LI') {
+            text += `- ${child.nodeValue}`;
+          } else if (element.tagName === 'CODE') {
+            text += `\`${child.nodeValue}\``;
+          } else {
+            text += child.nodeValue;
+          }
+        } else if (child.nodeType === Node.ELEMENT_NODE) {
+          text += getTextFromElement(child as HTMLElement);
+        }
+      });
+    }
+    return text;
+  }
+  function copyToClipboard(text: string) {
+    text = text.replace(/&nbsp;/g, '').replace(/\u00A0/g, '');
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        console.log('Text copied to clipboard successfully!');
+      })
+      .catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+  }
+  const userPrompt = document.querySelector(
+    'div.rounded-xl p.whitespace-pre-wrap'
+  )?.parentElement;
+  const botResponse = document.querySelector(
+    'div.rounded-xl.bg-pink-100 pre code'
+  )?.textContent;
+  const editorContent = getEditorContent();
+  const operatorReason =
+    document.querySelectorAll('div[data-grid]>div>div>div>div>p.whitespace-pre-wrap')[2]
+      ?.textContent || '';
+  const formattedText = `"""\n${getTextFromElement(
+    userPrompt as HTMLElement
+  )}\n"""\n\n################################# REASON #################################\n\n"""\n${operatorReason.trim() ? operatorReason : 'No reason provided'}\n""" \n\n################################ RESPONSE ################################\n\n${botResponse} \n\n################################# TESTS ##################################\n\n${editorContent}`;
+  copyToClipboard(formattedText);
+}
+
+// TODO: this is ported from a bookmarklet, so the code is a bit messy
+export function copyId() {
+  const buttons = document.querySelectorAll('button');
+  let titleToCopy = '';
+
+  for (let button of buttons) {
+    if (
+      !button.disabled &&
+      button.querySelector('span') &&
+      button.classList.contains('cursor-pointer') &&
+      button.querySelector('span')?.textContent?.includes('In Progress')
+    ) {
+      const row = button.closest('tr');
+      if (row) {
+        const titledDiv = row.querySelector('div[title]');
+        if (titledDiv) {
+          titleToCopy = titledDiv.getAttribute('title') || '';
+          break;
+        }
+      }
+    }
+  }
+
+  // check if it appears to be UUID
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+  if (uuidRegex.test(titleToCopy)) {
+    navigator.clipboard.writeText(titleToCopy);
+  } else {
+    alert(
+      'ID could not be found. Sometimes the ID becomes unavailable as the rows in the backgrond update, causing the current task to fall out of view.'
+    );
+  }
+}
+
+// TODO: this is ported from a bookmarklet, so the code is a bit messy
+export function copyEmail() {
+  const element = document.querySelector(
+    '.MuiTypography-root.MuiTypography-body2.MuiTypography-noWrap'
+  );
+  if (element) {
+    const modifiedText = element.textContent + 'invisible.email';
+    navigator.clipboard.writeText(modifiedText);
+  }
 }
