@@ -20,15 +20,19 @@ export function insertDiffToggles(tabContainer: HTMLElement): void {
   log('debug', 'Inserting diff toggles');
   const diffLineToggle = document.createElement('div');
   const diffBlockToggle = document.createElement('div');
+  const sxsDiffToggle = document.createElement('div');
 
   diffLineToggle.className = 'tab hover:text-theme-main';
   diffBlockToggle.className = 'tab hover:text-theme-main';
+  sxsDiffToggle.className = 'tab hover:text-theme-main';
 
   diffLineToggle.textContent = 'Toggle Diff (Lines)';
   diffBlockToggle.textContent = 'Toggle Diff (Blocks)';
+  sxsDiffToggle.textContent = 'Open SxS Diff';
 
   diffLineToggle.style.cursor = 'pointer';
   diffBlockToggle.style.cursor = 'pointer';
+  sxsDiffToggle.style.cursor = 'pointer';
 
   diffLineToggle.addEventListener('click', e =>
     handleDiffToggleClicked(e, DiffViewState.LINES)
@@ -36,9 +40,15 @@ export function insertDiffToggles(tabContainer: HTMLElement): void {
   diffBlockToggle.addEventListener('click', e =>
     handleDiffToggleClicked(e, DiffViewState.BLOCKS)
   );
+  sxsDiffToggle.addEventListener('click', e => {
+    const originalContent = store.getState().originalContent;
+    const editedContent = store.getState().editedContent;
+    openDiffModal(originalContent, editedContent, DiffViewState.LINES);
+  });
 
   tabContainer.appendChild(diffLineToggle);
   tabContainer.appendChild(diffBlockToggle);
+  tabContainer.appendChild(sxsDiffToggle);
 }
 
 export function insertDiffElement(
@@ -60,9 +70,7 @@ export function insertDiffElement(
   const diff = diffLines(originalContent, editedContent, {
     newlineIsToken: state === DiffViewState.LINES
   });
-
-  const leftFragment = document.createDocumentFragment();
-  const rightFragment = document.createDocumentFragment();
+  const fragment = document.createDocumentFragment();
   const container = selectTabContentParentElement();
 
   if (!container) {
@@ -71,28 +79,85 @@ export function insertDiffElement(
   }
 
   diff.forEach(part => {
+    if (part.value.trim() === '') {
+      return;
+    }
+
+    part.value = part.value.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g, '');
+
     const color = part.added ? 'green' : part.removed ? 'red' : 'grey';
     const bgColor = part.added ? '#E3F4E4' : part.removed ? '#F7E8E9' : '#f8f9fa';
 
     const pre = document.createElement('pre');
 
     pre.style.color = color;
+    pre.style.margin = '0';
+    pre.style.padding = '0';
+    pre.style.whiteSpace = 'pre-wrap';
     pre.style.backgroundColor = bgColor;
     pre.textContent = part.value;
 
+    fragment.appendChild(pre);
+  });
+
+  const diffView = document.createElement('div');
+  diffView.id = 'diffView';
+  diffView.appendChild(fragment);
+  container.prepend(diffView);
+}
+
+export function openDiffModal(
+  originalContent: string,
+  editedContent: string,
+  state: DiffViewState
+): void {
+  logDiff(originalContent, editedContent);
+
+  const diffViewState = store.getState().diffView;
+
+  if (diffViewState === state) {
+    log('warn', `Diff element already inserted with state ${state}`);
+    return;
+  }
+
+  store.setState({ diffView: state });
+
+  const diff = diffLines(originalContent, editedContent, {
+    newlineIsToken: state === DiffViewState.LINES
+  });
+
+  const leftFragment = document.createDocumentFragment();
+  const rightFragment = document.createDocumentFragment();
+
+  diff.forEach(part => {
+    part.value = part.value.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g, '');
+    if (part.value.trim() === '') {
+      return;
+    }
+
+    let color = part.added ? 'green' : part.removed ? 'red' : 'grey';
+    let bgColor = part.added ? '#E3F4E4' : part.removed ? '#F7E8E9' : '#f8f9fa';
+    const pre = document.createElement('pre');
+
+    pre.style.color = color;
+    pre.style.backgroundColor = bgColor;
+    pre.style.whiteSpace = 'pre-wrap';
+    pre.textContent = part.value;
+    pre.style.margin = '0';
+    pre.style.padding = '0';
+
     if (part.added) {
-      rightFragment.appendChild(pre);
-    } else if (part.removed) {
       leftFragment.appendChild(pre);
+    } else if (part.removed) {
+      rightFragment.appendChild(pre);
     } else {
-      leftFragment.appendChild(pre.cloneNode(true));
       rightFragment.appendChild(pre.cloneNode(true));
+      leftFragment.appendChild(pre.cloneNode(true));
     }
   });
 
   const diffView = document.createElement('div');
   diffView.style.display = 'flex';
-  diffView.id = 'diffView';
 
   const leftDiv = document.createElement('div');
   const rightDiv = document.createElement('div');
@@ -106,14 +171,56 @@ export function insertDiffElement(
   diffView.appendChild(leftDiv);
   diffView.appendChild(rightDiv);
 
-  container.prepend(diffView);
+  // Create a modal with a close button
+  const modal = document.createElement('div');
+  modal.style.display = 'block';
+  modal.style.position = 'fixed';
+  modal.style.zIndex = '1';
+  modal.style.left = '0';
+  modal.style.top = '0';
+  modal.style.width = '100%';
+  modal.style.height = '100%';
+  modal.style.overflow = 'auto';
+  modal.style.backgroundColor = 'rgba(0,0,0,0.4)';
+
+  const modalContent = document.createElement('div');
+  modalContent.style.backgroundColor = '#fefefe';
+  modalContent.style.margin = '15% auto';
+  modalContent.style.padding = '20px';
+  modalContent.style.border = '1px solid #888';
+  modalContent.style.width = '80%';
+
+  const closeButton = document.createElement('span');
+  closeButton.textContent = 'x';
+  closeButton.style.color = '#aaa';
+  closeButton.style.float = 'right';
+  closeButton.style.fontSize = '28px';
+  closeButton.style.fontWeight = 'bold';
+  closeButton.style.cursor = 'pointer';
+
+  closeButton.onclick = function () {
+    removeDiffElement();
+  };
+  modal.onclick = function (e) {
+    if (e.target === modal) removeDiffElement();
+  };
+
+  modalContent.appendChild(closeButton);
+  modalContent.appendChild(diffView);
+  modal.appendChild(modalContent);
+
+  // Append the modal to the document body
+  modal.style.zIndex = '1000';
+  modal.id = 'diffView';
+
+  document.body.appendChild(modal);
 }
 
 export function removeDiffElement(): void {
   log('debug', 'Removing diff element');
   store.setState({ diffView: DiffViewState.CLOSED });
   const diffView = document.getElementById('diffView');
-  diffView?.parentNode?.removeChild(diffView);
+  diffView?.remove();
 }
 
 // TODO: These buttons are ported functionality from bookmarklets. They're a bit hacked-together right now and the code can be cleaned up, but they work fine.
