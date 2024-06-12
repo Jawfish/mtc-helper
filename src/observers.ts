@@ -1,5 +1,5 @@
 import { handleSubmitButtonClicked } from './handlers';
-import { isPython, log } from './helpers';
+import { log } from './helpers';
 import {
   selectEditButton,
   selectEditedTabElement,
@@ -15,11 +15,8 @@ import {
 import { DiffViewState, store, resetStore } from './store';
 
 import {
-  insertCheckButton,
-  insertConvoCopyButton,
-  insertCopyEmailButton,
-  insertCopyIdButton,
   insertDiffToggles,
+  insertOrochiHelperToolbar,
   removeDiffElement
 } from './elements';
 
@@ -76,6 +73,7 @@ function observeSnoozeButton(mutation: MutationRecord) {
   if (snoozeButton && !convoOpen) {
     log('info', 'New conversation detected.');
     store.setState({ conversationOpen: true });
+    insertOrochiHelperToolbar();
     return;
   }
 }
@@ -138,17 +136,6 @@ function observeEditedContent(mutation: MutationRecord) {
 
   // remove the first character which is the number associated with the response
   const editedContent = element.textContent.slice(1);
-  selectSubmitButtonElement()?.parentElement?.style.setProperty('gap', '1em');
-  selectSubmitButtonElement()?.parentElement?.style.setProperty(
-    'justify-content',
-    'flex-start'
-  );
-  insertCheckButton();
-  insertCopyEmailButton();
-  insertCopyIdButton();
-  if (isPython()) {
-    insertConvoCopyButton();
-  }
   store.setState({ editedContent });
 }
 

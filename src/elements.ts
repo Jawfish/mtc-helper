@@ -5,6 +5,7 @@ import {
   copyEmail,
   copyId,
   determineWarnings,
+  isPython,
   log,
   logDiff
 } from './helpers';
@@ -119,8 +120,15 @@ export function insertCheckButton(): void {
     }
     alert(messages.join('\n'));
   });
-  submitButton?.parentElement?.prepend(checkButton);
   checkButton.appendChild(span);
+
+  const toolbar = store.getState().orochiToolbarElement;
+  if (!toolbar) {
+    log('error', 'Orochi toolbar not found while inserting check button');
+    return;
+  }
+
+  toolbar.appendChild(checkButton);
 }
 
 export function insertConvoCopyButton(): void {
@@ -135,8 +143,15 @@ export function insertConvoCopyButton(): void {
     log('debug', 'Copy button clicked');
     copyConversation();
   });
-  submitButton?.parentElement?.prepend(copyButton);
   copyButton.appendChild(span);
+
+  const toolbar = store.getState().orochiToolbarElement;
+  if (!toolbar) {
+    log('error', 'Orochi toolbar not found while inserting copy convo button');
+    return;
+  }
+
+  toolbar.appendChild(copyButton);
 }
 
 export function insertCopyIdButton(): void {
@@ -151,8 +166,15 @@ export function insertCopyIdButton(): void {
     log('debug', 'Copy ID button clicked');
     copyId();
   });
-  submitButton?.parentElement?.prepend(copyIdButton);
   copyIdButton.appendChild(span);
+
+  const toolbar = store.getState().orochiToolbarElement;
+  if (!toolbar) {
+    log('error', 'Orochi toolbar not found while inserting copy ID button');
+    return;
+  }
+
+  toolbar.appendChild(copyIdButton);
 }
 
 export function insertCopyEmailButton(): void {
@@ -167,6 +189,51 @@ export function insertCopyEmailButton(): void {
     log('debug', 'Copy email button clicked');
     copyEmail();
   });
-  submitButton?.parentElement?.prepend(copyEmailButton);
   copyEmailButton.appendChild(span);
+
+  const toolbar = store.getState().orochiToolbarElement;
+  if (!toolbar) {
+    log('error', 'Orochi toolbar not found while inserting copy email button');
+    return;
+  }
+
+  toolbar.appendChild(copyEmailButton);
+}
+
+/**
+ * Inserts a toolbar that is always visible at the top of the page and on top of all other elements.
+ */
+export function insertOrochiHelperToolbar(): void {
+  log('debug', 'Inserting Orochi Helper toolbar');
+  const toolbar = document.createElement('div');
+
+  toolbar.id = 'orochiToolbar';
+  toolbar.style.position = 'fixed';
+  toolbar.style.top = '0';
+  toolbar.style.left = '50%';
+  toolbar.style.transform = 'translateX(-50%)';
+  toolbar.style.display = 'flex';
+  toolbar.style.gap = '1em';
+  toolbar.style.backgroundColor = '#FFFFFFCC';
+  toolbar.style.borderBottomLeftRadius = '0.5em';
+  toolbar.style.borderBottomRightRadius = '0.5em';
+  toolbar.style.backdropFilter = 'blur(2px)';
+  toolbar.style.boxShadow = '0 0 1em 0.5em #00000022';
+  toolbar.style.padding = '1em';
+  toolbar.style.flexDirection = 'row';
+  toolbar.style.justifyContent = 'center';
+  toolbar.style.alignItems = 'center';
+  toolbar.style.width = 'auto';
+  toolbar.style.zIndex = '1000';
+
+  store.setState({ orochiToolbarElement: toolbar });
+
+  document.body.appendChild(toolbar);
+  if (isPython()) {
+    insertConvoCopyButton();
+  }
+  // TODO: make these take the toolbar and their styles as an argument
+  insertCopyIdButton();
+  insertCopyEmailButton();
+  insertCheckButton();
 }

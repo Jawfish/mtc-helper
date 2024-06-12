@@ -21,6 +21,10 @@ type StoreState = {
   responseEditButtonHasListener: boolean;
   saveButtonHasListener: boolean;
   submitButtonHasListener: boolean;
+  orochiToolbarElement: HTMLDivElement | undefined;
+  // TODO: when "next" in the tests section is clicked, save them here to preserve
+  // the content so they can be copied even after moving to the QA scoring section
+  testContent: string;
 };
 
 const initialState: StoreState = {
@@ -35,7 +39,9 @@ const initialState: StoreState = {
   originalTabHasListener: false,
   responseEditButtonHasListener: false,
   saveButtonHasListener: false,
-  submitButtonHasListener: false
+  submitButtonHasListener: false,
+  orochiToolbarElement: undefined,
+  testContent: ''
 };
 
 export const store = createStore<StoreState>(() => ({
@@ -43,5 +49,6 @@ export const store = createStore<StoreState>(() => ({
 }));
 
 export function resetStore() {
+  store.getState().orochiToolbarElement?.remove();
   store.setState({ ...initialState });
 }
