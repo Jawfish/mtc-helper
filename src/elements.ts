@@ -1,6 +1,5 @@
 import { diffLines } from 'diff';
 import {
-  checkAlignmentScore,
   copyConversation,
   copyEmail,
   copyId,
@@ -61,7 +60,9 @@ export function insertDiffElement(
   const diff = diffLines(originalContent, editedContent, {
     newlineIsToken: state === DiffViewState.LINES
   });
-  const fragment = document.createDocumentFragment();
+
+  const leftFragment = document.createDocumentFragment();
+  const rightFragment = document.createDocumentFragment();
   const container = selectTabContentParentElement();
 
   if (!container) {
@@ -70,28 +71,41 @@ export function insertDiffElement(
   }
 
   diff.forEach(part => {
-    if (part.value.trim() === '') {
-      return;
-    }
-
-    part.value = part.value.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g, '');
-
     const color = part.added ? 'green' : part.removed ? 'red' : 'grey';
     const bgColor = part.added ? '#E3F4E4' : part.removed ? '#F7E8E9' : '#f8f9fa';
 
     const pre = document.createElement('pre');
 
     pre.style.color = color;
-    pre.style.whiteSpace = 'pre-wrap';
     pre.style.backgroundColor = bgColor;
     pre.textContent = part.value;
 
-    fragment.appendChild(pre);
+    if (part.added) {
+      rightFragment.appendChild(pre);
+    } else if (part.removed) {
+      leftFragment.appendChild(pre);
+    } else {
+      leftFragment.appendChild(pre.cloneNode(true));
+      rightFragment.appendChild(pre.cloneNode(true));
+    }
   });
 
   const diffView = document.createElement('div');
+  diffView.style.display = 'flex';
   diffView.id = 'diffView';
-  diffView.appendChild(fragment);
+
+  const leftDiv = document.createElement('div');
+  const rightDiv = document.createElement('div');
+
+  leftDiv.style.width = '50%';
+  rightDiv.style.width = '50%';
+
+  leftDiv.appendChild(leftFragment);
+  rightDiv.appendChild(rightFragment);
+
+  diffView.appendChild(leftDiv);
+  diffView.appendChild(rightDiv);
+
   container.prepend(diffView);
 }
 
