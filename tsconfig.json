@@ -1,16 +1,69 @@
 {
-    "compilerOptions": {
-        "strict": true,
-        "target": "es6",
-        "moduleResolution": "bundler",
-        "module": "ES6",
-        "esModuleInterop": true,
-        "sourceMap": false,
-        "rootDir": "src",
-        "outDir": "dist/js",
-        "noEmitOnError": true,
-        "typeRoots": [
-            "node_modules/@types"
-        ]
+  "compilerOptions": {
+    "target": "esnext",
+    "types": [
+      "vite/client",
+      "node",
+      "chrome"
+    ],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": [
+        "src/*"
+      ],
+      "@assets/*": [
+        "src/assets/*"
+      ],
+      "@pages/*": [
+        "src/pages/*"
+      ],
+      "@lib/*": [
+        "src/lib/*"
+      ],
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@external/*": [
+        "src/external/*"
+      ],
+      "@store/*": [
+        "src/store/*"
+      ],
+      "@hooks/*": [
+        "src/hooks/*"
+      ],
+      "@selectors/*": [
+        "src/selectors/*"
+      ],
+      "@inject/*": [
+        "inject/*"
+      ],
+      "@handlers/*": [
+        "src/handlers/*"
+      ],
     }
+  },
+  "include": [
+    "src",
+    "utils",
+    "vite.config.ts",
+    "inject"
+  ],
 }
