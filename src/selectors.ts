@@ -15,26 +15,26 @@ import { log } from './helpers';
  * @returns The send case button if found, otherwise `undefined`.
  */
 export const selectFeedbackSectionElement = (): HTMLElement | undefined =>
-  Array.from(document.querySelectorAll('button')).find(
-    button => button.textContent === 'Send case to'
-  )?.parentElement?.parentElement || undefined;
+    Array.from(document.querySelectorAll('button')).find(
+        button => button.textContent === 'Send case to'
+    )?.parentElement?.parentElement || undefined;
 
 /**
  * Select the return target element from the feedback section, i.e. the Rework dropdown.
  * @returns The return element if found, otherwise `undefined`.
  */
 export const selectReturnTargetElement = (): Element | undefined => {
-  const feedbackSection = selectFeedbackSectionElement();
-  if (!feedbackSection) {
-    return undefined;
-  }
-  const children = feedbackSection.children;
-  if (children.length < 3) {
-    log('debug', 'Feedback section does not contain a return target');
-    return undefined;
-  }
+    const feedbackSection = selectFeedbackSectionElement();
+    if (!feedbackSection) {
+        return undefined;
+    }
+    const children = feedbackSection.children;
+    if (children.length < 3) {
+        log('debug', 'Feedback section does not contain a return target');
+        return undefined;
+    }
 
-  return children[2];
+    return children[2];
 };
 
 /**
@@ -42,11 +42,11 @@ export const selectReturnTargetElement = (): Element | undefined => {
  * @returns The conversation submit button.
  */
 export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
-  const element = Array.from(document.querySelectorAll('span')).find(span =>
-    span.textContent?.trim()?.includes('Submit QA Task')
-  )?.parentElement;
+    const element = Array.from(document.querySelectorAll('span')).find(span =>
+        span.textContent?.trim()?.includes('Submit QA Task')
+    )?.parentElement;
 
-  return element instanceof HTMLButtonElement ? element : undefined;
+    return element instanceof HTMLButtonElement ? element : undefined;
 };
 
 /**
@@ -54,13 +54,15 @@ export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
  * @returns The conversation response element.
  */
 export const selectResponseElement = (): Element | undefined => {
-  const conversationElements = Array.from(document.querySelectorAll('div.rounded-xl'));
+    const conversationElements = Array.from(
+        document.querySelectorAll('div.rounded-xl')
+    );
 
-  if (conversationElements.length < 2) {
-    return undefined;
-  }
+    if (conversationElements.length < 2) {
+        return undefined;
+    }
 
-  return conversationElements[1];
+    return conversationElements[1];
 };
 
 /**
@@ -68,7 +70,7 @@ export const selectResponseElement = (): Element | undefined => {
  * @returns The response code element.
  */
 export const selectResponseCodeElement = (): Element | undefined =>
-  document.querySelector('div.rounded-xl.bg-pink-100 pre code') || undefined;
+    document.querySelector('div.rounded-xl.bg-pink-100 pre code') || undefined;
 
 // const hasMultipleCodeBlocks = () =>
 //     document.querySelectorAll("div.rounded-xl pre code")?.length > 1;
@@ -78,24 +80,24 @@ export const selectResponseCodeElement = (): Element | undefined =>
  * @returns The alignment score element.
  */
 export const selectScoreElement = (): HTMLElement | undefined =>
-  Array.from(document.querySelectorAll('span')).find(
-    span => span.textContent?.trim() === 'Alignment %'
-  )?.parentElement || undefined;
+    Array.from(document.querySelectorAll('span')).find(
+        span => span.textContent?.trim() === 'Alignment %'
+    )?.parentElement || undefined;
 
 /**
  * Select the response edit button.
  * @returns The response edit button.
  */
 export function selectEditButton(): HTMLButtonElement | undefined {
-  const buttons: HTMLButtonElement[] = Array.from(
-    document.querySelectorAll("button[title='Edit']")
-  );
+    const buttons: HTMLButtonElement[] = Array.from(
+        document.querySelectorAll("button[title='Edit']")
+    );
 
-  if (buttons.length < 2) {
-    return undefined;
-  }
+    if (buttons.length < 2) {
+        return undefined;
+    }
 
-  return buttons[1];
+    return buttons[1];
 }
 
 /**
@@ -103,15 +105,15 @@ export function selectEditButton(): HTMLButtonElement | undefined {
  * @returns The tab container.
  */
 export function selectTabContainerElement(): HTMLDivElement | undefined {
-  const tabContainers: NodeListOf<HTMLDivElement> = document.querySelectorAll(
-    "div[data-cy='tabsHeaderContainer']"
-  );
+    const tabContainers: NodeListOf<HTMLDivElement> = document.querySelectorAll(
+        "div[data-cy='tabsHeaderContainer']"
+    );
 
-  if (!tabContainers || tabContainers.length < 2) {
-    return undefined;
-  }
+    if (!tabContainers || tabContainers.length < 2) {
+        return undefined;
+    }
 
-  return tabContainers[1];
+    return tabContainers[1];
 }
 
 /**
@@ -119,14 +121,14 @@ export function selectTabContainerElement(): HTMLDivElement | undefined {
  * @returns  The tab for the edited conversation content.
  */
 export const selectEditedTabElement = (): HTMLElement | undefined =>
-  document.getElementById('1') || undefined;
+    document.getElementById('1') || undefined;
 
 /**
  * Get the original content's tab element.
  * @returns The tab for the original conversation content.
  */
 export const selectOriginalTabElement = (): HTMLElement | undefined =>
-  document.getElementById('2') || undefined;
+    document.getElementById('2') || undefined;
 
 /**
  * Get the tab content for the specified tab. Throws an error if the conversation is
@@ -134,18 +136,18 @@ export const selectOriginalTabElement = (): HTMLElement | undefined =>
  * @returns  The content of the tab.
  */
 export function selectOriginalTabContentElement(): Element | undefined {
-  const element = document.querySelector("div[data-cy='tab'] > div");
+    const element = document.querySelector("div[data-cy='tab'] > div");
 
-  if (!element) {
-    return undefined;
-  }
+    if (!element) {
+        return undefined;
+    }
 
-  // if the content is editable, then it's the edited tab, not the original tab
-  if (element.getAttribute('contenteditable') === 'true') {
-    return undefined;
-  }
+    // if the content is editable, then it's the edited tab, not the original tab
+    if (element.getAttribute('contenteditable') === 'true') {
+        return undefined;
+    }
 
-  return element;
+    return element;
 }
 
 /**
@@ -153,16 +155,16 @@ export function selectOriginalTabContentElement(): Element | undefined {
  * @returns The parent element for the tab content.
  */
 export function selectTabContentParentelement(): Element | undefined {
-  const tabs = document.querySelectorAll("div[data-cy='tab']");
+    const tabs = document.querySelectorAll("div[data-cy='tab']");
 
-  if (!tabs) {
-    return undefined;
-  }
-  if (tabs.length < 2) {
-    return undefined;
-  }
+    if (!tabs) {
+        return undefined;
+    }
+    if (tabs.length < 2) {
+        return undefined;
+    }
 
-  return tabs[tabs.length - 1];
+    return tabs[tabs.length - 1];
 }
 
 /**
@@ -170,15 +172,15 @@ export function selectTabContentParentelement(): Element | undefined {
  * @returns The snooze button element.
  */
 export const selectSnoozeButtonElement = (): Element | undefined =>
-  document.querySelector("button[title='Snooze']") || undefined;
+    document.querySelector("button[title='Snooze']") || undefined;
 
 export const selectSaveButtonElement = (): HTMLButtonElement | undefined => {
-  const element = Array.from(document.querySelectorAll('span')).find(
-    span => span.textContent === 'Save'
-  )?.parentElement;
+    const element = Array.from(document.querySelectorAll('span')).find(
+        span => span.textContent === 'Save'
+    )?.parentElement;
 
-  return (element as HTMLButtonElement) || undefined;
+    return (element as HTMLButtonElement) || undefined;
 };
 
 export const selectMetadataSectionElement = (): HTMLElement | undefined =>
-  document.querySelector('h4')?.parentElement || undefined;
+    document.querySelector('h4')?.parentElement || undefined;

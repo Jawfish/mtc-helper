@@ -5,7 +5,6 @@ import './helpers';
 import './observers';
 import './store';
 import './selectors';
-
 import { log } from './helpers';
 import { observe } from './observers';
 
@@ -20,19 +19,19 @@ import { observe } from './observers';
  * @returns
  */
 function initializeOrochiHelper(): void {
-  log('info', 'Orochi Helper initializing...');
+    log('info', 'Orochi Helper initializing...');
 
-  const observer = new MutationObserver(mutations => {
-    mutations.forEach(mutation => {
-      observe.updateObservers(mutation);
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            observe.updateObservers(mutation);
+        });
     });
-  });
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-  log('info', 'Orochi Helper initialized.');
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    log('info', 'Orochi Helper initialized.');
 }
 
 initializeOrochiHelper();

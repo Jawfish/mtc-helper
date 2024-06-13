@@ -1,35 +1,35 @@
 import {
-  selectResponseCodeElement,
-  selectReturnTargetElement,
-  selectScoreElement
+    selectResponseCodeElement,
+    selectReturnTargetElement,
+    selectScoreElement
 } from './selectors';
 
 export function log(
-  level: 'log' | 'debug' | 'info' | 'warn' | 'error',
-  message: string
+    level: 'log' | 'debug' | 'info' | 'warn' | 'error',
+    message: string
 ) {
-  const prefix = '%c[Orochi Helper]';
-  const defaultStyle = 'color: blue; font-weight: bold;';
-  switch (level) {
-    case 'log':
-      console.log(prefix, defaultStyle, message);
-      break;
-    case 'debug':
-      console.debug(prefix, 'color: black; font-weight: bold;', message);
-      break;
-    case 'info':
-      console.info(prefix, defaultStyle, message);
-      break;
-    case 'warn':
-      console.warn(prefix, 'color: orange; font-weight: bold;', message);
-      break;
-    case 'error':
-      console.error(prefix, 'color: red; font-weight: bold;', message);
-      break;
-    default:
-      console.log(prefix, defaultStyle, message);
-      break;
-  }
+    const prefix = '%c[Orochi Helper]';
+    const defaultStyle = 'color: blue; font-weight: bold;';
+    switch (level) {
+        case 'log':
+            console.log(prefix, defaultStyle, message);
+            break;
+        case 'debug':
+            console.debug(prefix, 'color: black; font-weight: bold;', message);
+            break;
+        case 'info':
+            console.info(prefix, defaultStyle, message);
+            break;
+        case 'warn':
+            console.warn(prefix, 'color: orange; font-weight: bold;', message);
+            break;
+        case 'error':
+            console.error(prefix, 'color: red; font-weight: bold;', message);
+            break;
+        default:
+            console.log(prefix, defaultStyle, message);
+            break;
+    }
 }
 
 /**
@@ -38,18 +38,18 @@ export function log(
  * @returns - True if the conversation window contains Python code.
  */
 export const isPython = (): boolean => {
-  const span = Array.from(document.querySelectorAll('span')).find(
-    span => span.textContent?.trim() === 'Programming Language'
-  );
+    const span = Array.from(document.querySelectorAll('span')).find(
+        span => span.textContent?.trim() === 'Programming Language'
+    );
 
-  const hasPythonInSpan =
-    span?.parentElement?.textContent?.split(':')[1]?.trim() === 'Python';
+    const hasPythonInSpan =
+        span?.parentElement?.textContent?.split(':')[1]?.trim() === 'Python';
 
-  const hasPythonInButton = Array.from(document.querySelectorAll('button')).some(
-    button => button.textContent?.includes('Python')
-  );
+    const hasPythonInButton = Array.from(document.querySelectorAll('button')).some(
+        button => button.textContent?.includes('Python')
+    );
 
-  return hasPythonInSpan || hasPythonInButton;
+    return hasPythonInSpan || hasPythonInButton;
 };
 
 /**
@@ -66,62 +66,68 @@ export const isPython = (): boolean => {
  * @returns
  */
 export const validatePython = (code: string, messages: string[]): void => {
-  const maxLineLength = 240;
+    const maxLineLength = 240;
 
-  const lines = code.split('\n');
+    const lines = code.split('\n');
 
-  const truncateLine = (line: string): string => {
-    const truncateLength = 26;
-    return line.length > truncateLength ? `${line.slice(0, truncateLength)}...` : line;
-  };
+    const truncateLine = (line: string): string => {
+        const truncateLength = 26;
+        return line.length > truncateLength
+            ? `${line.slice(0, truncateLength)}...`
+            : line;
+    };
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const isConstant = /^[A-Z_]+/.test(line.split(' ')[0]);
-    const isFunctionOrClass =
-      line.startsWith('def ') ||
-      line.startsWith('class ') ||
-      line.startsWith('@') || // Account for decorators
-      line.startsWith('async def ');
-    const isImport = line.startsWith('import ') || line.startsWith('from ');
-    const isIndented = line.startsWith('    ');
-    const isCommented = line.startsWith('#');
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const isConstant = /^[A-Z_]+/.test(line.split(' ')[0]);
+        const isFunctionOrClass =
+            line.startsWith('def ') ||
+            line.startsWith('class ') ||
+            line.startsWith('@') || // Account for decorators
+            line.startsWith('async def ');
+        const isImport = line.startsWith('import ') || line.startsWith('from ');
+        const isIndented = line.startsWith('    ');
+        const isCommented = line.startsWith('#');
 
-    const shortenedLine = truncateLine(line);
+        const shortenedLine = truncateLine(line);
 
-    // Ignore empty lines
-    if (line.trim().length === 0) {
-      continue;
+        // Ignore empty lines
+        if (line.trim().length === 0) {
+            continue;
+        }
+
+        if (line.length > maxLineLength) {
+            log('warn', `A line is suspiciously long: ${line}`);
+            messages.push(
+                `A line in the bot response is suspiciously long: ${shortenedLine}`
+            );
+        }
+
+        if (
+            !isConstant &&
+            !isImport &&
+            !isFunctionOrClass &&
+            !isIndented &&
+            !isCommented &&
+            line.trim().length > 0 && // Ignore empty lines
+            !line.startsWith(') ->') // For multi-line function definitions
+        ) {
+            log(
+                'warn',
+                `Found non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${line}`
+            );
+            messages.push(
+                `The bot response contains a non-indented line: ${shortenedLine}`
+            );
+        }
+
+        if (line.includes('#') && !line.trim().startsWith('#')) {
+            log('warn', `Found inline comment: ${line}`);
+            messages.push(
+                `The bot response contains an inline comment: ${shortenedLine}`
+            );
+        }
     }
-
-    if (line.length > maxLineLength) {
-      log('warn', `A line is suspiciously long: ${line}`);
-      messages.push(
-        `A line in the bot response is suspiciously long: ${shortenedLine}`
-      );
-    }
-
-    if (
-      !isConstant &&
-      !isImport &&
-      !isFunctionOrClass &&
-      !isIndented &&
-      !isCommented &&
-      line.trim().length > 0 && // Ignore empty lines
-      !line.startsWith(') ->') // For multi-line function definitions
-    ) {
-      log(
-        'warn',
-        `Found non-indented line that doesn't appear to be an import, class definition, comment, or function definition: ${line}`
-      );
-      messages.push(`The bot response contains a non-indented line: ${shortenedLine}`);
-    }
-
-    if (line.includes('#') && !line.trim().startsWith('#')) {
-      log('warn', `Found inline comment: ${line}`);
-      messages.push(`The bot response contains an inline comment: ${shortenedLine}`);
-    }
-  }
 };
 
 /**
@@ -134,18 +140,18 @@ export const validatePython = (code: string, messages: string[]): void => {
  * @returns
  */
 export const checkForHtmlInCode = (code: string, messages: string[]): void => {
-  try {
-    const closingTagRegex = /<\/[^>]+>/;
-    if (closingTagRegex.test(code)) {
-      log(
-        'warn',
-        'Something that appears to be a closing HTML tag was found in the bot response.'
-      );
-      messages.push('The bot response appears to contain HTML.');
+    try {
+        const closingTagRegex = /<\/[^>]+>/;
+        if (closingTagRegex.test(code)) {
+            log(
+                'warn',
+                'Something that appears to be a closing HTML tag was found in the bot response.'
+            );
+            messages.push('The bot response appears to contain HTML.');
+        }
+    } catch (error) {
+        log('error', `Error checking for closing HTML tag: ${error}`);
     }
-  } catch (error) {
-    log('error', `Error checking for closing HTML tag: ${error}`);
-  }
 };
 
 /**
@@ -155,7 +161,7 @@ export const checkForHtmlInCode = (code: string, messages: string[]): void => {
  * @returns The formatted messages.
  */
 export const formatMessages = (messages: string[]): string[] => {
-  return messages.map((message, idx) => `${idx + 1}. ${message}\n\n`);
+    return messages.map((message, idx) => `${idx + 1}. ${message}\n\n`);
 };
 
 /**
@@ -169,40 +175,40 @@ export const formatMessages = (messages: string[]): string[] => {
  * response.
  */
 export function determineWarnings(): string[] {
-  const messages: string[] = [];
-  checkAlignmentScore(85, messages);
+    const messages: string[] = [];
+    checkAlignmentScore(85, messages);
 
-  const code = selectResponseCodeElement()?.textContent;
+    const code = selectResponseCodeElement()?.textContent;
 
-  if (!code) {
-    log('warn', 'The code cannot be found in the response.');
-    messages.push('The code cannot be found in the response.');
+    if (!code) {
+        log('warn', 'The code cannot be found in the response.');
+        messages.push('The code cannot be found in the response.');
+        return messages;
+    }
+
+    if (code.includes('```')) {
+        log(
+            'warn',
+            'The code does not appear to be in a properly-closed markdown code block.'
+        );
+        messages.push(
+            'The code does not appear to be in a properly-closed markdown code block.'
+        );
+    }
+
+    checkForHtmlInCode(code, messages);
+
+    if (code.split('\n').length <= 3) {
+        log('warn', 'The bot response has suspiciously few lines.');
+        messages.push('The bot response has suspiciously few lines.');
+    }
+
+    if (isPython()) {
+        log('debug', 'The code appears to be Python.');
+        validatePython(code, messages);
+    }
+
     return messages;
-  }
-
-  if (code.includes('```')) {
-    log(
-      'warn',
-      'The code does not appear to be in a properly-closed markdown code block.'
-    );
-    messages.push(
-      'The code does not appear to be in a properly-closed markdown code block.'
-    );
-  }
-
-  checkForHtmlInCode(code, messages);
-
-  if (code.split('\n').length <= 3) {
-    log('warn', 'The bot response has suspiciously few lines.');
-    messages.push('The bot response has suspiciously few lines.');
-  }
-
-  if (isPython()) {
-    log('debug', 'The code appears to be Python.');
-    validatePython(code, messages);
-  }
-
-  return messages;
 }
 
 /**
@@ -216,32 +222,33 @@ export function determineWarnings(): string[] {
  * response should not be sent to rework; `false` otherwise.
  */
 export function checkAlignmentScore(threshold: number, messages: string[]): void {
-  try {
-    log('debug', 'Checking if alignment score is low...');
-    const sendToRework = selectReturnTargetElement()?.textContent?.includes('Rework');
-    const scoreText = selectScoreElement()?.textContent?.split(':')[1]?.trim();
-    if (!scoreText) {
-      log('warn', 'Alignment score not found.');
-      return;
-    }
+    try {
+        log('debug', 'Checking if alignment score is low...');
+        const sendToRework =
+            selectReturnTargetElement()?.textContent?.includes('Rework');
+        const scoreText = selectScoreElement()?.textContent?.split(':')[1]?.trim();
+        if (!scoreText) {
+            log('warn', 'Alignment score not found.');
+            return;
+        }
 
-    const score = parseInt(scoreText, 10);
+        const score = parseInt(scoreText, 10);
 
-    log('debug', `Alignment score: ${score}, send to rework: ${sendToRework}`);
-    if (score < threshold && sendToRework === false) {
-      messages.push(
-        `The alignment score is ${score}, but the conversation is not marked as a rework.`
-      );
+        log('debug', `Alignment score: ${score}, send to rework: ${sendToRework}`);
+        if (score < threshold && sendToRework === false) {
+            messages.push(
+                `The alignment score is ${score}, but the conversation is not marked as a rework.`
+            );
+        }
+    } catch (error) {
+        log('error', `Error checking if alignment score is low: ${error}`);
     }
-  } catch (error) {
-    log('error', `Error checking if alignment score is low: ${error}`);
-  }
 }
 
 export function logDiff(originalContent: string, editedContent: string) {
-  log(
-    'debug',
-    `Inserting diff element
+    log(
+        'debug',
+        `Inserting diff element
 Original content:
 
 ${originalContent}
@@ -253,116 +260,117 @@ ${editedContent}
 
 --------------------------------------------------------------------------------------
 `
-  );
+    );
 }
 
 declare global {
-  interface Window {
-    monaco: any;
-  }
+    interface Window {
+        monaco: any;
+    }
 }
 
 // TODO: this is ported from a bookmarklet, so the code is a bit messy
 export function copyConversation() {
-  function getEditorContent() {
-    console.log('Checking for editor content...');
-    if (window.monaco && window.monaco.editor) {
-      return window.monaco.editor.getEditors()[0].getValue();
-    } else {
-      return '';
-    }
-  }
-  function getTextFromElement(element: HTMLElement | null): string {
-    let text = '';
-    if (element) {
-      element.childNodes.forEach((child: Node) => {
-        if (child.nodeType === Node.TEXT_NODE) {
-          if (element.tagName === 'P') {
-            text += `${child.nodeValue}`;
-          } else if (element.tagName === 'LI') {
-            text += `- ${child.nodeValue}`;
-          } else if (element.tagName === 'CODE') {
-            text += `\`${child.nodeValue}\``;
-          } else {
-            text += child.nodeValue;
-          }
-        } else if (child.nodeType === Node.ELEMENT_NODE) {
-          text += getTextFromElement(child as HTMLElement);
+    function getEditorContent() {
+        console.log('Checking for editor content...');
+        if (window.monaco && window.monaco.editor) {
+            return window.monaco.editor.getEditors()[0].getValue();
+        } else {
+            return '';
         }
-      });
     }
-    return text;
-  }
-  function copyToClipboard(text: string) {
-    text = text.replace(/&nbsp;/g, '').replace(/\u00A0/g, '');
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        console.log('Text copied to clipboard successfully!');
-      })
-      .catch(err => {
-        console.error('Failed to copy text: ', err);
-      });
-  }
-  const userPrompt = document.querySelector(
-    'div.rounded-xl p.whitespace-pre-wrap'
-  )?.parentElement;
-  const botResponse = document.querySelector(
-    'div.rounded-xl.bg-pink-100 pre code'
-  )?.textContent;
-  const editorContent = getEditorContent();
-  const operatorReason =
-    document.querySelectorAll('div[data-grid]>div>div>div>div>p.whitespace-pre-wrap')[2]
-      ?.textContent || '';
-  const formattedText = `"""\n${getTextFromElement(
-    userPrompt as HTMLElement
-  )}\n"""\n\n################################# REASON #################################\n\n"""\n${operatorReason.trim() ? operatorReason : 'No reason provided'}\n""" \n\n################################ RESPONSE ################################\n\n${botResponse} \n\n################################# TESTS ##################################\n\n${editorContent}`;
-  copyToClipboard(formattedText);
+    function getTextFromElement(element: HTMLElement | null): string {
+        let text = '';
+        if (element) {
+            element.childNodes.forEach((child: Node) => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                    if (element.tagName === 'P') {
+                        text += `${child.nodeValue}`;
+                    } else if (element.tagName === 'LI') {
+                        text += `- ${child.nodeValue}`;
+                    } else if (element.tagName === 'CODE') {
+                        text += `\`${child.nodeValue}\``;
+                    } else {
+                        text += child.nodeValue;
+                    }
+                } else if (child.nodeType === Node.ELEMENT_NODE) {
+                    text += getTextFromElement(child as HTMLElement);
+                }
+            });
+        }
+        return text;
+    }
+    function copyToClipboard(text: string) {
+        text = text.replace(/&nbsp;/g, '').replace(/\u00A0/g, '');
+        navigator.clipboard
+            .writeText(text)
+            .then(() => {
+                console.log('Text copied to clipboard successfully!');
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+    }
+    const userPrompt = document.querySelector(
+        'div.rounded-xl p.whitespace-pre-wrap'
+    )?.parentElement;
+    const botResponse = document.querySelector(
+        'div.rounded-xl.bg-pink-100 pre code'
+    )?.textContent;
+    const editorContent = getEditorContent();
+    const operatorReason =
+        document.querySelectorAll(
+            'div[data-grid]>div>div>div>div>p.whitespace-pre-wrap'
+        )[2]?.textContent || '';
+    const formattedText = `"""\n${getTextFromElement(
+        userPrompt as HTMLElement
+    )}\n"""\n\n################################# REASON #################################\n\n"""\n${operatorReason.trim() ? operatorReason : 'No reason provided'}\n""" \n\n################################ RESPONSE ################################\n\n${botResponse} \n\n################################# TESTS ##################################\n\n${editorContent}`;
+    copyToClipboard(formattedText);
 }
 
 // TODO: this is ported from a bookmarklet, so the code is a bit messy
 export function copyId() {
-  const buttons = document.querySelectorAll('button');
-  let titleToCopy = '';
+    const buttons = document.querySelectorAll('button');
+    let titleToCopy = '';
 
-  for (let button of buttons) {
-    if (
-      !button.disabled &&
-      button.querySelector('span') &&
-      button.classList.contains('cursor-pointer') &&
-      button.querySelector('span')?.textContent?.includes('In Progress')
-    ) {
-      const row = button.closest('tr');
-      if (row) {
-        const titledDiv = row.querySelector('div[title]');
-        if (titledDiv) {
-          titleToCopy = titledDiv.getAttribute('title') || '';
-          break;
+    for (let button of buttons) {
+        if (
+            !button.disabled &&
+            button.querySelector('span') &&
+            button.classList.contains('cursor-pointer') &&
+            button.querySelector('span')?.textContent?.includes('In Progress')
+        ) {
+            const row = button.closest('tr');
+            if (row) {
+                const titledDiv = row.querySelector('div[title]');
+                if (titledDiv) {
+                    titleToCopy = titledDiv.getAttribute('title') || '';
+                    break;
+                }
+            }
         }
-      }
     }
-  }
 
-  // check if it appears to be UUID
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+    // check if it appears to be UUID
+    const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
-  if (uuidRegex.test(titleToCopy)) {
-    navigator.clipboard.writeText(titleToCopy);
-  } else {
-    alert(
-      'ID could not be found. Sometimes the ID becomes unavailable as the rows in the backgrond update, causing the current task to fall out of view.'
-    );
-  }
+    if (uuidRegex.test(titleToCopy)) {
+        navigator.clipboard.writeText(titleToCopy);
+    } else {
+        alert(
+            'ID could not be found. Sometimes the ID becomes unavailable as the rows in the backgrond update, causing the current task to fall out of view.'
+        );
+    }
 }
 
 // TODO: this is ported from a bookmarklet, so the code is a bit messy
 export function copyEmail() {
-  const element = document.querySelector(
-    '.MuiTypography-root.MuiTypography-body2.MuiTypography-noWrap'
-  );
-  if (element) {
-    const modifiedText = element.textContent + 'invisible.email';
-    navigator.clipboard.writeText(modifiedText);
-  }
+    const element = document.querySelector(
+        '.MuiTypography-root.MuiTypography-body2.MuiTypography-noWrap'
+    );
+    if (element) {
+        const modifiedText = element.textContent + 'invisible.email';
+        navigator.clipboard.writeText(modifiedText);
+    }
 }
