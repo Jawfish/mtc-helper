@@ -155,7 +155,7 @@ export function insertDiffButton(): void {
     const submitButton = selectSubmitButtonElement();
     const span = document.createElement('span');
 
-    span.textContent = 'Diff';
+    span.textContent = 'View Diff';
     diffButton.className = submitButton?.className || '';
     diffButton.addEventListener('click', () => {
         if (!store.getState().originalContent) {
