@@ -3,6 +3,7 @@ import {
     selectReturnTargetElement,
     selectScoreElement
 } from './selectors';
+import { store } from './store';
 
 export function log(
     level: 'log' | 'debug' | 'info' | 'warn' | 'error',
@@ -44,12 +45,25 @@ export const isPython = (): boolean => {
 
     const hasPythonInSpan =
         span?.parentElement?.textContent?.split(':')[1]?.trim() === 'Python';
+    const hasPythonInCode =
+        document.querySelector('pre > code')?.classList.contains('language-python') ||
+        false;
 
-    const hasPythonInButton = Array.from(document.querySelectorAll('button')).some(
-        button => button.textContent?.includes('Python')
+    const pythonButton = Array.from(document.querySelectorAll('button')).find(
+        button => {
+            const grandparent = button.parentElement?.parentElement?.parentElement;
+            const firstChildDiv = grandparent?.firstElementChild;
+            return (
+                button.textContent?.trim() === 'Python' &&
+                !button.hasAttribute('data-disabled') &&
+                firstChildDiv?.textContent?.includes('Programming Language')
+            );
+        }
     );
 
-    return hasPythonInSpan || hasPythonInButton;
+    const hasPythonInButton = Boolean(pythonButton);
+
+    return hasPythonInSpan || hasPythonInCode || hasPythonInButton;
 };
 
 /**
@@ -271,14 +285,6 @@ declare global {
 
 // TODO: this is ported from a bookmarklet, so the code is a bit messy
 export function copyConversation() {
-    function getEditorContent() {
-        console.log('Checking for editor content...');
-        if (window.monaco && window.monaco.editor) {
-            return window.monaco.editor.getEditors()[0].getValue();
-        } else {
-            return '';
-        }
-    }
     function getTextFromElement(element: HTMLElement | null): string {
         let text = '';
         if (element) {
@@ -314,17 +320,15 @@ export function copyConversation() {
     const userPrompt = document.querySelector(
         'div.rounded-xl p.whitespace-pre-wrap'
     )?.parentElement;
-    const botResponse = document.querySelector(
-        'div.rounded-xl.bg-pink-100 pre code'
-    )?.textContent;
-    const editorContent = getEditorContent();
+    const botResponse = store.getState().responseCode;
+    const monacoEditorTestContent = store.getState().monacoEditorContent;
     const operatorReason =
         document.querySelectorAll(
             'div[data-grid]>div>div>div>div>p.whitespace-pre-wrap'
         )[2]?.textContent || '';
     const formattedText = `"""\n${getTextFromElement(
         userPrompt as HTMLElement
-    )}\n"""\n\n################################# REASON #################################\n\n"""\n${operatorReason.trim() ? operatorReason : 'No reason provided'}\n""" \n\n################################ RESPONSE ################################\n\n${botResponse} \n\n################################# TESTS ##################################\n\n${editorContent}`;
+    )}\n"""\n\n################################# REASON #################################\n\n"""\n${operatorReason.trim() ? operatorReason : 'No reason provided'}\n""" \n\n################################ RESPONSE ################################\n\n${botResponse} \n\n################################# TESTS ##################################\n\n${monacoEditorTestContent}`;
     copyToClipboard(formattedText);
 }
 

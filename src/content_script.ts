@@ -3,8 +3,8 @@ import './elements';
 import './handlers';
 import './helpers';
 import './observers';
-import './store';
 import './selectors';
+import './store';
 import { log } from './helpers';
 import { observe } from './observers';
 

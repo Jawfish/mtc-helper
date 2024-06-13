@@ -182,5 +182,11 @@ export const selectSaveButtonElement = (): HTMLButtonElement | undefined => {
     return (element as HTMLButtonElement) || undefined;
 };
 
-export const selectMetadataSectionElement = (): HTMLElement | undefined =>
-    document.querySelector('h4')?.parentElement || undefined;
+export const selectMetadataSectionElement = (): HTMLElement | undefined => {
+    const h4Elements = Array.from(document.querySelectorAll('h4'));
+    const metadataElement = h4Elements.find(h4 => {
+        const span = h4.querySelector('span');
+        return span && span.textContent === 'Metadata info';
+    });
+    return metadataElement?.parentElement || undefined;
+};

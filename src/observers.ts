@@ -6,6 +6,7 @@ import {
     selectMetadataSectionElement,
     selectOriginalTabContentElement,
     selectOriginalTabElement,
+    selectResponseCodeElement,
     selectResponseElement,
     selectSaveButtonElement,
     selectSnoozeButtonElement,
@@ -14,6 +15,7 @@ import {
 import { DiffViewState, store, resetStore } from './store';
 
 import { insertOrochiHelperToolbar } from './elements';
+import { editor } from 'monaco-editor';
 
 class Observe {
     private observers: Array<(mutation: MutationRecord) => void>;
@@ -119,10 +121,6 @@ function observeResponseEditButton(mutation: MutationRecord) {
 }
 
 function observeEditedContent(mutation: MutationRecord) {
-    if (store.getState().editedContent) {
-        return;
-    }
-
     const element = selectResponseElement();
     if (!element?.textContent) {
         return;
@@ -130,7 +128,8 @@ function observeEditedContent(mutation: MutationRecord) {
 
     // remove the first character which is the number associated with the response
     const editedContent = element.textContent.slice(1);
-    store.setState({ editedContent });
+    const responseCode = selectResponseCodeElement()?.textContent || '';
+    store.setState({ editedContent, responseCode });
 }
 
 function observeOriginalContent(mutation: MutationRecord) {
@@ -144,7 +143,8 @@ function observeOriginalContent(mutation: MutationRecord) {
     }
 
     const originalContent = element.textContent;
-    store.setState({ originalContent });
+    const originalCode = element.querySelector('pre code')?.textContent || '';
+    store.setState({ originalContent, originalCode });
 }
 
 // Remove the useless metadata section with the useless save button
@@ -225,6 +225,37 @@ function observeSaveButton(mutation: MutationRecord) {
     store.setState({ saveButtonHasListener: true });
 }
 
+function observeMonacoTestEditor(mutation: MutationRecord) {
+    if (store.getState().monacoEditorContent || !window.monaco?.editor?.getEditors()) {
+        return;
+    }
+
+    const editors = window.monaco.editor.getEditors();
+    if (!editors.length) {
+        return;
+    }
+
+    const editor: editor.IStandaloneCodeEditor = editors[0];
+
+    // add a listener so that when the editor is changed it updates the value in the store
+    const monacoEditorDisposer = editor.onDidChangeModelContent(() => {
+        if (!window.monaco?.editor?.getEditors()) {
+            monacoEditorDisposer.dispose();
+            return;
+        }
+        const monacoEditorContent = editor.getValue();
+        store.setState({
+            monacoEditorContent
+        });
+    });
+
+    const monacoEditorContent = editor.getValue();
+    store.setState({
+        monacoEditorContent,
+        monacoEditorDisposer
+    });
+}
+
 export const observe = new Observe(
     observeEditedContent,
     observeEditedTab,
@@ -234,5 +265,6 @@ export const observe = new Observe(
     observeResponseEditButton,
     observeSaveButton,
     observeSnoozeButton,
-    observeSubmitButton
+    observeSubmitButton,
+    observeMonacoTestEditor
 );

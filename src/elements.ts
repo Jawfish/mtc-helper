@@ -11,16 +11,16 @@ import {
 import { selectSubmitButtonElement } from './selectors';
 import { store } from './store';
 import React from 'react';
-import ReactDiffViewer from 'react-diff-viewer-continued';
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
 
 // TODO: These buttons are ported functionality from bookmarklets. They're a bit hacked-together right now and the code can be cleaned up, but they work fine.
-export function insertCheckButton(): void {
+export function insertValidateButton(): void {
     log('debug', 'Inserting check button');
     const checkButton = document.createElement('button');
     const submitButton = selectSubmitButtonElement();
     const span = document.createElement('span');
 
-    span.textContent = 'Check Task';
+    span.textContent = 'Validate';
     checkButton.className = submitButton?.className || '';
     checkButton.addEventListener('click', () => {
         log('debug', 'Check button clicked');
@@ -111,6 +111,39 @@ export function insertCopyEmailButton(): void {
     toolbar.appendChild(copyEmailButton);
 }
 
+export function insertCopyOriginalCodeButton(): void {
+    log('debug', 'Inserting copy original code button');
+    const copyOriginalCodeButton = document.createElement('button');
+    const submitButton = selectSubmitButtonElement();
+    const span = document.createElement('span');
+
+    span.textContent = 'Copy Original Code';
+    copyOriginalCodeButton.className = submitButton?.className || '';
+    copyOriginalCodeButton.addEventListener('click', () => {
+        log('debug', 'Copy original code button clicked');
+        const originalCode = store.getState().originalCode;
+        if (!originalCode) {
+            alert(
+                'Original code not found; the original code must be viewed before it can be copied.'
+            );
+            return;
+        }
+        navigator.clipboard.writeText(originalCode);
+    });
+    copyOriginalCodeButton.appendChild(span);
+
+    const toolbar = store.getState().orochiToolbar;
+    if (!toolbar) {
+        log(
+            'error',
+            'Orochi toolbar not found while inserting copy original code button'
+        );
+        return;
+    }
+
+    toolbar.appendChild(copyOriginalCodeButton);
+}
+
 /**
  * Inserts a toolbar that is always visible at the top of the page and on top of all other elements.
  */
@@ -125,7 +158,7 @@ export function insertOrochiHelperToolbar(): void {
     toolbar.style.transform = 'translateX(-50%)';
     toolbar.style.display = 'flex';
     toolbar.style.gap = '1em';
-    toolbar.style.backgroundColor = '#FFFFFFCC';
+    toolbar.style.backgroundColor = '#FFFFFFDF';
     toolbar.style.borderBottomLeftRadius = '0.5em';
     toolbar.style.borderBottomRightRadius = '0.5em';
     toolbar.style.boxShadow = '0 0 1em 0.5em #00000022';
@@ -142,10 +175,13 @@ export function insertOrochiHelperToolbar(): void {
     if (isPython()) {
         insertConvoCopyButton();
     }
-    // TODO: make these take the toolbar and their styles as an argument
+    // TODO: make these take the toolbar and their styles as an argument, Also probably just make
+    // these TSX components. Also they currently are called by the toolbar but use a referenc to the
+    // toolbar to insert themselves into the toolbar, so that's a bit dumb
+    insertCopyOriginalCodeButton();
     insertCopyIdButton();
     insertCopyEmailButton();
-    insertCheckButton();
+    insertValidateButton();
     insertDiffButton();
 }
 
@@ -159,7 +195,7 @@ export function insertDiffButton(): void {
     diffButton.className = submitButton?.className || '';
     diffButton.addEventListener('click', () => {
         if (!store.getState().originalContent) {
-            alert('The original content must be viewed before diffing.');
+            alert('The original content must be viewed before the diff can be viewed.');
             return;
         }
         log('debug', 'Diff button clicked');
@@ -184,82 +220,151 @@ export function insertDiffButton(): void {
 
     toolbar.appendChild(diffButton);
 }
-
-// TODO: extract to proper tsx component?
+// TODO: this is getting kinda stupid as I add things, extract to proper tsx components
 export function openDiffModal(originalContent: string, editedContent: string): void {
-    logDiff(originalContent, editedContent);
-
-    const diffViewerElement = React.createElement(ReactDiffViewer, {
-        oldValue: originalContent,
-        newValue: editedContent,
-        splitView: true
-    });
-
-    const closeModal = () => {
-        store.setState({ diffModalOpen: false });
-        store.getState().reactRoot?.render(null);
-        document.removeEventListener('keydown', handleKeyDown);
-    };
-
     const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
             closeModal();
         }
     };
-
-    const backgroundProps = {
-        style: {
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'fixed',
-            zIndex: '1000',
-            left: '0',
-            top: '0',
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.4)'
-        },
-        onClick: (e: React.MouseEvent<HTMLDivElement>) => {
-            if (e.target === e.currentTarget) closeModal();
-        }
+    const closeModal = () => {
+        store.setState({ diffModalOpen: false });
+        store.getState().reactRoot?.render(null);
+        document.removeEventListener('keydown', handleKeyDown);
     };
+    logDiff(originalContent, editedContent);
+    const submitButton = selectSubmitButtonElement();
 
-    const contentProps = {
-        style: {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '90%',
-            height: '90%',
-            backgroundColor: '#fff',
-            position: 'relative',
-            overflow: 'auto'
-        }
+    const renderModal = () => {
+        const diffViewerElement = React.createElement(ReactDiffViewer, {
+            oldValue: originalContent,
+            newValue: editedContent,
+            splitView: true,
+            disableWordDiff: store.getState().disableWordDiff
+        });
+
+        const toggleDisableWordDiff = () => {
+            store.setState({ disableWordDiff: !store.getState().disableWordDiff });
+            renderModal();
+        };
+
+        const buttonsWrapperProps = {
+            style: {
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '1rem',
+                margin: '1rem'
+            }
+        };
+
+        const contentAndButtonWrapperProps = {
+            style: {
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+                overflow: 'auto'
+            }
+        };
+
+        const toggleButtonProps = {
+            className: submitButton?.className || '',
+            style: {
+                alignSelf: 'center',
+                margin: '0',
+                zIndex: '1002'
+            },
+            onClick: toggleDisableWordDiff
+        };
+
+        const backgroundProps = {
+            style: {
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'fixed',
+                zIndex: '1000',
+                left: '0',
+                top: '0',
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(0,0,0,0.2)'
+            },
+            onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+                if (e.target === e.currentTarget) closeModal();
+            }
+        };
+
+        // necessary to preserve border radius when the content has a scrollbar
+        const outerContainerProps = {
+            style: {
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: '0.5em',
+                boxShadow: '0 0 1em 0.5em #00000022',
+                width: '90%',
+                height: '85%',
+                backgroundColor: '#fff',
+                position: 'relative',
+                overflow: 'hidden'
+            }
+        };
+
+        const contentProps = {
+            style: {
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+                overflow: 'auto'
+            }
+        };
+
+        const closeButtonProps = {
+            className: submitButton?.className || '',
+            style: {
+                alignSelf: 'center',
+                margin: '0',
+                backgroundColor: '#ef4444', // red-500 from tailwind
+                border: '0px',
+                zIndex: '1002'
+            },
+            onClick: closeModal
+        };
+
+        const Modal = React.createElement(
+            'div',
+            backgroundProps,
+            React.createElement(
+                'div',
+                outerContainerProps,
+                React.createElement(
+                    'div',
+                    contentAndButtonWrapperProps,
+                    React.createElement('div', contentProps, diffViewerElement),
+                    React.createElement(
+                        'div',
+                        buttonsWrapperProps,
+                        React.createElement(
+                            'button',
+                            toggleButtonProps,
+                            'Toggle Word Diff'
+                        ),
+                        React.createElement('button', closeButtonProps, 'Close')
+                    )
+                )
+            )
+        );
+
+        store.getState().reactRoot?.render(Modal);
     };
-
-    const closeButtonProps = {
-        style: {
-            color: 'red',
-            zIndex: '1001',
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            fontSize: '28px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-        },
-        onClick: closeModal
-    };
-
-    const Modal = React.createElement(
-        'div',
-        backgroundProps,
-        React.createElement('span', closeButtonProps, '🗙'),
-        React.createElement('div', contentProps, diffViewerElement)
-    );
 
     document.addEventListener('keydown', handleKeyDown);
-    store.getState().reactRoot?.render(Modal);
+    renderModal();
     store.setState({ diffModalOpen: true });
 }
