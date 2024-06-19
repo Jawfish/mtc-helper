@@ -15,11 +15,11 @@ export const selectGlobalObserverTarget = async () => {
 };
 
 export const selectTaskWindowElement = (): HTMLDivElement | undefined => {
-    const element = document.querySelector(
+    const taskWindow = document.querySelector(
         '#__next > div > div > div > div > div.fixed.top-0.left-0.flex.h-screen.w-screen.items-center.justify-center'
     );
 
-    return element instanceof HTMLDivElement ? element : undefined;
+    return taskWindow instanceof HTMLDivElement ? taskWindow : undefined;
 };
 
 export const selectTaskIdElement = (): HTMLDivElement | undefined => {

@@ -25,11 +25,11 @@ import { useMTCStore } from '@src/store/MTCStore';
  */
 export type MutHandler = (mutation: MutationRecord) => void;
 
-export const addMtcHelperAttributeToElement = (element: Element) => {
+export const addMtcHelperAttributeToElement = (element: HTMLElement | SVGElement) => {
     element.setAttribute('data-mtc-helper', 'true');
 };
 
-export const elementHasMtcHelperAttribute = (element: Element) => {
+export const elementHasMtcHelperAttribute = (element: HTMLElement | SVGElement) => {
     return Boolean(element.attributes.getNamedItem('data-mtc-helper'));
 };
 
@@ -78,7 +78,11 @@ export const handleAnySubmitButtonMutation: MutHandler = (mutation: MutationReco
 
 export const handleAnyCloseButtonMutation: MutHandler = (mutation: MutationRecord) => {
     const buttonElement = selectTaskWindowCloseButton();
-    if (!buttonElement || elementHasMtcHelperAttribute(buttonElement)) {
+    if (!buttonElement) {
+        return;
+    }
+    const seen = elementHasMtcHelperAttribute(buttonElement);
+    if (seen) {
         return;
     }
 

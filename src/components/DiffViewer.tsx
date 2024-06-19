@@ -14,7 +14,7 @@ import {
 import { useState } from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
 import clsx from 'clsx';
-import { ContentType, useContentStore } from '@src/store/ContentStore';
+import { ResponseContent, useContentStore } from '@src/store/ContentStore';
 import { Process, useMTCStore } from '@src/store/MTCStore';
 import {
     Select,
@@ -23,10 +23,6 @@ import {
     SelectValue,
     SelectItem
 } from '@src/external/components/ui/select';
-import markdownToTxt from 'markdown-to-txt';
-import { selectPandaOriginalResponse } from '@src/selectors/panda';
-import TurndownService from 'turndown';
-import { useTurndownService } from '@src/contexts/TurndownContext';
 
 import Button from './shared/Button';
 
@@ -37,14 +33,12 @@ interface Props {
 export default function DiffViewer({ setDiffViewOpen }: Props) {
     const [activeTab, setActiveTab] = useState(0);
     const [disableWordDiff, setDisableWordDiff] = useState(false);
-    const { orochiCode, orochiResponse, pandaResponse } = useContentStore();
-    const [removeEditedMarkdown, setRemoveEditedMarkdown] = useState(false);
-    const [addMarkdownToOriginal, setAddMarkdownToOriginal] = useState(false);
+    const { orochiCode, orochiResponse, pandaOriginalResponse, pandaEditedResponse } =
+        useContentStore();
     const process = useMTCStore(state => state.process);
     const [diffMethod, setDiffMethod] = useState(
         process === Process.PANDA ? DiffMethod.WORDS : DiffMethod.LINES
     );
-    const turndownService = useTurndownService();
 
     useKeyPress('Escape', () => setDiffViewOpen(false));
 
@@ -57,20 +51,19 @@ export default function DiffViewer({ setDiffViewOpen }: Props) {
     // Create an array of the ContentItems that can be mapped over and filter out
     // any objects that don't have any edited or original content. This is a bit of a
     // hacky way to do this, but it works for now.
+
+    // TODO: no, for real, this is actually stupid
+    const pandaResponseObj: ResponseContent = {
+        edited: pandaEditedResponse,
+        original: pandaOriginalResponse
+    };
     const contents = Object.entries({
         orochiCode,
         orochiResponse,
-        pandaResponse
+        pandaResponseObj
     }).filter(([, content]) => content.edited || content.original);
 
     const count = contents.length;
-
-    const parseMarkdown = createParseMarkdown({
-        process,
-        turndownService,
-        addMarkdownToOriginal,
-        removeEditedMarkdown
-    });
 
     function handleSelectChange(value: string) {
         if (value === 'None') {
@@ -92,7 +85,7 @@ export default function DiffViewer({ setDiffViewOpen }: Props) {
                     }>
                     {count > 1 && (
                         <TabsList className='flex justify-start gap-0 p-0 shadow bg-mtc-faded mb-2 rounded-none rounded-t-md'>
-                            {contents.map(([contentKey, contentItem], index) => (
+                            {contents.map(([contentKey, _], index) => (
                                 <TabsTrigger
                                     key={contentKey}
                                     value={`tab-${index}`}
@@ -102,7 +95,7 @@ export default function DiffViewer({ setDiffViewOpen }: Props) {
                                         'bg-mtc-faded text-mtc-primary cursor-pointer',
                                         { 'rounded-tl-md': index === 0 }
                                     )}>
-                                    {getTabName(contentItem.type, index)}
+                                    {`Tab ${index + 1}`}
                                 </TabsTrigger>
                             ))}
                         </TabsList>
@@ -114,20 +107,18 @@ export default function DiffViewer({ setDiffViewOpen }: Props) {
                             className='overflow-auto max-h-[80vh] mt-0 rounded-t-md'>
                             {/* TODO: split the markdown parse handling. Also, fix the fact that adding markdown to the original response is hardcoded for PANDA */}
                             <ReactDiffViewer
-                                oldValue={parseMarkdown(
-                                    contentItem.original,
-                                    contentItem.type
-                                )}
-                                newValue={parseMarkdown(
-                                    contentItem.edited,
-                                    contentItem.type
-                                )}
+                                oldValue={contentItem.original}
+                                newValue={contentItem.edited}
                                 splitView={true}
                                 disableWordDiff={disableWordDiff}
                                 compareMethod={diffMethod}
+                                extraLinesSurroundingDiff={
+                                    process === Process.PANDA ? 0 : 1
+                                }
                             />
                         </TabsContent>
                     ))}
+
                     <DiffControls>
                         <Select
                             onValueChange={value => handleSelectChange(value)}
@@ -165,22 +156,6 @@ export default function DiffViewer({ setDiffViewOpen }: Props) {
                                 </SelectItem>
                             </SelectContent>
                         </Select>
-                        {process === Process.PANDA && (
-                            <>
-                                <Button
-                                    onClick={() =>
-                                        setAddMarkdownToOriginal(!addMarkdownToOriginal)
-                                    }>
-                                    Toggle Original Markdown
-                                </Button>
-                                <Button
-                                    onClick={() =>
-                                        setRemoveEditedMarkdown(!removeEditedMarkdown)
-                                    }>
-                                    Toggle Edited Markdown
-                                </Button>
-                            </>
-                        )}
                         <Button
                             onClick={() => setDiffViewOpen(false)}
                             variant='destructive'>
@@ -220,48 +195,3 @@ function DiffBackground({
 function DiffControls({ children }: { children: React.ReactNode }) {
     return <div className='my-4 flex justify-center gap-4'>{children}</div>;
 }
-
-const getTabName = (contentType: ContentType | undefined, index: number) => {
-    switch (contentType) {
-        case ContentType.OrochiResponse:
-            return 'Full Response';
-        case ContentType.OrochiCode:
-            return 'Code Only';
-        default:
-            return `Tab ${index}`;
-    }
-};
-
-interface ParseMarkdownConfig {
-    process: Process;
-    turndownService: TurndownService;
-    addMarkdownToOriginal: boolean;
-    removeEditedMarkdown: boolean;
-}
-
-const createParseMarkdown =
-    ({
-        process,
-        turndownService,
-        addMarkdownToOriginal,
-        removeEditedMarkdown
-    }: ParseMarkdownConfig) =>
-    (content: string | undefined, contentType: ContentType | undefined) => {
-        if (
-            process === Process.PANDA &&
-            contentType === ContentType.PandaResponse &&
-            addMarkdownToOriginal
-        ) {
-            return turndownService.turndown(
-                selectPandaOriginalResponse()?.outerHTML || ''
-            );
-        } else if (
-            process === Process.PANDA &&
-            contentType === ContentType.PandaResponse &&
-            removeEditedMarkdown
-        ) {
-            return markdownToTxt(content || '');
-        } else {
-            return content;
-        }
-    };

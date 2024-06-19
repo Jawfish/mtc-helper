@@ -9,7 +9,7 @@ const Watermark = ({ version }: WatermarkProps) => {
 
     return (
         <div className='absolute bottom-0 left-0 z-50 text-sm text-gray-300'>
-            <div>MTC Helper version {version}c</div>
+            <div>MTC Helper version {version}d</div>
             <div>Current process: {process}</div>
         </div>
     );

@@ -21,7 +21,6 @@ import {
     handleAnyTaskWindowMutation
 } from '@handlers/shared';
 import DiffViewer from '@src/components/DiffViewer';
-import { TurndownProvider } from '@src/contexts/TurndownContext';
 import {
     handleOrochiEditedResponseMutation,
     handleOrochiEditedViewMetadataSectionMutation,
@@ -29,7 +28,12 @@ import {
     handleOrochiPromptMutation,
     handleOrochiTaskWindowMetadataSectionMutation
 } from '@src/handlers/orochi';
-import { handlePandaResponseMutation } from '@src/handlers/panda';
+import {
+    handlePandaEditedResponseMutation,
+    handlePandaEditResponseButtonMutation,
+    handlePandaOriginalResponseMutation,
+    handlePandaSelectedResponseSaveButtonMutation
+} from '@src/handlers/panda';
 
 const div = document.createElement('div');
 div.id = 'mtc-helper-root';
@@ -65,11 +69,7 @@ const App = () => {
                 taskIdElementSelector={selectTaskIdElement}
             />
             {/* {process == Process.Orochi && <OrochiMetadata />} */}
-            {diffViewOpen && (
-                <TurndownProvider>
-                    <DiffViewer setDiffViewOpen={setDiffViewOpen} />
-                </TurndownProvider>
-            )}
+            {diffViewOpen && <DiffViewer setDiffViewOpen={setDiffViewOpen} />}
             <Watermark version='1.0.0' />
         </>
     );
@@ -97,7 +97,10 @@ const App = () => {
                 handleOrochiOriginalResponseMutation,
                 handleOrochiPromptMutation,
                 handleOrochiTaskWindowMetadataSectionMutation,
-                handlePandaResponseMutation
+                handlePandaEditedResponseMutation,
+                handlePandaOriginalResponseMutation,
+                handlePandaSelectedResponseSaveButtonMutation,
+                handlePandaEditResponseButtonMutation
             ],
             observerTarget
         );

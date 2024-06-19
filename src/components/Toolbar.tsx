@@ -545,10 +545,7 @@ const canOpenOrochiDiffView = (toastContext: IToastContext | undefined) => {
     if (!orochiResponse.edited) {
         Logger.debug('Tried to view diff with no edited response content');
         if (toastContext) {
-            toastContext.notify(
-                'Unexpected error: no edited response content found.',
-                'error'
-            );
+            toastContext.notify('No content found.', 'error');
         }
 
         return false;
@@ -558,9 +555,10 @@ const canOpenOrochiDiffView = (toastContext: IToastContext | undefined) => {
 };
 
 const canOpenPandaDiffView = (toastContext: IToastContext | undefined) => {
-    const { pandaResponse } = useContentStore.getState();
+    const { pandaEditedResponse } = useContentStore.getState();
+    const { pandaOriginalResponse } = useContentStore.getState();
 
-    if (!pandaResponse.original) {
+    if (!pandaOriginalResponse) {
         Logger.debug('Tried to view diff with no original response content');
         if (toastContext) {
             toastContext.notify(
@@ -573,13 +571,10 @@ const canOpenPandaDiffView = (toastContext: IToastContext | undefined) => {
 
         return false;
     }
-    if (!pandaResponse.edited) {
+    if (!pandaEditedResponse) {
         Logger.debug('Tried to view diff with no edited response content');
         if (toastContext) {
-            toastContext.notify(
-                'Unexpected error: no edited response content found.',
-                'error'
-            );
+            toastContext.notify('No content found.', 'error');
         }
 
         return false;

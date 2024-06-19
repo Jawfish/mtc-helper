@@ -2,14 +2,7 @@ import { truncateString } from '@src/lib/helpers';
 import Logger from '@src/lib/logging';
 import { create } from 'zustand';
 
-export enum ContentType {
-    OrochiResponse = 'OrochiResponse',
-    OrochiCode = 'OrochiCode',
-    PandaResponse = 'PandaResponse'
-}
-
 export type ResponseContent = {
-    type?: ContentType;
     original?: string;
     edited?: string;
     previousOriginal?: string;
@@ -25,7 +18,8 @@ export type ContentStoreState = {
     orochiConversationTitle: string | undefined;
     orochiResponse: ResponseContent;
     orochiCode: ResponseContent;
-    pandaResponse: ResponseContent;
+    pandaEditedResponse: string | undefined;
+    pandaOriginalResponse: string | undefined;
 };
 
 type ContentStoreActions = {
@@ -37,7 +31,8 @@ type ContentStoreActions = {
     setOrochiConversationTitle: (content: string | undefined) => void;
     setOrochiResponse: (content: ResponseContent) => void;
     setOrochiCode: (content: ResponseContent) => void;
-    setPandaResponse: (content: ResponseContent) => void;
+    setPandaEditedResponse: (content: string | undefined) => void;
+    setPandaOriginalResponse: (content: string | undefined) => void;
     reset: () => void;
 };
 
@@ -50,7 +45,8 @@ const initialState: ContentStoreState = {
     orochiConversationTitle: undefined,
     orochiResponse: {},
     orochiCode: {},
-    pandaResponse: {}
+    pandaEditedResponse: undefined,
+    pandaOriginalResponse: undefined
 };
 
 // The actions defined in here intentionally use shallow comparison because we want to
@@ -87,7 +83,7 @@ export const useContentStore = create<ContentStoreState & ContentStoreActions>(
 
             Logger.debug(`Updating orochi response content in store.`);
 
-            set({ orochiResponse: { ...content, type: ContentType.OrochiResponse } });
+            set({ orochiResponse: { ...content } });
         },
         setOrochiCode: content => {
             if (JSON.stringify(content) == JSON.stringify(get().orochiCode)) {
@@ -96,16 +92,29 @@ export const useContentStore = create<ContentStoreState & ContentStoreActions>(
 
             Logger.debug(`Updating orochi code in store.`);
 
-            set({ orochiCode: { ...content, type: ContentType.OrochiCode } });
+            set({ orochiCode: { ...content } });
         },
-        setPandaResponse: content => {
-            if (JSON.stringify(content) == JSON.stringify(get().pandaResponse)) {
+        setPandaEditedResponse: content => {
+            if (content == get().pandaEditedResponse) {
                 return;
             }
 
-            Logger.debug(`Updating panda response in store.`);
+            Logger.debug(
+                `Setting panda edited response to "${truncateString(content)}" in store.`
+            );
 
-            set({ pandaResponse: { ...content, type: ContentType.PandaResponse } });
+            set({ pandaEditedResponse: content });
+        },
+        setPandaOriginalResponse: content => {
+            if (content == get().pandaOriginalResponse) {
+                return;
+            }
+
+            Logger.debug(
+                `Setting panda original response to "${truncateString(content)}" in store.`
+            );
+
+            set({ pandaOriginalResponse: content });
         },
         setOrochiPrompt: content => {
             if (content == get().orochiPrompt) {
