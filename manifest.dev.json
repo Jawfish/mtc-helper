@@ -1,27 +1,18 @@
 {
-  "action": {
-    "default_icon": "public/dev-icon-32.png"
-  },
-  "icons": {
-    "128": "public/dev-icon-128.png"
-  },
-  "web_accessible_resources": [
-    {
-      "matches": [],
-      "resources": [
-        "contentStyle.css",
-        "dev-icon-128.png",
-        "dev-icon-32.png"
-      ]
+    "action": {
+        "default_icon": "public/dev-icon-32.png"
     },
-    {
-      "matches": [
-        "https://app.inv.tech/*"
-      ],
-      "resources": [
-        "inject/inject.js",
-        "inject/inject.js.map"
-      ]
-    }
-  ]
+    "icons": {
+        "128": "public/dev-icon-128.png"
+    },
+    "web_accessible_resources": [
+        {
+            "matches": [],
+            "resources": ["contentStyle.css", "dev-icon-128.png", "dev-icon-32.png"]
+        },
+        {
+            "matches": ["https://app.inv.tech/*"],
+            "resources": ["inject/inject.js", "inject/inject.js.map"]
+        }
+    ]
 }

@@ -4,6 +4,7 @@ import fs from 'fs';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { crx, ManifestV3Export } from '@crxjs/vite-plugin';
+import { coverageConfigDefaults } from 'vitest/config';
 import { build } from 'esbuild';
 
 import manifest from './manifest.json';
@@ -127,6 +128,14 @@ export default defineConfig({
     },
     test: {
         setupFiles: ['testSetup.ts'],
-        environment: 'jsdom'
+        environment: 'jsdom',
+        coverage: {
+            include: ['src/**/*'],
+            exclude: [
+                'src/**/*.stories.tsx',
+                'src/**/*.mock.ts',
+                ...coverageConfigDefaults.exclude
+            ]
+        }
     }
 });

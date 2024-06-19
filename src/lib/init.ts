@@ -1,15 +1,22 @@
-// oldVersionScripts/urlWatcher.ts
-import { Process, processUuidMap, useMTCStore } from '@src/store/MTCStore';
 import {
+    injectScriptDest,
     isMonacoMessage,
     isURLMessage,
     MonacoMessage,
     URLMessage
 } from '@src/types/injectTypes';
-import { useContentStore } from '@src/store/ContentStore';
-import { MutHandler } from '@handlers/shared';
+import {
+    MutHandler,
+    globalHandlers,
+    orochiHandlers,
+    pandaHandlers
+} from '@handlers/index';
+import { selectGlobalObserverTarget } from '@lib/selectors';
+import { orochiStore } from '@src/store/orochiStore';
+import { globalStore } from '@src/store/globalStore';
 
 import Logger from './logging';
+import { updateProcess } from './process';
 
 /**
  * Initializes the URL observer which listens for changes to the URL from
@@ -17,46 +24,7 @@ import Logger from './logging';
  * accordingly.
  */
 export function initializeUrlObserver() {
-    /**
-     * Returns the process based on the UUID found in the URL. Returns undefined if the
-     * UUID is not found in the processUuidMap.
-     */
-    const getProcess = (url: string | undefined): Process => {
-        if (!url) {
-            return Process.Unknown;
-        }
-
-        const [cleanUrl] = url.split('?');
-        const [, , , , uuid] = cleanUrl.split('/');
-        const uuidRegex =
-            /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
-
-        if (!uuid || !uuidRegex.test(uuid)) {
-            return Process.Unknown;
-        }
-
-        Logger.debug(`URL observer: UUID found in URL: ${uuid}`);
-
-        const process = processUuidMap[uuid];
-        if (!process) {
-            Logger.debug(`URL observer: Process not found for UUID ${uuid}`);
-
-            return Process.Unknown;
-        }
-
-        return process;
-    };
-
-    // on initial load, we need to manually check the URL because the listener hasn't
-    // seen any URL changes yet
-    const process = getProcess(window.location.href);
-    if (process) {
-        Logger.debug(
-            `URL observer: Process changed to ${process} using URL ${window.location.href}`
-        );
-        // useMTCStore.setState({ process });
-        useMTCStore.getState().setProcess(process);
-    }
+    updateProcess(window.location.href);
 
     Logger.debug('Initializing URL change observer');
     try {
@@ -68,14 +36,14 @@ export function initializeUrlObserver() {
             const message = event.data as URLMessage;
 
             if (message.type !== 'url-changed') {
+                Logger.warn('Message type was not url-changed');
+
                 return;
             }
 
             Logger.debug(`URL observer: URL changed to ${message.url}`);
 
-            const process = getProcess(message.url);
-            // useMTCStore.setState({ process });
-            useMTCStore.getState().setProcess(process);
+            updateProcess(message.url);
         });
 
         Logger.debug('URL change observer initialized');
@@ -107,8 +75,7 @@ export function initializeMonacoObserver() {
                 `Monaco editor observer received payload of ${message.content.length} characters`
             );
 
-            // useContentStore.setState({ testEditorContent: message.content });
-            useContentStore.getState().setOrochiTests(message.content);
+            orochiStore.setState({ tests: message.content });
         });
 
         Logger.debug('Monaco editor observer initialized');
@@ -127,15 +94,40 @@ export function initializeMonacoObserver() {
  * observer does not observe changes to the extension's own elements.
  */
 export function initializeMutationObserver(
-    handlers: MutHandler[],
+    handlers: {
+        orochi: MutHandler[];
+        panda: MutHandler[];
+        global: MutHandler[];
+    },
     target: HTMLDivElement
 ) {
     Logger.debug('Creating MutationObserver');
     const observer = new MutationObserver(mutations => {
+        const { process, taskIsOpen } = globalStore.getState();
         mutations.forEach(mutation => {
-            if (mutation.target.nodeType === Node.ELEMENT_NODE) {
-                handlers.forEach(handler => {
-                    handler(mutation);
+            if (mutation.target.nodeType !== Node.ELEMENT_NODE) {
+                return;
+            }
+
+            const target = mutation.target as Element;
+
+            handlers.global.forEach(handler => {
+                handler(target);
+            });
+
+            if (!taskIsOpen) {
+                return;
+            }
+
+            if (process === 'Orochi') {
+                handlers.orochi.forEach(handler => {
+                    handler(target);
+                });
+            }
+
+            if (process === 'PANDA') {
+                handlers.panda.forEach(handler => {
+                    handler(target);
                 });
             }
         });
@@ -149,4 +141,44 @@ export function initializeMutationObserver(
     });
 
     Logger.debug('MutationObserver created and observing.');
+}
+
+export function initializeObservers() {
+    /**
+     * This is an async IIFE because it needs to wait for the observer target element to
+     * exist for the extension to work at all. In the future this can probably done within
+     * the React app and there can be much less reliance on the stores, keeping state local
+     * to the components.
+     */
+    (async () => {
+        try {
+            Logger.info('MTC Helper initializing...');
+
+            const observerTarget = await selectGlobalObserverTarget();
+
+            initializeMutationObserver(
+                {
+                    global: globalHandlers,
+                    orochi: orochiHandlers,
+                    panda: pandaHandlers
+                },
+                observerTarget
+            );
+
+            initializeUrlObserver();
+            initializeMonacoObserver();
+
+            Logger.debug('Injecting extension onto page');
+
+            const injectScriptElement = document.createElement('script');
+            injectScriptElement.src = chrome.runtime.getURL(injectScriptDest);
+            (document.head || document.documentElement).appendChild(
+                injectScriptElement
+            );
+
+            Logger.info('MTC Helper initialized.');
+        } catch (e) {
+            Logger.error(`Error initializing MTC Helper: ${(e as Error).message}`);
+        }
+    })();
 }

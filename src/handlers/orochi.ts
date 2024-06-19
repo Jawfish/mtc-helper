@@ -1,153 +1,246 @@
 import Logger from '@src/lib/logging';
-import {
-    selectMetadataSectionElement as selectEditedViewMetadataSectionElement,
-    selectOriginalTabContentElement
-} from '@src/selectors/shared';
-import { useContentStore } from '@src/store/ContentStore';
-import { Process, useMTCStore } from '@src/store/MTCStore';
-import {
-    selectResponseElement,
-    selectPromptElement,
-    selectOrochiOperatorNotesElement,
-    selectOrochiConversationTitle,
-    selectOrochiErrorLabels,
-    selectOrochiTaskWindowMetadataSectionElement
-} from '@src/selectors/orochi';
-import { getTextFromElement } from '@src/lib/helpers';
+import { getTextFromElement } from '@lib/textProcessing';
+import { selectMetadataSectionElement } from '@lib/selectors';
+import { orochiStore } from '@src/store/orochiStore';
 
 import {
     addMtcHelperAttributeToElement,
     elementHasMtcHelperAttribute,
     MutHandler
-} from './shared';
+} from '.';
 
-export const handleOrochiPromptMutation: MutHandler = (mutation: MutationRecord) => {
-    const isOrochi = useMTCStore.getState().process === 'Orochi';
-    const element = selectPromptElement();
-    if (!isOrochi || !element) {
+export const handlePromptMutation: MutHandler = (target: Element) => {
+    const element = target.querySelector(
+        'div.rounded-xl.bg-indigo-100 p.whitespace-pre-wrap'
+    )?.parentElement;
+
+    if (!element) {
         return;
     }
 
     const processedText = getTextFromElement(element);
 
-    useContentStore.getState().setOrochiPrompt(processedText);
+    orochiStore.setState({ prompt: processedText });
 };
 
-export const handleOrochiOriginalResponseMutation: MutHandler = (
-    mutation: MutationRecord
-) => {
-    const isOrochi = useMTCStore.getState().process === 'Orochi';
-    const element = selectOriginalTabContentElement();
-    if (!isOrochi || !element) {
+export const handleResponseMutation: MutHandler = (_target: Element) => {
+    const originalElement = selectOriginalContentElement();
+    const editedElement = selectResponseElement();
+
+    let element, isOriginal;
+
+    if (originalElement) {
+        element = originalElement;
+        isOriginal = true;
+    } else if (editedElement) {
+        element = editedElement;
+        isOriginal = false;
+    } else {
         return;
     }
 
-    const state = useContentStore.getState();
-    const { orochiResponse, orochiCode } = state;
+    const seen = elementHasMtcHelperAttribute(element);
 
-    const responseChanged = orochiResponse.previousOriginal !== orochiResponse.original;
-    const codeChanged = orochiCode.previousOriginal !== orochiCode.original;
+    const content = isOriginal
+        ? element.textContent || null
+        : element.textContent?.slice(1) || null; // Remove first character for edited response
 
-    const elementSeen = elementHasMtcHelperAttribute(element);
+    const code = element.querySelector('pre code')?.textContent || null;
 
-    // The element has already been seen and the content hasn't changed
-    if (elementSeen && !responseChanged && !codeChanged) {
+    const { originalResponse, originalCode, editedResponse, editedCode } =
+        orochiStore.getState();
+
+    const responseChanged = isOriginal
+        ? content !== originalResponse
+        : content !== editedResponse;
+
+    const codeChanged = isOriginal ? code !== originalCode : code !== editedCode;
+
+    if (seen && !responseChanged && !codeChanged) {
         return;
     }
 
-    Logger.debug('Handling change in original response element state.');
+    Logger.debug(
+        `Handling change in ${isOriginal ? 'original' : 'edited'} response element state.`
+    );
 
-    // The element has either not been seen or the content has changed
-    if (!elementSeen) {
+    if (!seen) {
         addMtcHelperAttributeToElement(element);
     }
 
-    const newResponse = element.textContent || undefined;
-    const newCode = element.querySelector('pre code')?.textContent || undefined;
-
-    state.setOrochiResponse({
-        ...orochiResponse,
-        original: newResponse,
-        previousOriginal: orochiResponse.original
-    });
-    state.setOrochiCode({
-        ...orochiCode,
-        original: newCode,
-        previousOriginal: orochiCode.original
-    });
+    orochiStore.setState(
+        isOriginal
+            ? { originalResponse: content, originalCode: code }
+            : { editedResponse: content, editedCode: code }
+    );
 };
 
-// TODO: Currently almost identical to originalContentMutHandler.
-export const handleOrochiEditedResponseMutation: MutHandler = (
-    mutation: MutationRecord
-) => {
-    const isOrochi = useMTCStore.getState().process === 'Orochi';
-    const element = selectResponseElement();
-    if (!isOrochi || !element) {
+export const handleMetadataSection: MutHandler = (_target: Element) => {
+    const { metadataRemoved } = orochiStore.getState();
+    if (metadataRemoved) {
         return;
     }
 
-    // Remove the first character which is the number associated with the response
-    const elemContent = element.textContent?.slice(1) || undefined;
-    const elemCode = element.querySelector('pre code')?.textContent || undefined;
-
-    const state = useContentStore.getState();
-    const { orochiResponse, orochiCode } = state;
-
-    const responseChanged = elemContent !== orochiResponse.edited;
-    const codeChanged = elemCode !== orochiCode.edited;
-
-    // The element has already been seen and the content hasn't changed
-    if (elementHasMtcHelperAttribute(element) && !responseChanged && !codeChanged) {
+    const element = selectMetadataSectionElement();
+    if (!element) {
         return;
     }
 
-    Logger.debug('Handling change in edited response element state.');
-
-    // The element has either not been seen or the content has changed
-    if (!elementHasMtcHelperAttribute(element)) {
-        addMtcHelperAttributeToElement(element);
-    }
-
-    state.setOrochiResponse({
-        ...orochiResponse,
-        edited: elemContent,
-        previousEdited: orochiResponse.edited
-    });
-    state.setOrochiCode({
-        ...orochiCode,
-        edited: elemCode,
-        previousEdited: orochiCode.edited
-    });
-};
-
-export const handleOrochiEditedViewMetadataSectionMutation: MutHandler = (
-    mutation: MutationRecord
-) => {
-    const { process } = useMTCStore.getState();
-    const element = selectEditedViewMetadataSectionElement();
-    if (!(process == Process.Orochi) || !element) {
-        return;
-    }
     element.remove();
+
     Logger.debug('Metadata section removed.');
 };
 
 export const handleOrochiTaskWindowMetadataSectionMutation: MutHandler = (
-    mutation: MutationRecord
+    _target: Element
 ) => {
-    const { process } = useMTCStore.getState();
     const element = selectOrochiTaskWindowMetadataSectionElement();
-    if (!(process == Process.Orochi) || !element) {
+    if (!element) {
         return;
     }
 
-    const state = useContentStore.getState();
     const operatorNotes = getTextFromElement(selectOrochiOperatorNotesElement());
-    const conversationTitle = selectOrochiConversationTitle()?.textContent || undefined;
-    const errorLabels = selectOrochiErrorLabels()?.textContent || undefined;
+    const conversationTitle = selectOrochiConversationTitle()?.textContent || null;
+    const errorLabels = selectOrochiErrorLabels()?.textContent || null;
 
-    state.setOrochiOperatorNotes(operatorNotes);
-    state.setOrochiConversationTitle(conversationTitle);
-    state.setOrochiErrorLabels(errorLabels);
+    orochiStore.setState({ operatorNotes, conversationTitle, errorLabels });
+};
+
+export const handleLanguageMutation: MutHandler = (_target: Element) => {
+    const hasPythonDiv = Array.from(document.querySelectorAll('div')).find(
+        div => div.textContent === 'Programming Language:Python'
+    );
+
+    if (hasPythonDiv) {
+        orochiStore.setState({ language: 'python' });
+
+        return;
+    }
+
+    const responseCodeElement = selectResponseCodeElement();
+    const pythonInClass = responseCodeElement?.classList.contains('language-python');
+
+    if (pythonInClass) {
+        orochiStore.setState({ language: 'python' });
+    }
+};
+
+export const handleScoreMutation: MutHandler = (_target: Element) => {
+    const element = selectScoreElement();
+    if (!element) {
+        return;
+    }
+
+    const content = element.textContent?.split(':')[1].trim();
+    if (!content) {
+        return;
+    }
+
+    const score = parseInt(content, 10);
+    orochiStore.setState({ score });
+};
+
+export const handleReturnTargetMutation: MutHandler = (_target: Element) => {
+    const element = selectFeedbackSectionElement();
+    if (!element) {
+        return;
+    }
+
+    const rework = element.textContent?.includes('Rework (Same Operator)');
+    if (rework === undefined) {
+        return;
+    }
+
+    orochiStore.setState({ rework });
+};
+
+/**
+ * Get the response code element from the QA task.
+ * @returns The response code element.
+ */
+const selectResponseCodeElement = (): Element | null =>
+    document.querySelector('div.rounded-xl.bg-pink-100 pre code');
+
+/**
+ * Get the alignment score element from the page.
+ * @returns The alignment score element.
+ */
+const selectScoreElement = (): HTMLElement | null =>
+    Array.from(document.querySelectorAll('span')).find(
+        span => span.textContent?.trim() === 'Alignment %'
+    )?.parentElement || null;
+
+/**
+ * Select the task's response element.
+ * @returns The task response element.
+ */
+const selectResponseElement = (): HTMLDivElement | null => {
+    const taskElements = Array.from(document.querySelectorAll('div.rounded-xl'));
+
+    if (taskElements.length < 2) {
+        return null;
+    }
+
+    const [, responseElement] = taskElements;
+
+    return responseElement instanceof HTMLDivElement ? responseElement : null;
+};
+
+/**
+ * Select the QA feedback section element (the section that contains the feedback, send case button, submit QA result button, etc.)
+ * @returns The send case button if found, otherwise `undefined`.
+ */
+const selectFeedbackSectionElement = (): HTMLElement | null =>
+    Array.from(document.querySelectorAll('button')).find(
+        button => button.textContent === 'Send case to'
+    )?.parentElement?.parentElement || null;
+
+const selectOrochiTaskWindowMetadataSectionElement = (): HTMLDivElement | null => {
+    const [, outerContainer] =
+        document.querySelector('.react-grid-layout')?.children || [];
+    const [, element] = outerContainer?.children || [];
+
+    return element instanceof HTMLDivElement ? element : null;
+};
+
+const selectOrochiConversationTitle = (): HTMLDivElement | null => {
+    const element =
+        selectOrochiTaskWindowMetadataSectionElement()?.children[0]?.children[1]
+            ?.lastElementChild;
+
+    return element instanceof HTMLDivElement ? element : null;
+};
+
+const selectOrochiErrorLabels = (): HTMLDivElement | null => {
+    const element =
+        selectOrochiTaskWindowMetadataSectionElement()?.children[1]?.children[1]
+            ?.lastElementChild;
+
+    return element instanceof HTMLDivElement ? element : null;
+};
+
+const selectOrochiOperatorNotesElement = (): HTMLDivElement | null => {
+    const element =
+        selectOrochiTaskWindowMetadataSectionElement()?.children[2]?.children[1]
+            ?.lastElementChild;
+
+    return element instanceof HTMLDivElement ? element : null;
+};
+
+/**
+ * Get the tab content for the specified tab.
+ * @returns  The content of the tab.
+ */
+const selectOriginalContentElement = (): HTMLDivElement | null => {
+    const element = document.querySelector("div[data-cy='tab'] > div");
+    if (!element) {
+        return null;
+    }
+
+    // If the content is editable, then it's the edited tab, not the original tab
+    if (element.getAttribute('contenteditable') === 'true') {
+        return null;
+    }
+
+    return element instanceof HTMLDivElement ? element : null;
 };

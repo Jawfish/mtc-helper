@@ -67,51 +67,41 @@ export const selectTaskWindowCloseButton = (): SVGElement | undefined => {
  * task window is.
  * @returns The snooze button element.
  */
-export const selectSnoozeButtonElement = (): HTMLButtonElement | undefined => {
+const selectSnoozeButtonElement = (): HTMLButtonElement | undefined => {
     const button = document.querySelector("button[title='Snooze']");
 
     return button instanceof HTMLButtonElement ? button : undefined;
 };
 
-export const selectTaskWindowHeaderElement = (): HTMLDivElement | undefined => {
+const selectTaskWindowHeaderElement = (): HTMLDivElement | undefined => {
     const header =
         selectSnoozeButtonElement()?.parentElement?.parentElement?.parentElement;
 
     return header instanceof HTMLDivElement ? header : undefined;
 };
-export const selectTaskWindowHeaderControlsElement = (): HTMLDivElement | undefined => {
+const selectTaskWindowHeaderControlsElement = (): HTMLDivElement | undefined => {
     const controls = selectTaskWindowHeaderElement()?.children[1];
 
     return controls instanceof HTMLDivElement ? controls : undefined;
 };
 
 /**
- * Get the edited content's tab element.
- * @returns  The tab for the edited task content.
+ * Select the main task submission button element from a QA task.
+ * @returns The task submit button element if found, otherwise `undefined`.
  */
-export const selectEditedTabElement = (): HTMLElement | undefined =>
-    document.getElementById('1') || undefined;
-/**
- * Get the original content's tab element.
- * @returns The tab for the original task content.
- */
-export const selectOriginalTabElement = (): HTMLElement | undefined =>
-    document.getElementById('2') || undefined;
-/**
- * Get the tab content for the specified tab.
- * @returns  The content of the tab.
- */
-export function selectOriginalTabContentElement(): HTMLDivElement | undefined {
-    const element = document.querySelector("div[data-cy='tab'] > div");
 
-    if (!element) {
-        return undefined;
-    }
+export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
+    const element = Array.from(document.querySelectorAll('span')).find(span =>
+        span.textContent?.trim()?.includes('Submit QA Task')
+    )?.parentElement;
 
-    // If the content is editable, then it's the edited tab, not the original tab
-    if (element.getAttribute('contenteditable') === 'true') {
-        return undefined;
-    }
+    return element instanceof HTMLButtonElement ? element : undefined;
+};
 
-    return element instanceof HTMLDivElement ? element : undefined;
-}
+export const selectOperatorNameElement = (): HTMLParagraphElement | null => {
+    const element = document.querySelector(
+        '.MuiTypography-root.MuiTypography-body2.MuiTypography-noWrap'
+    );
+
+    return element instanceof HTMLParagraphElement ? element : null;
+};

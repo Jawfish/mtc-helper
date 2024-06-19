@@ -1,23 +1,21 @@
 {
-  "env": {
-    "__DEV__": "true",
-    "NODE_ENV": "development"
-  },
-  "exec": "rimraf dist && vite build",
-  "ext": "tsx,css,html,ts,json",
-  "ignore": [
-    "src/**/*.spec.ts"
-  ],
-  "watch": [
-    ".eslintrc.cjs",
-    "manifest.dev.json",
-    "manifest.json",
-    "nodemon.json",
-    "src",
-    "tailwind.config.cjs",
-    "tsconfig.json",
-    "utils",
-    "vite.config.ts",
-    "inject/inject.ts"
-  ]
+    "env": {
+        "__DEV__": "true",
+        "NODE_ENV": "development"
+    },
+    "exec": "rimraf dist && vite build",
+    "ext": "tsx,css,html,ts,json",
+    "ignore": ["src/**/*.spec.ts"],
+    "watch": [
+        ".eslintrc.cjs",
+        "manifest.dev.json",
+        "manifest.json",
+        "nodemon.json",
+        "src",
+        "tailwind.config.cjs",
+        "tsconfig.json",
+        "utils",
+        "vite.config.ts",
+        "inject/inject.ts"
+    ]
 }

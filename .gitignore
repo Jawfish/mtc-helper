@@ -394,3 +394,7 @@ $RECYCLE.BIN/
 
 #generated manifest
 public/manifest.json
+.aider*
+
+
+*storybook.log

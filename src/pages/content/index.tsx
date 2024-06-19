@@ -1,39 +1,14 @@
 import './style.css';
 import { createRoot } from 'react-dom/client';
-import Logger from '@src/lib/logging';
 import Watermark from '@src/components/Watermark';
-import Toolbar from '@src/components/Toolbar';
-import {
-    initializeMonacoObserver,
-    initializeMutationObserver,
-    initializeUrlObserver
-} from '@src/lib/init';
-import { selectGlobalObserverTarget, selectTaskIdElement } from '@src/selectors/shared';
-import { useMTCStore } from '@src/store/MTCStore';
-import { injectScriptDest } from '@src/types/injectTypes';
-import { useState } from 'react';
 import Toasts from '@src/components/Toasts';
 import { Tooltip } from 'react-tooltip';
-import { ToastProvider } from '@src/contexts/ToastContext';
-import {
-    handleAnyCloseButtonMutation,
-    handleAnySubmitButtonMutation,
-    handleAnyTaskWindowMutation
-} from '@handlers/shared';
 import DiffViewer from '@src/components/DiffViewer';
-import {
-    handleOrochiEditedResponseMutation,
-    handleOrochiEditedViewMetadataSectionMutation,
-    handleOrochiOriginalResponseMutation,
-    handleOrochiPromptMutation,
-    handleOrochiTaskWindowMetadataSectionMutation
-} from '@src/handlers/orochi';
-import {
-    handlePandaEditedResponseMutation,
-    handlePandaEditResponseButtonMutation,
-    handlePandaOriginalResponseMutation,
-    handlePandaSelectedResponseSaveButtonMutation
-} from '@src/handlers/panda';
+import { useDiffView } from '@hooks/useDiffView';
+import { initializeObservers } from '@lib/init';
+import { ToastProvider } from '@src/contexts/ToastContext';
+import Toolbar from '@components/Toolbar';
+import { useGlobalStore } from '@src/store/globalStore';
 
 const div = document.createElement('div');
 div.id = 'mtc-helper-root';
@@ -43,10 +18,9 @@ const rootContainer = document.querySelector('#mtc-helper-root');
 if (!rootContainer) throw new Error("Can't find Content root element");
 const root = createRoot(rootContainer);
 
-// TODO: refactor
 const App = () => {
-    const [diffViewOpen, setDiffViewOpen] = useState(false);
-    const { taskOpen } = useMTCStore();
+    const { diffViewOpen, toggleDiffView } = useDiffView();
+    const { taskIsOpen: taskOpen, process } = useGlobalStore();
 
     if (!taskOpen) return <Watermark version='1.0.0' />;
 
@@ -64,63 +38,19 @@ const App = () => {
             />
             <Toasts />
             <Toolbar
-                diffViewOpen={diffViewOpen}
-                setDiffViewOpen={setDiffViewOpen}
-                taskIdElementSelector={selectTaskIdElement}
+                toggleDiffView={toggleDiffView}
+                process={process}
             />
-            {/* {process == Process.Orochi && <OrochiMetadata />} */}
-            {diffViewOpen && <DiffViewer setDiffViewOpen={setDiffViewOpen} />}
+            {diffViewOpen && <DiffViewer toggleDiffView={toggleDiffView} />}
             <Watermark version='1.0.0' />
         </>
     );
 };
 
-/**
- * This is an async IIFE because it needs to wait for the observer target element to
- * exist for the extension to work at all. In the future this can probably done within
- * the React app and there can be much less reliance on the stores, keeping state local
- * to the components.
- */
-(async () => {
-    try {
-        Logger.info('MTC Helper initializing...');
+root.render(
+    <ToastProvider>
+        <App />
+    </ToastProvider>
+);
 
-        const observerTarget = await selectGlobalObserverTarget();
-
-        initializeMutationObserver(
-            [
-                handleAnyCloseButtonMutation,
-                handleAnySubmitButtonMutation,
-                handleAnyTaskWindowMutation,
-                handleOrochiEditedResponseMutation,
-                handleOrochiEditedViewMetadataSectionMutation,
-                handleOrochiOriginalResponseMutation,
-                handleOrochiPromptMutation,
-                handleOrochiTaskWindowMetadataSectionMutation,
-                handlePandaEditedResponseMutation,
-                handlePandaOriginalResponseMutation,
-                handlePandaSelectedResponseSaveButtonMutation,
-                handlePandaEditResponseButtonMutation
-            ],
-            observerTarget
-        );
-
-        initializeUrlObserver();
-        initializeMonacoObserver();
-
-        Logger.debug('Injecting extension onto page');
-        root.render(
-            <ToastProvider>
-                <App />
-            </ToastProvider>
-        );
-
-        const injectScriptElement = document.createElement('script');
-        injectScriptElement.src = chrome.runtime.getURL(injectScriptDest);
-        (document.head || document.documentElement).appendChild(injectScriptElement);
-
-        Logger.info('MTC Helper initialized.');
-    } catch (e) {
-        Logger.error(`Error initializing MTC Helper: ${(e as Error).message}`);
-    }
-})();
+initializeObservers();

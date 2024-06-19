@@ -3,6 +3,7 @@
         "ms-vscode.vscode-typescript-next",
         "dbaeumer.vscode-eslint",
         "bradlc.vscode-tailwindcss",
-        "rvest.vs-code-prettier-eslint"
+        "esbenp.prettier-vscode",
+        "vitest.explorer"
     ]
 }

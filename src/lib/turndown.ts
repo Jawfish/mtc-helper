@@ -10,7 +10,18 @@ class TurndownSingleton {
                 bulletListMarker: '-',
                 codeBlockStyle: 'fenced',
                 emDelimiter: '_',
-                strongDelimiter: '**'
+                strongDelimiter: '**',
+                br: ''
+            });
+
+            TurndownSingleton.instance.addRule('heading', {
+                filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+                replacement(content, node, _) {
+                    const level = Number(node.nodeName.charAt(1));
+                    const prefix = '#'.repeat(level);
+
+                    return `\n${prefix} ${content}\n\n`;
+                }
             });
         }
     }
