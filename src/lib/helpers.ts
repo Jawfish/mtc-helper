@@ -262,7 +262,7 @@ export function truncateString(str: string | undefined, num: number = 50): strin
     return `${str.slice(0, num)}...`;
 }
 
-export function getTextFromElement(element: HTMLElement | null): string {
+export function getTextFromElement(element: HTMLElement | undefined): string {
     let text = '';
     if (element) {
         element.childNodes.forEach((child: Node) => {

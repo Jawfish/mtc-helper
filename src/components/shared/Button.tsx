@@ -29,7 +29,7 @@ export default function Button({
             data-tooltip-content={tooltip}
             variant={variant}
             onClick={onClick}
-            className={clsx('border-0 cursor-pointer', {
+            className={clsx('border-0 cursor-pointer focus:!ring-mtc-primary', {
                 'bg-mtc-primary hover:bg-mtc-primary-strong': variant === 'default'
             })}>
             {children}

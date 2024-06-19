@@ -24,9 +24,10 @@ import DiffViewer from '@src/components/DiffViewer';
 import { TurndownProvider } from '@src/contexts/TurndownContext';
 import {
     handleOrochiEditedResponseMutation,
-    handleOrochiMetadataMutation,
+    handleOrochiEditedViewMetadataSectionMutation,
     handleOrochiOriginalResponseMutation,
-    handleOrochiPromptMutation
+    handleOrochiPromptMutation,
+    handleOrochiTaskWindowMetadataSectionMutation
 } from '@src/handlers/orochi';
 import { handlePandaResponseMutation } from '@src/handlers/panda';
 
@@ -63,6 +64,7 @@ const App = () => {
                 setDiffViewOpen={setDiffViewOpen}
                 taskIdElementSelector={selectTaskIdElement}
             />
+            {/* {process == Process.Orochi && <OrochiMetadata />} */}
             {diffViewOpen && (
                 <TurndownProvider>
                     <DiffViewer setDiffViewOpen={setDiffViewOpen} />
@@ -91,9 +93,10 @@ const App = () => {
                 handleAnySubmitButtonMutation,
                 handleAnyTaskWindowMutation,
                 handleOrochiEditedResponseMutation,
-                handleOrochiMetadataMutation,
+                handleOrochiEditedViewMetadataSectionMutation,
                 handleOrochiOriginalResponseMutation,
                 handleOrochiPromptMutation,
+                handleOrochiTaskWindowMetadataSectionMutation,
                 handlePandaResponseMutation
             ],
             observerTarget

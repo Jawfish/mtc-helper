@@ -1,11 +1,18 @@
 import Logger from '@src/lib/logging';
 import {
-    selectMetadataSectionElement,
+    selectMetadataSectionElement as selectEditedViewMetadataSectionElement,
     selectOriginalTabContentElement
 } from '@src/selectors/shared';
 import { useContentStore } from '@src/store/ContentStore';
 import { Process, useMTCStore } from '@src/store/MTCStore';
-import { selectResponseElement, selectPromptElement } from '@src/selectors/orochi';
+import {
+    selectResponseElement,
+    selectPromptElement,
+    selectOrochiOperatorNotesElement,
+    selectOrochiConversationTitle,
+    selectOrochiErrorLabels,
+    selectOrochiTaskWindowMetadataSectionElement
+} from '@src/selectors/orochi';
 import { getTextFromElement } from '@src/lib/helpers';
 
 import {
@@ -114,12 +121,33 @@ export const handleOrochiEditedResponseMutation: MutHandler = (
     });
 };
 
-export const handleOrochiMetadataMutation: MutHandler = (mutation: MutationRecord) => {
+export const handleOrochiEditedViewMetadataSectionMutation: MutHandler = (
+    mutation: MutationRecord
+) => {
     const { process } = useMTCStore.getState();
-    const element = selectMetadataSectionElement();
+    const element = selectEditedViewMetadataSectionElement();
     if (!(process == Process.Orochi) || !element) {
         return;
     }
     element.remove();
     Logger.debug('Metadata section removed.');
+};
+
+export const handleOrochiTaskWindowMetadataSectionMutation: MutHandler = (
+    mutation: MutationRecord
+) => {
+    const { process } = useMTCStore.getState();
+    const element = selectOrochiTaskWindowMetadataSectionElement();
+    if (!(process == Process.Orochi) || !element) {
+        return;
+    }
+
+    const state = useContentStore.getState();
+    const operatorNotes = getTextFromElement(selectOrochiOperatorNotesElement());
+    const conversationTitle = selectOrochiConversationTitle()?.textContent || undefined;
+    const errorLabels = selectOrochiErrorLabels()?.textContent || undefined;
+
+    state.setOrochiOperatorNotes(operatorNotes);
+    state.setOrochiConversationTitle(conversationTitle);
+    state.setOrochiErrorLabels(errorLabels);
 };

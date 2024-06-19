@@ -23,14 +23,6 @@ export const selectPromptElement = (): HTMLDivElement | undefined => {
     return element instanceof HTMLDivElement ? element : undefined;
 };
 
-export const selectOperatorNotesElement = (): HTMLDivElement | undefined => {
-    const element = Array.from(document.querySelectorAll('div')).find(
-        div => div.textContent === 'Conversations > Operator Notes'
-    )?.nextElementSibling;
-
-    return element instanceof HTMLDivElement ? element : undefined;
-};
-
 /**
  * Select the task's response element.
  * @returns The task response element.
@@ -81,4 +73,38 @@ export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
     )?.parentElement;
 
     return element instanceof HTMLButtonElement ? element : undefined;
+};
+
+export const selectOrochiTaskWindowMetadataSectionElement = ():
+    | HTMLDivElement
+    | undefined => {
+    const [, outerContainer] =
+        document.querySelector('.react-grid-layout')?.children || [];
+    const [, element] = outerContainer?.children || [];
+
+    return element instanceof HTMLDivElement ? element : undefined;
+};
+
+export const selectOrochiConversationTitle = (): HTMLDivElement | undefined => {
+    const element =
+        selectOrochiTaskWindowMetadataSectionElement()?.children[0]?.children[1]
+            ?.lastElementChild;
+
+    return element instanceof HTMLDivElement ? element : undefined;
+};
+
+export const selectOrochiErrorLabels = (): HTMLDivElement | undefined => {
+    const element =
+        selectOrochiTaskWindowMetadataSectionElement()?.children[1]?.children[1]
+            ?.lastElementChild;
+
+    return element instanceof HTMLDivElement ? element : undefined;
+};
+
+export const selectOrochiOperatorNotesElement = (): HTMLDivElement | undefined => {
+    const element =
+        selectOrochiTaskWindowMetadataSectionElement()?.children[2]?.children[1]
+            ?.lastElementChild;
+
+    return element instanceof HTMLDivElement ? element : undefined;
 };

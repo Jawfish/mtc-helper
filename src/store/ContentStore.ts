@@ -20,6 +20,9 @@ export type ContentStoreState = {
     taskId: string | undefined;
     orochiTests: string | undefined;
     orochiPrompt: string | undefined;
+    orochiOperatorNotes: string | undefined;
+    orochiErrorLabels: string | undefined;
+    orochiConversationTitle: string | undefined;
     orochiResponse: ResponseContent;
     orochiCode: ResponseContent;
     pandaResponse: ResponseContent;
@@ -29,6 +32,9 @@ type ContentStoreActions = {
     setTaskId: (id: string | undefined) => void;
     setOrochiTests: (content: string | undefined) => void;
     setOrochiPrompt: (content: string | undefined) => void;
+    setOrochiOperatorNotes: (content: string | undefined) => void;
+    setOrochiErrorLabels: (content: string | undefined) => void;
+    setOrochiConversationTitle: (content: string | undefined) => void;
     setOrochiResponse: (content: ResponseContent) => void;
     setOrochiCode: (content: ResponseContent) => void;
     setPandaResponse: (content: ResponseContent) => void;
@@ -39,6 +45,9 @@ const initialState: ContentStoreState = {
     taskId: undefined,
     orochiTests: undefined,
     orochiPrompt: undefined,
+    orochiOperatorNotes: undefined,
+    orochiErrorLabels: undefined,
+    orochiConversationTitle: undefined,
     orochiResponse: {},
     orochiCode: {},
     pandaResponse: {}
@@ -108,6 +117,39 @@ export const useContentStore = create<ContentStoreState & ContentStoreActions>(
             );
 
             set({ orochiPrompt: content });
+        },
+        setOrochiOperatorNotes: content => {
+            if (content == get().orochiOperatorNotes) {
+                return;
+            }
+
+            Logger.debug(
+                `Setting orochiOperatorNotes to "${truncateString(content)}" in store.`
+            );
+
+            set({ orochiOperatorNotes: content });
+        },
+        setOrochiErrorLabels: content => {
+            if (content == get().orochiErrorLabels) {
+                return;
+            }
+
+            Logger.debug(
+                `Setting orochiErrorLabels to "${truncateString(content)}" in store.`
+            );
+
+            set({ orochiErrorLabels: content });
+        },
+        setOrochiConversationTitle: content => {
+            if (content == get().orochiConversationTitle) {
+                return;
+            }
+
+            Logger.debug(
+                `Setting orochiConversationTitle to "${truncateString(content)}" in store.`
+            );
+
+            set({ orochiConversationTitle: content });
         },
         reset: () => {
             if (JSON.stringify(get()) == JSON.stringify(initialState)) {

@@ -2,7 +2,6 @@ import { copyToClipboard, determineWarnings, isPython } from '@src/lib/helpers';
 import { ResponseContent, useContentStore } from '@src/store/ContentStore';
 import Logger from '@src/lib/logging';
 import { Process, useMTCStore } from '@src/store/MTCStore';
-import { selectOperatorNotesElement } from '@src/selectors/orochi';
 import { IToastContext, useToast } from '@src/contexts/ToastContext';
 import {
     DropdownMenu,
@@ -37,178 +36,192 @@ export default function Toolbar({
 }: Props) {
     const toastContext = useToast();
     const process = useMTCStore(state => state.process);
-    const { orochiCode, orochiPrompt, orochiResponse, pandaResponse, orochiTests } =
+    const { orochiCode, orochiPrompt, orochiOperatorNotes, orochiTests } =
         useContentStore();
 
     return (
-        <div className='fixed top-0 left-1/2 -translate-x-1/2 flex gap-3 bg-mtc-faded/90 rounded-b-lg shadow-md p-3 flex-row justify-center items-center w-auto z-[800]'>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <ShadButton
-                        className='bg-white border-mtc-primary text-mtc-primary border rounded-md shadow-none focus:ring-mtc-primary cursor-pointer flex gap-3'
-                        variant={'outline'}>
-                        <span>Copy Content</span>
-                        <ChevronDown size={16} className='p-0' />
-                    </ShadButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className='w-36 z-[1300] text-mtc-primary '>
-                    {isPython() && (
-                        <>
-                            <DropdownMenuItem
-                                className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
-                                onClick={() =>
-                                    handleCopySelectChange('All', {
-                                        orochiPrompt,
-                                        orochiCode,
-                                        orochiTests,
-                                        toastContext,
-                                        taskIdElementSelector
-                                    })
-                                }>
-                                All
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
-                                onClick={() =>
-                                    handleCopySelectChange('Prompt', {
-                                        orochiPrompt,
-                                        orochiCode,
-                                        orochiTests,
-                                        toastContext,
-                                        taskIdElementSelector
-                                    })
-                                }>
-                                Prompt
-                            </DropdownMenuItem>
-                        </>
-                    )}
-                    {process === Process.Orochi && (
-                        <>
-                            <DropdownMenuItem
-                                className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
-                                onClick={() =>
-                                    handleCopySelectChange('Edited Code', {
-                                        orochiPrompt,
-                                        orochiCode,
-                                        orochiTests,
-                                        toastContext,
-                                        taskIdElementSelector
-                                    })
-                                }>
-                                Edited Code
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
-                                onClick={() =>
-                                    handleCopySelectChange('Original Code', {
-                                        orochiPrompt,
-                                        orochiCode,
-                                        orochiTests,
-                                        toastContext,
-                                        taskIdElementSelector
-                                    })
-                                }>
-                                Original Code
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
-                                onClick={() =>
-                                    handleCopySelectChange('Tests', {
-                                        orochiPrompt,
-                                        orochiCode,
-                                        orochiTests,
-                                        toastContext,
-                                        taskIdElementSelector
-                                    })
-                                }>
-                                Tests
-                            </DropdownMenuItem>
-                        </>
-                    )}
-                    <DropdownMenuItem
-                        className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
-                        onClick={() =>
-                            handleCopySelectChange('Task ID', {
-                                orochiPrompt,
-                                orochiCode,
-                                orochiTests,
-                                toastContext,
-                                taskIdElementSelector
-                            })
-                        }>
-                        Task ID
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
-                        onClick={() =>
-                            handleCopySelectChange('Email', {
-                                orochiPrompt,
-                                orochiCode,
-                                orochiTests,
-                                toastContext,
-                                taskIdElementSelector
-                            })
-                        }>
-                        Email
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-            {process === Process.Orochi && (
+        <div className='flex flex-col fixed top-0 left-1/2 -translate-x-1/2 gap-3 bg-mtc-faded/90 rounded-b-lg shadow-md p-3 w-auto z-[800]'>
+            <div className='flex gap-3 flex-row justify-center items-center '>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <ShadButton
+                            className='bg-white border-mtc-primary text-mtc-primary border rounded-md shadow-none focus:!ring-mtc-primary cursor-pointer flex gap-3'
+                            variant={'outline'}>
+                            <span>Copy Content</span>
+                            <ChevronDown size={16} className='p-0' strokeWidth={2} />
+                        </ShadButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className='w-36 z-[1300] text-mtc-primary '>
+                        {isPython() && (
+                            <>
+                                <DropdownMenuItem
+                                    className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
+                                    onClick={() =>
+                                        handleCopySelectChange('All', {
+                                            orochiPrompt,
+                                            orochiCode,
+                                            orochiTests,
+                                            orochiReason: orochiOperatorNotes,
+                                            toastContext,
+                                            taskIdElementSelector
+                                        })
+                                    }>
+                                    All
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
+                                    onClick={() =>
+                                        handleCopySelectChange('Prompt', {
+                                            orochiPrompt,
+                                            orochiCode,
+                                            orochiTests,
+                                            orochiReason: orochiOperatorNotes,
+                                            toastContext,
+                                            taskIdElementSelector
+                                        })
+                                    }>
+                                    Prompt
+                                </DropdownMenuItem>
+                            </>
+                        )}
+                        {process === Process.Orochi && (
+                            <>
+                                <DropdownMenuItem
+                                    className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
+                                    onClick={() =>
+                                        handleCopySelectChange('Edited Code', {
+                                            orochiPrompt,
+                                            orochiCode,
+                                            orochiTests,
+                                            orochiReason: orochiOperatorNotes,
+                                            toastContext,
+                                            taskIdElementSelector
+                                        })
+                                    }>
+                                    Edited Code
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
+                                    onClick={() =>
+                                        handleCopySelectChange('Original Code', {
+                                            orochiPrompt,
+                                            orochiCode,
+                                            orochiTests,
+                                            orochiReason: orochiOperatorNotes,
+                                            toastContext,
+                                            taskIdElementSelector
+                                        })
+                                    }>
+                                    Original Code
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
+                                    onClick={() =>
+                                        handleCopySelectChange('Tests', {
+                                            orochiPrompt,
+                                            orochiCode,
+                                            orochiTests,
+                                            orochiReason: orochiOperatorNotes,
+                                            toastContext,
+                                            taskIdElementSelector
+                                        })
+                                    }>
+                                    Tests
+                                </DropdownMenuItem>
+                            </>
+                        )}
+                        <DropdownMenuItem
+                            className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
+                            onClick={() =>
+                                handleCopySelectChange('Task ID', {
+                                    orochiPrompt,
+                                    orochiCode,
+                                    orochiTests,
+                                    orochiReason: orochiOperatorNotes,
+                                    toastContext,
+                                    taskIdElementSelector
+                                })
+                            }>
+                            Task ID
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
+                            onClick={() =>
+                                handleCopySelectChange('Email', {
+                                    orochiPrompt,
+                                    orochiCode,
+                                    orochiTests,
+                                    orochiReason: orochiOperatorNotes,
+                                    toastContext,
+                                    taskIdElementSelector
+                                })
+                            }>
+                            Email
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                {process === Process.Orochi && (
+                    <Button
+                        tooltip='Check the edited response for common issues'
+                        onClick={() => {
+                            const messages = handleCheckResponseClicked(
+                                orochiCode.edited
+                            ).join('\n');
+                            if (messages == 'No issues detected.') {
+                                sendSuccessMessage(messages, toastContext);
+                            } else {
+                                // TODO: show nicer non-native alert
+                                alert(messages);
+                            }
+                        }}>
+                        Check Response
+                    </Button>
+                )}
                 <Button
-                    tooltip='Check the edited response for common issues'
-                    onClick={() => {
-                        const messages = handleCheckResponseClicked(
-                            orochiCode.edited
-                        ).join('\n');
-                        if (messages == 'No issues detected.') {
-                            sendSuccessMessage(messages, toastContext);
-                        } else {
-                            // TODO: show nicer non-native alert
-                            alert(messages);
-                        }
-                    }}>
-                    Check Response
+                    tooltip='View the differences between the original and edited responses'
+                    onClick={() =>
+                        handleOpenDiffViewClicked(
+                            process,
+                            setDiffViewOpen,
+                            diffViewOpen,
+                            toastContext
+                        )
+                    }>
+                    View Diff
                 </Button>
-            )}
-            <Button
-                tooltip='View the differences between the original and edited responses'
-                onClick={() =>
-                    handleOpenDiffViewClicked(
-                        process,
-                        setDiffViewOpen,
-                        diffViewOpen,
-                        toastContext
-                    )
-                }>
-                View Diff
-            </Button>
-            {/* TODO: show metadata, click to copy */}
+                {/* TODO: show metadata, click to copy */}
+            </div>
         </div>
     );
 }
 
+// TODO: this is very stupid because everything that calls it has to pass all state
+// even if it's irrelevant to the copy operation
 const handleCopySelectChange = (
     value: string,
     {
         orochiPrompt,
         orochiCode,
         orochiTests,
+        orochiReason,
         toastContext,
         taskIdElementSelector
     }: {
         orochiPrompt: string | undefined;
         orochiCode: ResponseContent;
         orochiTests: string | undefined;
+        orochiReason: string | undefined;
         toastContext: IToastContext | undefined;
         taskIdElementSelector: () => HTMLDivElement | undefined;
     }
 ) => {
     switch (value) {
         case 'All':
-            handleCopyTaskClicked(
+            copyAll(
                 orochiPrompt,
                 orochiCode.edited,
                 orochiTests,
+                orochiReason,
                 toastContext
             );
             break;
@@ -325,10 +338,11 @@ const copyContent = (
     }
 };
 
-const handleCopyTaskClicked = (
+const copyAll = (
     prompt: string | undefined,
     code: string | undefined,
     tests: string | undefined,
+    reason: string | undefined,
     toastContext: IToastContext | undefined
 ) => {
     Logger.debug('Copy task button clicked');
@@ -353,14 +367,14 @@ const handleCopyTaskClicked = (
         errors.push(err);
     }
 
-    // TODO: set up a MutHandler to set this in the content store
-    let operatorReason = getTextFromElement(selectOperatorNotesElement());
-    if (!operatorReason?.trim()) {
-        operatorReason = 'No reason provided or reason could not be found';
+    if (!reason) {
+        const err = 'Operator reason could not be found';
+        reason = err;
+        errors.push(err);
     }
 
     try {
-        copyTaskToClipboard(prompt, code, tests, operatorReason);
+        copyTaskToClipboard(prompt, code, tests, reason);
 
         if (errors.length === 4) {
             const message = errors.join(', ');
