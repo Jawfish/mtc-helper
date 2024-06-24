@@ -98,10 +98,8 @@ export const isValidUUID = (uuid: string): boolean => {
 
 export const getWordCount = (text: string): number => {
     const WORD_PATTERN = /(?<!^|\n)\d+\.|\S+/gu;
-    const IGNORE_PATTERN = /(?<!^|\n)\d+\.|^[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]$/gu;
-
+    const IGNORE_PATTERN = /^[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]+$/;
     const matches = text.match(WORD_PATTERN);
-
     if (!matches) return 0;
 
     return matches

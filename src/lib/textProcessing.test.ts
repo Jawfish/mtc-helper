@@ -313,6 +313,19 @@ describe('Counting words', () => {
     it('counts colon-separated words as separate words', () => {
         expect(getWordCount('one:two three:four:five')).toBe(5);
     });
+
+    it('handles standalone special characters', () => {
+        const sentence =
+            '! @ # $ % ^ & * ( ) \\ | / \' ; , . [ ] { } | < > ? : " !! @@ ## $$ %^&% ($%*#%()* (@#*%() *@<:{ >:?|} <:)) ***';
+        expect(getWordCount(sentence)).toBe(0);
+    });
+
+    // This differs from Google Docs because it counts $20,000 as two words. So, this is
+    // actually more accurate
+    it('handles monetary values', () => {
+        const sentence = `An advance of $20,000 upon signing.`;
+        expect(getWordCount(sentence)).toBe(6);
+    });
 });
 
 describe('Validating a UUID', () => {
