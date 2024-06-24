@@ -1,12 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 
-import {
-    v,
-    vv,
-    good,
-    retry,
-    withTimeout
-} from './errorValues';
+import { v, vv, good, retry, withTimeout } from './errorValues';
 
 describe('errorValues', () => {
     describe('v', () => {

@@ -2,7 +2,7 @@ import Logger from '@src/lib/logging';
 import markdownToTxt from 'markdown-to-txt';
 import { selectTaskWindowElement } from '@lib/selectors';
 import { pandaStore } from '@src/store/pandaStore';
-import { doubleSpace, wordCount as getWordCount } from '@lib/textProcessing';
+import { getWordCount, doubleSpace } from '@lib/textProcessing';
 import Turndown from '@lib/turndown';
 
 import {

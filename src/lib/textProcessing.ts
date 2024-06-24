@@ -96,8 +96,19 @@ export const isValidUUID = (uuid: string): boolean => {
     return uuidRegex.test(uuid);
 };
 
-export const wordCount = (text: string): number =>
-    text.trim().split(/\s+/).filter(Boolean).length;
+export const getWordCount = (text: string): number => {
+    const WORD_PATTERN = /(?<!^|\n)\d+\.|\S+/gu;
+    const IGNORE_PATTERN = /(?<!^|\n)\d+\.|^[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]$/gu;
+
+    const matches = text.match(WORD_PATTERN);
+
+    if (!matches) return 0;
+
+    return matches
+        .filter(match => !/^\d+\.$/.test(match))
+        .flatMap(word => word.split(/[/:]/))
+        .filter(word => word.length > 0 && !IGNORE_PATTERN.test(word)).length;
+};
 
 export const doubleSpace = (text: string): string =>
     text

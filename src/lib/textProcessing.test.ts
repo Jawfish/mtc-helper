@@ -7,7 +7,7 @@ import {
     codeContainsMarkdownFence,
     truncateString,
     getTextFromElement,
-    wordCount,
+    getWordCount,
     isValidUUID
 } from './textProcessing';
 
@@ -184,27 +184,134 @@ describe('Getting the text from an HTML element', () => {
 
 describe('Counting words', () => {
     it('counts the correct number of space-separated words', () => {
-        expect(wordCount('one two three')).toBe(3);
+        expect(getWordCount('one two three')).toBe(3);
     });
 
     it('handles leading and trailing whitespace', () => {
-        expect(wordCount('  start   end  ')).toBe(2);
+        expect(getWordCount('  start   end  ')).toBe(2);
     });
 
     it('handles multiple spaces between words', () => {
-        expect(wordCount('word1    word2     word3')).toBe(3);
+        expect(getWordCount('word1    word2     word3')).toBe(3);
     });
 
     it('returns 0 for an empty string', () => {
-        expect(wordCount('')).toBe(0);
+        expect(getWordCount('')).toBe(0);
     });
 
     it('returns 0 for a string with only whitespace', () => {
-        expect(wordCount('   \t   \n   ')).toBe(0);
+        expect(getWordCount('   \t   \n   ')).toBe(0);
     });
 
     it('handles a mix of spaces and tabs', () => {
-        expect(wordCount('word1\t\tword2 \t word3')).toBe(3);
+        expect(getWordCount('word1\t\tword2 \t word3')).toBe(3);
+    });
+
+    it('handles numbers', () => {
+        expect(getWordCount('1 word')).toBe(2);
+    });
+
+    it('handles hyphens', () => {
+        expect(getWordCount('word - word word-word word- -word')).toBe(5);
+    });
+
+    it('handles apostrophes', () => {
+        expect(getWordCount("don't can't won't")).toBe(3);
+    });
+
+    it('handles punctuation', () => {
+        expect(getWordCount('word! word? word. word,')).toBe(4);
+    });
+
+    it('handles newlines', () => {
+        expect(getWordCount('word\nword\nword')).toBe(3);
+    });
+
+    it('counts words with accented characters', () => {
+        expect(getWordCount('Café au lait')).toBe(3);
+    });
+
+    it('counts words with umlauts', () => {
+        expect(getWordCount('Über Äpfel und Öl')).toBe(4);
+    });
+
+    it('counts Cyrillic words', () => {
+        expect(getWordCount('Россия и Україна')).toBe(3);
+    });
+
+    it('counts Japanese words', () => {
+        expect(getWordCount('こんにちは 世界')).toBe(2);
+    });
+
+    it('handles mixed words and numbers', () => {
+        expect(getWordCount("It's 20 degrees outside")).toBe(4);
+    });
+
+    it('handles contractions and possessives', () => {
+        expect(getWordCount("It's John's book")).toBe(3);
+    });
+
+    it('handles numbered list', () => {
+        expect(getWordCount('1. Lake One\n2. Lake Two\n3. Lake Three')).toBe(6);
+    });
+
+    it('handles markdown', () => {
+        expect(getWordCount('*one* _two_ **three** __four__')).toBe(4);
+    });
+
+    it('handles example sentence in the same way Obsidian and Google Docs do', () => {
+        const sentence =
+            '“Example Product Direct: Product Direct courses offer individualized study focused on state standards, while supported by certified teachers.”';
+        expect(getWordCount(sentence)).toBe(18);
+    });
+
+    it('handles example sentence that contains "K-8" and "9" in the same way Obsidian and Google Docs do', () => {
+        const sentence =
+            'Students in grades K-8 complete 9 units and the correlating checkpoint worksheets each semester, submitting one worksheet every two weeks.';
+        expect(getWordCount(sentence)).toBe(20);
+    });
+
+    it('handles standalone special characters', () => {
+        const one = 'one " two \' three" / four';
+        expect(getWordCount(one)).toBe(4);
+
+        const two = 'one ! two . three ? four';
+        expect(getWordCount(two)).toBe(4);
+    });
+
+    it('handles alphanumeric combinations', () => {
+        expect(getWordCount('COVID-19 A1 B-52 3D-printed')).toBe(4);
+    });
+
+    it('counts slash-separated words as separate words', () => {
+        expect(getWordCount('one/two three/four/five')).toBe(5);
+    });
+
+    it('handles mixed scenarios with slashes', () => {
+        expect(getWordCount('apple/banana 2/3 cup COVID-19/SARS-CoV-2')).toBe(7);
+    });
+
+    it('handles multiple consecutive slashes', () => {
+        expect(getWordCount('one//two///three')).toBe(3);
+    });
+
+    it('handles slashes at the beginning or end of words', () => {
+        expect(getWordCount('/start middle/ /both/')).toBe(3);
+    });
+
+    it('handles complex scenarios with slashes, hyphens, and numbers', () => {
+        expect(
+            getWordCount('1. item-one/sub-item 2. item-two/sub-item/third-part')
+        ).toBe(5);
+    });
+
+    it('handles emojis', () => {
+        const paragraph = 'chicken: 🐤 (chicken) turtle:🐢 (turtle).';
+        expect(getWordCount(paragraph)).toBe(6);
+    });
+
+    it('counts colon-separated words as separate words', () => {
+        expect(getWordCount('one:two three:four:five')).toBe(5);
     });
 });
 

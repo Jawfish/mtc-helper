@@ -7,7 +7,7 @@ type Result<T> = readonly [T | null, Error | null];
  * @returns An Error object.
  */
 const createError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error(String(error), { cause: error });
+    error instanceof Error ? error : new Error(String(error), { cause: error });
 
 /**
  * Wraps a function in a try/catch block and returns a Result.
@@ -15,13 +15,12 @@ const createError = (error: unknown): Error =>
  * @returns A Result containing either the function's return value or an error.
  */
 export const v = <T>(fn: () => T): Result<T> => {
-  try {
-    return [fn(), null] as const;
-  } catch (error) {
-    return [null, createError(error)] as const;
-  }
+    try {
+        return [fn(), null] as const;
+    } catch (error) {
+        return [null, createError(error)] as const;
+    }
 };
-
 
 /**
  * Wraps a promise in a try/catch block and returns a Result.
@@ -29,11 +28,11 @@ export const v = <T>(fn: () => T): Result<T> => {
  * @returns A Promise that resolves to a Result containing either the promise's resolved value or an error.
  */
 export const vv = async <T>(promise: Promise<T>): Promise<Result<T>> => {
-  try {
-    return [await promise, null] as const;
-  } catch (error) {
-    return [null, createError(error)] as const;
-  }
+    try {
+        return [await promise, null] as const;
+    } catch (error) {
+        return [null, createError(error)] as const;
+    }
 };
 
 /**
@@ -51,16 +50,17 @@ export const good = <T>([_, error]: Result<T>): boolean => error === null;
  * @returns A Promise that resolves to a Result containing either the successful operation result or an error.
  */
 export const retry = async <T>(
-  operation: () => Promise<T>,
-  maxRetries = 3,
-  baseDelay = 1000
+    operation: () => Promise<T>,
+    maxRetries = 3,
+    baseDelay = 1000
 ): Promise<Result<T>> => {
-  for (let attempt = 0; attempt < maxRetries - 1; attempt++) {
-    const result = await vv(operation());
-    if (good(result)) return result;
-    await new Promise(resolve => setTimeout(resolve, baseDelay * 2 ** attempt));
-  }
-  return vv(operation());
+    for (let attempt = 0; attempt < maxRetries - 1; attempt++) {
+        const result = await vv(operation());
+        if (good(result)) return result;
+        await new Promise(resolve => setTimeout(resolve, baseDelay * 2 ** attempt));
+    }
+
+    return vv(operation());
 };
 
 /**
@@ -70,11 +70,15 @@ export const retry = async <T>(
  * @returns A Promise that resolves to a Result containing either the value of the original Promise if it completes before the timeout, or a timeout error.
  */
 export const withTimeout = <T>(
-  promise: Promise<T>,
-  timeoutMs: number
+    promise: Promise<T>,
+    timeoutMs: number
 ): Promise<Result<T>> => {
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(`Operation timed out after ${timeoutMs}ms`)), timeoutMs)
-  );
-  return vv(Promise.race([promise, timeoutPromise]));
+    const timeoutPromise = new Promise<never>((_resolve, reject) =>
+        setTimeout(
+            () => reject(new Error(`Operation timed out after ${timeoutMs}ms`)),
+            timeoutMs
+        )
+    );
+
+    return vv(Promise.race([promise, timeoutPromise]));
 };
