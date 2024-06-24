@@ -35,7 +35,7 @@ describe('Toolbar', () => {
 
     beforeEach(() => {
         globalStore.setState({ process: 'Unknown' });
-        orochiStore.setState({ language: 'unknown' });
+        orochiStore.getState().reset();
     });
 
     afterEach(() => {
@@ -71,7 +71,8 @@ describe('Toolbar', () => {
         expect(screen.getByText('View Diff')).toBeInTheDocument();
     });
 
-    it('calls toggleDiffView when View Diff button is clicked', () => {
+    it('calls toggleDiffView when View Diff button is clicked if it is enabled', () => {
+        orochiStore.setState({ originalCode: 'some code' });
         render(
             <Toolbar
                 toggleDiffView={mockToggleDiffView}
@@ -80,6 +81,18 @@ describe('Toolbar', () => {
         );
         fireEvent.click(screen.getByText('View Diff'));
         expect(mockToggleDiffView).toHaveBeenCalledTimes(1);
+    });
+
+    it("doesn't call toggleDiffView when View Diff button is clicked if it is disabled", () => {
+        orochiStore.setState({ originalCode: undefined });
+        render(
+            <Toolbar
+                toggleDiffView={mockToggleDiffView}
+                process='Unknown'
+            />
+        );
+        fireEvent.click(screen.getByText('View Diff'));
+        expect(mockToggleDiffView).not.toHaveBeenCalled();
     });
 
     it('displays Check Response button only for Orochi process', () => {

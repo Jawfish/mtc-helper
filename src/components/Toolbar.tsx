@@ -21,6 +21,7 @@ type Props = {
 
 export default function Toolbar({ toggleDiffView, process }: Props) {
     const { validateResponse } = useValidation();
+    const { originalCode } = useOrochiStore();
 
     return (
         <ToolbarContainer>
@@ -34,7 +35,8 @@ export default function Toolbar({ toggleDiffView, process }: Props) {
             )}
             <Button
                 tooltip='View the differences between the original and edited responses'
-                onClick={toggleDiffView}>
+                onClick={toggleDiffView}
+                disabled={!originalCode}>
                 View Diff
             </Button>
             {/* TODO: show metadata, click to copy */}
@@ -85,7 +87,7 @@ const Dropdown = ({ process }: { process: Process }) => {
 const OrochiDropdownItems = () => {
     const { copyEditedCode, copyOriginalCode, copyTests, copyAllAsPython, copyPrompt } =
         useOrochiActions();
-    const { language } = useOrochiStore();
+    const { language, originalCode } = useOrochiStore();
 
     return (
         <>
@@ -94,7 +96,11 @@ const OrochiDropdownItems = () => {
             )}
             <Item onClick={copyPrompt}>Prompt</Item>
             <Item onClick={copyEditedCode}>Edited Code</Item>
-            <Item onClick={copyOriginalCode}>Original Code</Item>
+            <Item
+                onClick={copyOriginalCode}
+                disabled={!originalCode}>
+                Original Code
+            </Item>
             <Item onClick={copyTests}>Tests</Item>
         </>
     );
@@ -103,12 +109,14 @@ const OrochiDropdownItems = () => {
 type ItemProps = {
     onClick: () => void;
     children: React.ReactNode;
+    disabled?: boolean;
 };
 
-const Item = ({ onClick, children }: ItemProps) => (
+const Item = ({ onClick, children, disabled = false }: ItemProps) => (
     <DropdownMenuItem
         className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
-        onClick={onClick}>
+        onClick={onClick}
+        disabled={disabled}>
         {children}
     </DropdownMenuItem>
 );
