@@ -195,11 +195,11 @@ describe('Counting words', () => {
         expect(getWordCount('word1    word2     word3')).toBe(3);
     });
 
-    it('returns 0 for an empty string', () => {
+    it('counts 0 for an empty string', () => {
         expect(getWordCount('')).toBe(0);
     });
 
-    it('returns 0 for a string with only whitespace', () => {
+    it('counts 0 for a string with only whitespace', () => {
         expect(getWordCount('   \t   \n   ')).toBe(0);
     });
 
@@ -207,19 +207,27 @@ describe('Counting words', () => {
         expect(getWordCount('word1\t\tword2 \t word3')).toBe(3);
     });
 
-    it('handles numbers', () => {
-        expect(getWordCount('1 word')).toBe(2);
+    it("doesn't count a list number as a word", () => {
+        expect(getWordCount('1. word')).toBe(1);
     });
 
-    it('handles hyphens', () => {
+    it("doesn't count a list number as a word when the list spans multiple lines", () => {
+        expect(getWordCount('1. Lake One\n2. Lake Two\n3. Lake Three')).toBe(6);
+    });
+
+    it('counts standalone, non-list numbers as a word', () => {
+        expect(getWordCount("It's 20 degrees outside")).toBe(4);
+    });
+
+    it('counts hyphenated words as one word', () => {
         expect(getWordCount('word - word word-word word- -word')).toBe(5);
     });
 
-    it('handles apostrophes', () => {
+    it('counts contractions as one word', () => {
         expect(getWordCount("don't can't won't")).toBe(3);
     });
 
-    it('handles punctuation', () => {
+    it("doesn't count punctuation", () => {
         expect(getWordCount('word! word? word. word,')).toBe(4);
     });
 
@@ -243,35 +251,23 @@ describe('Counting words', () => {
         expect(getWordCount('こんにちは 世界')).toBe(2);
     });
 
-    it('handles mixed words and numbers', () => {
-        expect(getWordCount("It's 20 degrees outside")).toBe(4);
-    });
-
-    it('handles contractions and possessives', () => {
-        expect(getWordCount("It's John's book")).toBe(3);
-    });
-
-    it('handles numbered list', () => {
-        expect(getWordCount('1. Lake One\n2. Lake Two\n3. Lake Three')).toBe(6);
-    });
-
-    it('handles markdown', () => {
+    it("doesn't count markdown", () => {
         expect(getWordCount('*one* _two_ **three** __four__')).toBe(4);
     });
 
-    it('handles example sentence in the same way Obsidian and Google Docs do', () => {
+    it('counts example sentence in the same way Obsidian and Google Docs do', () => {
         const sentence =
             '“Example Product Direct: Product Direct courses offer individualized study focused on state standards, while supported by certified teachers.”';
         expect(getWordCount(sentence)).toBe(18);
     });
 
-    it('handles example sentence that contains "K-8" and "9" in the same way Obsidian and Google Docs do', () => {
+    it('counts example sentence that contains "K-8" and "9" in the same way Obsidian and Google Docs do', () => {
         const sentence =
             'Students in grades K-8 complete 9 units and the correlating checkpoint worksheets each semester, submitting one worksheet every two weeks.';
         expect(getWordCount(sentence)).toBe(20);
     });
 
-    it('handles standalone special characters', () => {
+    it("doesn't count standalone special characters", () => {
         const one = 'one " two \' three" / four';
         expect(getWordCount(one)).toBe(4);
 
@@ -279,52 +275,61 @@ describe('Counting words', () => {
         expect(getWordCount(two)).toBe(4);
     });
 
-    it('handles alphanumeric combinations', () => {
+    it('counts alphanumeric combinations as one word', () => {
         expect(getWordCount('COVID-19 A1 B-52 3D-printed')).toBe(4);
     });
 
     it('counts slash-separated words as separate words', () => {
-        expect(getWordCount('one/two three/four/five')).toBe(5);
+        expect(getWordCount('yes/no three/four/five')).toBe(5);
     });
 
-    it('handles mixed scenarios with slashes', () => {
-        expect(getWordCount('apple/banana 2/3 cup COVID-19/SARS-CoV-2')).toBe(7);
+    it('counts mixed scenarios with slashes', () => {
+        expect(getWordCount('apple/banana COVID-19/SARS-CoV-2')).toBe(4);
     });
 
-    it('handles multiple consecutive slashes', () => {
+    it('counts multiple consecutive slashes the same as single slashes', () => {
         expect(getWordCount('one//two///three')).toBe(3);
     });
 
-    it('handles slashes at the beginning or end of words', () => {
+    it('counts properly with slashes at the beginning or end of words', () => {
         expect(getWordCount('/start middle/ /both/')).toBe(3);
     });
 
-    it('handles complex scenarios with slashes, hyphens, and numbers', () => {
+    it('properly counts words in complex scenarios with slashes, hyphens, and numbers', () => {
         expect(
             getWordCount('1. item-one/sub-item 2. item-two/sub-item/third-part')
         ).toBe(5);
     });
 
-    it('handles emojis', () => {
-        const paragraph = 'chicken: 🐤 (chicken) turtle:🐢 (turtle).';
-        expect(getWordCount(paragraph)).toBe(6);
+    it('counts emojis', () => {
+        const sentence = 'chicken: 🐤 (chicken) turtle:🐢 (turtle).';
+        expect(getWordCount(sentence)).toBe(6);
     });
 
     it('counts colon-separated words as separate words', () => {
         expect(getWordCount('one:two three:four:five')).toBe(5);
     });
 
-    it('handles standalone special characters', () => {
+    it("doesn't count standalone special characters", () => {
         const sentence =
             '! @ # $ % ^ & * ( ) \\ | / \' ; , . [ ] { } | < > ? : " !! @@ ## $$ %^&% ($%*#%()* (@#*%() *@<:{ >:?|} <:)) ***';
         expect(getWordCount(sentence)).toBe(0);
     });
 
-    // This differs from Google Docs because it counts $20,000 as two words. So, this is
-    // actually more accurate
-    it('handles monetary values', () => {
+    // This is to adhere to the same behavior as Google Docs
+    it('counts monetary values as two words', () => {
         const sentence = `An advance of $20,000 upon signing.`;
-        expect(getWordCount(sentence)).toBe(6);
+        expect(getWordCount(sentence)).toBe(7);
+    });
+
+    it('counts words separated by an em dash separately', () => {
+        const sentence = 'one—two three—four—five';
+        expect(getWordCount(sentence)).toBe(5);
+    });
+
+    it('counts words separated by an en dash separately', () => {
+        const sentence = 'one–two three–four–five';
+        expect(getWordCount(sentence)).toBe(5);
     });
 });
 

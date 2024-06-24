@@ -104,7 +104,7 @@ export const getWordCount = (text: string): number => {
 
     return matches
         .filter(match => !/^\d+\.$/.test(match))
-        .flatMap(word => word.split(/[/:]/))
+        .flatMap(word => word.split(/[/:—–,]/))
         .filter(word => word.length > 0 && !IGNORE_PATTERN.test(word)).length;
 };
 
