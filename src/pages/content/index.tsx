@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import Watermark from '@src/components/Watermark';
 import Toasts from '@src/components/Toasts';
 import { Tooltip } from 'react-tooltip';
-import DiffViewer from '@src/components/DiffViewer';
+import { DiffViewer } from '@components/DiffViewer/DiffViewer';
 import { useDiffView } from '@hooks/useDiffView';
 import { initializeObservers } from '@lib/init';
 import { ToastProvider } from '@src/contexts/ToastContext';

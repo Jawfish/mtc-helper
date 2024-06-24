@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import DiffViewer from '@src/components/DiffViewer';
+import { DiffViewer } from '@components/DiffViewer/DiffViewer';
 import { describe, it, vi, beforeEach, afterEach } from 'vitest';
 import { globalStore } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
