@@ -3,7 +3,6 @@ import { useToast } from '@src/contexts/ToastContext';
 import { codeContainsMarkdownFence, codeContainsHtml } from '@lib/textProcessing';
 import Logger from '@lib/logging';
 import { validatePython } from '@lib/validatePython';
-import { checkAlignmentScore } from '@lib/checkAlignmentScore';
 import { useOrochiStore } from '@src/store/orochiStore';
 
 enum ValidationMessage {
@@ -32,7 +31,8 @@ export function useValidation() {
                     ? [ValidationMessage.MARKDOWN_FENCE]
                     : []),
                 ...(language === 'python' ? validatePython(code) : []),
-                checkAlignmentScore(ALIGNMENT_SCORE_THRESHOLD) ?? '',
+                // TODO: run this automatically on submit instead of in response validation
+                // checkAlignmentScore(ALIGNMENT_SCORE_THRESHOLD) ?? '',
                 ...(codeContainsHtml(code) ? [ValidationMessage.HTML_DETECTED] : [])
             ].filter(Boolean);
 
@@ -49,7 +49,10 @@ export function useValidation() {
             const status: NotificationStatus =
                 messages.length > 0 ? 'warning' : 'success';
 
-            notify(messageText, status);
+            notify(
+                `${status === 'warning' ? 'Partial success: ' : ''}${messageText}`,
+                status
+            );
         } catch (error) {
             Logger.error(`Error checking response: ${error}`);
             notify(`Error checking response: ${error}`, 'error');

@@ -37,7 +37,7 @@ const validateAlignmentScore = (
     if (score === null || rework === null) {
         return {
             ok: false,
-            error: 'Unable to determine alignment score or rework status'
+            error: 'Unable to determine alignment score'
         };
     }
 
