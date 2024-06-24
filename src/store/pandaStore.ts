@@ -8,6 +8,7 @@ export type State = {
     editedResponseMarkdown: string | undefined;
     originalResponsePlaintext: string | undefined;
     originalResponseMarkdown: string | undefined;
+    originalResponseHtml: string | undefined;
     unselectedResponsePlaintext: string | undefined;
     unselectedResponseMarkdown: string | undefined;
 };
@@ -21,6 +22,7 @@ const initialState: State = {
     editedResponseMarkdown: undefined,
     originalResponsePlaintext: undefined,
     originalResponseMarkdown: undefined,
+    originalResponseHtml: undefined,
     unselectedResponsePlaintext: undefined,
     unselectedResponseMarkdown: undefined
 };

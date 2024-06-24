@@ -114,15 +114,21 @@ export const handlePandaSelectedResponseSaveButtonMutation: MutHandler = (
     const container = getControlsContainer();
     const wordCount = getWordCount(contentElement?.textContent || '');
     const wcElement = getWordCountElement(wordCount);
-    const markdownCopyButton = getCopyButton('Copy Markdown');
-    const plaintextCopyButton = getCopyButton('Copy Plaintext');
+    const copyEditedButton = getCopyButton('Copy Edited');
+    const copyOriginalButton = getCopyButton('Copy Original');
+    copyOriginalButton.disabled = true;
 
     // update word count in the word count element when editedResponse changes
     pandaStore.subscribe(({ editedResponseMarkdown }) => {
         wcElement.textContent = `${getWordCount(editedResponseMarkdown || '')} words`;
     });
 
-    markdownCopyButton.addEventListener('click', () => {
+    // enable copy button when there is content to copy
+    pandaStore.subscribe(({ originalResponseMarkdown }) => {
+        copyOriginalButton.disabled = !originalResponseMarkdown;
+    });
+
+    copyEditedButton.addEventListener('click', () => {
         const { editedResponseMarkdown } = pandaStore.getState();
         if (!editedResponseMarkdown) {
             return;
@@ -131,20 +137,18 @@ export const handlePandaSelectedResponseSaveButtonMutation: MutHandler = (
         navigator.clipboard.writeText(editedResponseMarkdown);
     });
 
-    plaintextCopyButton.addEventListener('click', () => {
-        const { editedResponsePlaintext } = pandaStore.getState();
-        if (!editedResponsePlaintext) {
+    copyOriginalButton.addEventListener('click', () => {
+        const { originalResponseMarkdown } = pandaStore.getState();
+        if (!originalResponseMarkdown) {
             return;
         }
 
-        const processedPlaintext = doubleSpace(editedResponsePlaintext);
-
-        navigator.clipboard.writeText(processedPlaintext);
+        navigator.clipboard.writeText(originalResponseMarkdown);
     });
 
     container.appendChild(wcElement);
-    container.appendChild(plaintextCopyButton);
-    container.appendChild(markdownCopyButton);
+    container.appendChild(copyEditedButton);
+    container.appendChild(copyOriginalButton);
     saveButton.parentElement?.insertAdjacentElement('afterend', container);
 
     // when the save button is clicked, reset the state
