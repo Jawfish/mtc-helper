@@ -108,6 +108,21 @@ export default [
             'prefer-spread': 'warn',
             '@typescript-eslint/no-non-null-assertion': 'off',
             yoda: 'error',
+            // Allow namespaces for component props pattern to allow for not needing to
+            // import separate interfaces:
+            // namespace Component {
+            //     export interface Props {
+            //         prop: string;
+            //     }
+            // }
+            //
+            // export function Component({ prop }: Component.Props) {
+            //     return <div>{prop}</div>;
+            // }
+            // ...
+            // const Wrapper = (props: Component.Props) => <Component {...props} />;
+
+            '@typescript-eslint/no-namespace': 'off',
             'tailwindcss/classnames-order': 'off',
             'tailwindcss/no-custom-classname': 'warn',
             'tailwindcss/no-contradicting-classname': 'error',

@@ -11,15 +11,18 @@ import { useOrochiActions } from '@hooks/useOrochiActions';
 import { useTask } from '@hooks/useTask';
 import { useValidation } from '@hooks/useValidation';
 import { useOrochiStore } from '@src/store/orochiStore';
+import { DropdownMenuItemProps } from '@radix-ui/react-dropdown-menu';
 
 import Button from './shared/Button';
 
-type Props = {
-    toggleDiffView: () => void;
-    process: Process;
-};
+namespace Toolbar {
+    export interface Props {
+        toggleDiffView: () => void;
+        process: Process;
+    }
+}
 
-export default function Toolbar({ toggleDiffView, process }: Props) {
+export default function Toolbar({ toggleDiffView, process }: Toolbar.Props) {
     const { validateResponse } = useValidation();
     const { originalCode } = useOrochiStore();
 
@@ -87,32 +90,42 @@ const Dropdown = ({ process }: { process: Process }) => {
 const OrochiDropdownItems = () => {
     const { copyEditedCode, copyOriginalCode, copyTests, copyAllAsPython, copyPrompt } =
         useOrochiActions();
-    const { language, originalCode } = useOrochiStore();
+    const { language, originalCode, editedCode, prompt, tests } = useOrochiStore();
 
     return (
         <>
             {language === 'python' && (
-                <Item onClick={copyAllAsPython}>Conversation</Item>
+                <Item
+                    onClick={copyAllAsPython}
+                    disabled={!editedCode || !tests || !prompt}>
+                    Conversation
+                </Item>
             )}
-            <Item onClick={copyPrompt}>Prompt</Item>
-            <Item onClick={copyEditedCode}>Edited Code</Item>
+            <Item
+                onClick={copyPrompt}
+                disabled={!prompt}>
+                Prompt
+            </Item>
+            <Item
+                onClick={copyEditedCode}
+                disabled={!editedCode}>
+                Edited Code
+            </Item>
             <Item
                 onClick={copyOriginalCode}
                 disabled={!originalCode}>
                 Original Code
             </Item>
-            <Item onClick={copyTests}>Tests</Item>
+            <Item
+                onClick={copyTests}
+                disabled={!tests}>
+                Tests
+            </Item>
         </>
     );
 };
 
-type ItemProps = {
-    onClick: () => void;
-    children: React.ReactNode;
-    disabled?: boolean;
-};
-
-const Item = ({ onClick, children, disabled = false }: ItemProps) => (
+const Item = ({ onClick, children, disabled = false }: DropdownMenuItemProps) => (
     <DropdownMenuItem
         className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
         onClick={onClick}

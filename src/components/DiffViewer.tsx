@@ -87,7 +87,7 @@ export default function DiffViewer({ toggleDiffView }: Props) {
 
 function DiffForeground({ children }: { children: React.ReactNode }) {
     return (
-        <div className='relative flex  w-[90%] flex-col rounded-md bg-white shadow-lg'>
+        <div className='relative flex w-[90%] max-w-[116rem] flex-col rounded-md bg-white shadow-lg'>
             {children}
         </div>
     );
