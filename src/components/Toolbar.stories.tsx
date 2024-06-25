@@ -2,17 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { fn } from '@storybook/test';
 import { ToastProvider } from '@src/contexts/ToastContext';
-import { globalStore } from '@src/store/globalStore';
-import { v4 } from 'uuid';
 import { orochiStore } from '@src/store/orochiStore';
 import { pandaStore } from '@src/store/pandaStore';
 
 import Toolbar from './Toolbar';
-
-globalStore.setState({
-    operatorName: 'test.name@',
-    taskId: v4()
-});
 
 orochiStore.setState({
     originalCode: 'original code',
@@ -25,8 +18,8 @@ orochiStore.setState({
 });
 
 pandaStore.setState({
-    originalResponsePlaintext: 'original response',
-    editedResponsePlaintext: 'edited response'
+    originalResponseMarkdown: 'original response',
+    editedResponseMarkdown: 'edited response'
 });
 
 const meta: Meta<typeof Toolbar> = {
@@ -48,7 +41,6 @@ const meta: Meta<typeof Toolbar> = {
 };
 export default meta;
 type Story = StoryObj<typeof Toolbar>;
-globalStore.setState({ operatorName: 'test.name@', taskId: v4() });
 
 export const Orochi: Story = {
     args: {

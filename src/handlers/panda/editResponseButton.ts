@@ -23,10 +23,7 @@ export const handlePandaEditResponseButtonMutation: MutHandler = (_target: Eleme
         button.addEventListener('click', () => {
             Logger.debug('Handling click on panda edit response button.');
 
-            pandaStore.setState({
-                editedResponsePlaintext: undefined,
-                originalResponsePlaintext: undefined
-            });
+            pandaStore.getState().reset();
         });
     });
 };

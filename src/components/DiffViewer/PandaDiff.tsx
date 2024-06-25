@@ -15,27 +15,9 @@ export const PandaDiff: React.FC<PandaDiffProps> = ({
     disableWordDiff
 }) => {
     const [activeTab, setActiveTab] = useState(0);
-    const {
-        editedResponsePlaintext,
-        originalResponsePlaintext,
-        editedResponseMarkdown,
-        originalResponseMarkdown
-    } = usePandaStore();
+    const { editedResponseMarkdown, originalResponseMarkdown } = usePandaStore();
 
     const tabs = [
-        {
-            label: 'Plaintext',
-            content: (
-                <ReactDiffViewer
-                    oldValue={originalResponsePlaintext}
-                    newValue={editedResponsePlaintext}
-                    splitView={true}
-                    compareMethod={diffMethod}
-                    extraLinesSurroundingDiff={0}
-                    disableWordDiff={disableWordDiff}
-                />
-            )
-        },
         {
             label: 'Markdown',
             content: (
@@ -45,6 +27,7 @@ export const PandaDiff: React.FC<PandaDiffProps> = ({
                     splitView={true}
                     compareMethod={diffMethod}
                     extraLinesSurroundingDiff={0}
+                    disableWordDiff={disableWordDiff}
                 />
             )
         }

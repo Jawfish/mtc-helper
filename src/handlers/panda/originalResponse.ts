@@ -1,35 +1,48 @@
 import { MutHandler } from '@handlers/types';
 import Logger from '@src/lib/logging';
 import { pandaStore } from '@src/store/pandaStore';
-import { standardizeNewlines } from '@lib/textProcessing';
-import Turndown from '@lib/turndown';
+import MarkdownConverter from '@lib/markdown';
 
-import { selectPandaOriginalResponse } from './selectors';
+import { selectPandaSelectedResponse } from './selectors';
 
+const selectPandaOriginalResponse = (): HTMLDivElement | null => {
+    const selectedResponse = selectPandaSelectedResponse();
+    const tab = selectedResponse?.querySelector('div[id="2"]');
+
+    // if tab doesn't have "text-theme-main" class, it is not selected, so the
+    // original content is not visible
+    if (!tab?.classList.contains('text-theme-main')) {
+        return null;
+    }
+
+    const element = selectedResponse?.querySelector('div[data-cy="tab"]');
+
+    return element instanceof HTMLDivElement ? element : null;
+};
 export const handlePandaOriginalResponseMutation: MutHandler = (_target: Element) => {
     const originalResponseElement = selectPandaOriginalResponse();
     if (!originalResponseElement) {
         return;
     }
 
-    const response = originalResponseElement.textContent || undefined;
-    if (!response) {
+    const { editedResponseMarkdown } = pandaStore.getState();
+    if (!editedResponseMarkdown) {
         return;
     }
 
-    const { originalResponsePlaintext: plaintextInStore } = pandaStore.getState();
-    const plaintextFromDOM = standardizeNewlines(response);
-    // Turndown takes a node or a string of HTML, not textContent
-    const markdownFromDOM = Turndown.getInstance()?.turndown(originalResponseElement);
+    const htmlAsMarkdown = MarkdownConverter.instance.htmlToMarkdown(
+        originalResponseElement,
+        editedResponseMarkdown
+    );
 
-    if (plaintextFromDOM === plaintextInStore) {
+    if (!htmlAsMarkdown) {
         return;
     }
 
     Logger.debug('Handling change in panda original response state.');
 
     pandaStore.setState({
-        originalResponsePlaintext: plaintextFromDOM,
-        originalResponseMarkdown: markdownFromDOM
+        originalResponseMarkdown: htmlAsMarkdown,
+        originalResponseHtml: originalResponseElement.innerHTML
     });
 };

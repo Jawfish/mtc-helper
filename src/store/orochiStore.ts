@@ -1,7 +1,9 @@
 import { useStore } from 'zustand';
+import Logger from '@lib/logging';
 
 import { createLogStore } from './storeMiddleware';
 import { globalStore } from './globalStore';
+import { isStateEqual } from './utils';
 
 type Language = 'python' | 'unknown';
 
@@ -49,7 +51,10 @@ export const orochiStore = createLogStore<State & Actions>('Orochi store')(set =
 export const useOrochiStore = () => useStore(orochiStore);
 
 globalStore.subscribe(({ taskIsOpen: taskOpen }) => {
-    if (!taskOpen) {
+    if (!taskOpen && !isStateEqual(orochiStore.getState(), initialState)) {
+        Logger.debug(
+            'Resetting Orochi store due to state change from subscription to global store'
+        );
         orochiStore.getState().reset();
     }
 });

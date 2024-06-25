@@ -2,7 +2,7 @@ import { MutHandler } from '@handlers/types';
 import Logger from '@src/lib/logging';
 import { pandaStore } from '@src/store/pandaStore';
 import { getWordCount } from '@lib/textProcessing';
-import Turndown from '@lib/turndown';
+import md from '@lib/markdown';
 import markdownToTxt from 'markdown-to-txt';
 
 import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..';
@@ -84,9 +84,9 @@ export const handlePandaUnselectedResponseMutation: MutHandler = (
 
     pandaStore.setState({
         unselectedResponsePlaintext,
-        // Turndown takes a node or a string of HTML, not textContent
-        unselectedResponseMarkdown: Turndown.getInstance()?.turndown(
-            unselectedResponseElement as HTMLElement
+        unselectedResponseMarkdown: md.instance.htmlToMarkdown(
+            unselectedResponseElement as HTMLElement,
+            '' // TODO: shouldn't force passing an empty string here
         )
     });
 };

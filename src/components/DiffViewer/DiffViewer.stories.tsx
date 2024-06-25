@@ -78,9 +78,27 @@ export const PandaDiff: Story = {
         Story => {
             globalStore.setState({ process: 'PANDA' });
             pandaStore.setState({
-                originalResponsePlaintext: 'This is the original response.',
-                editedResponsePlaintext:
-                    'This is the edited response with some changes.'
+                originalResponseMarkdown: 'This is the original response.',
+                editedResponseMarkdown: 'This is the edited response with some changes.'
+            });
+
+            return <Story />;
+        }
+    ]
+};
+
+export const PandaDiffWithMarkdown: Story = {
+    args: {
+        toggleDiffView: fn().mockName('toggleDiffView')
+    },
+    decorators: [
+        Story => {
+            globalStore.setState({ process: 'PANDA' });
+            pandaStore.setState({
+                originalResponseMarkdown:
+                    '# Title\n\nParagraph with **bold** and *italic* text.\n\n- Item 1\n- Item 2',
+                editedResponseMarkdown:
+                    '# Title\nParagraph with **bold** and *italic* text.\n\n- Item 1\n- Item 2'
             });
 
             return <Story />;
@@ -96,8 +114,8 @@ export const PandaDiffWithLongResponse: Story = {
         Story => {
             globalStore.setState({ process: 'PANDA' });
             pandaStore.setState({
-                originalResponsePlaintext: 'This is the original response.'.repeat(100),
-                editedResponsePlaintext:
+                originalResponseMarkdown: 'This is the original response.'.repeat(100),
+                editedResponseMarkdown:
                     'This is the edited response with some changes.'.repeat(100)
             });
 

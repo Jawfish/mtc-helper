@@ -71,9 +71,7 @@ export const handlePandaSelectedResponseSaveButtonMutation: MutHandler = (
         Logger.debug('Handling click on panda selected response save button.');
 
         pandaStore.setState({
-            editedResponsePlaintext: undefined,
             editedResponseMarkdown: undefined,
-            originalResponsePlaintext: undefined,
             originalResponseMarkdown: undefined,
             unselectedResponsePlaintext: undefined
         });

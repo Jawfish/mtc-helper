@@ -1,10 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import Toolbar from '@src/components/Toolbar';
-import { describe, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, vi, beforeEach } from 'vitest';
 import { globalStore, Process } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
 import { expect } from '@storybook/test';
+import { pandaStore } from '@src/store/pandaStore';
 
 vi.mock('@hooks/useOrochiActions', () => ({
     useOrochiActions: () => ({
@@ -36,9 +37,6 @@ describe('Toolbar', () => {
     beforeEach(() => {
         globalStore.setState({ process: 'Unknown' });
         orochiStore.getState().reset();
-    });
-
-    afterEach(() => {
         vi.clearAllMocks();
     });
 
@@ -75,52 +73,82 @@ describe('Toolbar', () => {
         }
     );
 
-    it('calls toggleDiffView when View Diff button is clicked if it is enabled', () => {
-        orochiStore.setState({ originalCode: 'some code' });
-        globalStore.setState({ process: 'Orochi' });
+    it.each(['Orochi', 'PANDA'] as Process[])(
+        'calls toggleDiffView when View Diff button is clicked if it is enabled',
+        process => {
+            globalStore.setState({ process });
 
-        render(
-            <Toolbar
-                toggleDiffView={mockToggleDiffView}
-                process='Orochi'
-            />
-        );
-        fireEvent.click(screen.getByText('View Diff'));
-        expect(mockToggleDiffView).toHaveBeenCalledTimes(1);
-    });
+            // These must run after setting global store state due a subscription to state
+            // changes in the global store
+            if (process === 'Orochi') {
+                orochiStore.setState({ originalCode: 'some code' });
+            } else if (process === 'PANDA') {
+                pandaStore.setState({ originalResponseMarkdown: 'some markdown' });
+            }
 
-    it("doesn't call toggleDiffView when View Diff button is clicked if it is disabled", () => {
-        globalStore.setState({ process: 'Orochi' });
-        orochiStore.setState({ originalCode: undefined });
-        render(
-            <Toolbar
-                toggleDiffView={mockToggleDiffView}
-                process='Orochi'
-            />
-        );
-        fireEvent.click(screen.getByText('View Diff'));
-        expect(mockToggleDiffView).not.toHaveBeenCalled();
-    });
+            render(
+                <Toolbar
+                    toggleDiffView={mockToggleDiffView}
+                    process={process}
+                />
+            );
+            fireEvent.click(screen.getByText('View Diff'));
 
-    it('displays Check Response button only for Orochi process', () => {
-        const { rerender } = render(
-            <Toolbar
-                toggleDiffView={mockToggleDiffView}
-                process='Unknown'
-            />
-        );
-        expect(screen.queryByText('Check Response')).not.toBeInTheDocument();
+            expect(screen.getByText('View Diff')).toBeEnabled();
+            expect(mockToggleDiffView).toHaveBeenCalledTimes(1);
+        }
+    );
 
-        rerender(
-            <Toolbar
-                toggleDiffView={mockToggleDiffView}
-                process='Orochi'
-            />
-        );
-        expect(screen.getByText('Check Response')).toBeInTheDocument();
-    });
+    it.each(['Orochi', 'PANDA'] as Process[])(
+        "doesn't call toggleDiffView when View Diff button is clicked if it is disabled",
+        process => {
+            globalStore.setState({ process });
+            orochiStore.setState({ originalCode: undefined });
+            render(
+                <Toolbar
+                    toggleDiffView={mockToggleDiffView}
+                    process={process}
+                />
+            );
+            fireEvent.click(screen.getByText('View Diff'));
+            expect(screen.getByText('View Diff')).not.toBeEnabled();
+            expect(mockToggleDiffView).not.toHaveBeenCalled();
+        }
+    );
 
-    it('does not display Conversation option when language is not python', async () => {
+    it.each(['Orochi', 'PANDA', 'Unknown'] as Process[])(
+        'displays Check Response button only for Orochi process',
+        process => {
+            render(
+                <Toolbar
+                    toggleDiffView={mockToggleDiffView}
+                    process={process}
+                />
+            );
+            if (process === 'Orochi') {
+                expect(screen.getByText('Check Response')).toBeInTheDocument();
+            } else {
+                expect(screen.queryByText('Check Response')).not.toBeInTheDocument();
+            }
+        }
+    );
+
+    // TODO: the dropdown is not visible to screen.getByText or .toBeInTheDocument
+    // it('only displays the Conversation option in the Orochi process', () => {
+    //     globalStore.setState({ process: 'Orochi' });
+    //     orochiStore.setState({ language: 'python' });
+    //     render(
+    //         <Toolbar
+    //             toggleDiffView={mockToggleDiffView}
+    //             process='Orochi'
+    //         />
+    //     );
+    //     fireEvent.click(screen.getByText('Copy'));
+
+    //     expect(screen.getByText('Conversation')).toBeInTheDocument();
+    // });
+
+    it('does not display Conversation option when language is not python', () => {
         globalStore.setState({ process: 'Orochi' });
         orochiStore.setState({ language: 'unknown' });
         render(

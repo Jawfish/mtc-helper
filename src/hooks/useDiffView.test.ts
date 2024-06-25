@@ -1,18 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useGlobalStore } from '@src/store/globalStore';
-import { useOrochiStore } from '@src/store/orochiStore';
-import { usePandaStore } from '@src/store/pandaStore';
+import { globalStore } from '@src/store/globalStore';
+import { orochiStore } from '@src/store/orochiStore';
+import { pandaStore } from '@src/store/pandaStore';
 import { useToast } from '@src/contexts/ToastContext';
 import Logger from '@lib/logging';
 
 import { useDiffView } from './useDiffView';
 
-// Mock the required modules
-vi.mock('@src/store/globalStore');
-vi.mock('@src/store/orochiStore');
-vi.mock('@src/store/pandaStore');
 vi.mock('@src/contexts/ToastContext');
 vi.mock('@lib/logging');
 
@@ -23,20 +18,23 @@ describe('useDiffView', () => {
         vi.resetAllMocks();
         vi.mocked(useToast).mockReturnValue({ notify: mockNotify });
         vi.mocked(Logger.debug).mockImplementation(() => {});
+        pandaStore.getState().reset();
+        orochiStore.getState().reset();
+        globalStore.setState({ process: 'Unknown' });
     });
 
     it('should initialize with diffViewOpen as false', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({ process: 'Orochi' } as any);
+        globalStore.setState({ process: 'Orochi' });
         const { result } = renderHook(() => useDiffView());
         expect(result.current.diffViewOpen).toBe(false);
     });
 
     it('should toggle diffViewOpen when conditions are met for Orochi', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({ process: 'Orochi' } as any);
-        vi.mocked(useOrochiStore).mockReturnValue({
+        globalStore.setState({ process: 'Orochi' });
+        orochiStore.setState({
             originalResponse: 'original',
             editedResponse: 'edited'
-        } as any);
+        });
 
         const { result } = renderHook(() => useDiffView());
 
@@ -56,11 +54,10 @@ describe('useDiffView', () => {
     });
 
     it('should toggle diffViewOpen when conditions are met for PANDA', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({ process: 'PANDA' } as any);
-        vi.mocked(usePandaStore).mockReturnValue({
-            originalResponsePlaintext: 'original',
-            editedResponsePlaintext: 'edited'
-        } as any);
+        globalStore.setState({ process: 'PANDA' });
+        pandaStore.setState({
+            originalResponseMarkdown: 'original'
+        });
 
         const { result } = renderHook(() => useDiffView());
 
@@ -73,11 +70,11 @@ describe('useDiffView', () => {
     });
 
     it('should not toggle diffViewOpen and show error for Orochi when original response is missing', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({ process: 'Orochi' } as any);
-        vi.mocked(useOrochiStore).mockReturnValue({
+        globalStore.setState({ process: 'Orochi' });
+        orochiStore.setState({
             originalResponse: null,
             editedResponse: 'edited'
-        } as any);
+        });
 
         const { result } = renderHook(() => useDiffView());
 
@@ -93,11 +90,11 @@ describe('useDiffView', () => {
     });
 
     it('should not toggle diffViewOpen and show error for Orochi when edited response is missing', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({ process: 'Orochi' } as any);
-        vi.mocked(useOrochiStore).mockReturnValue({
+        globalStore.setState({ process: 'Orochi' });
+        orochiStore.setState({
             originalResponse: 'original',
             editedResponse: null
-        } as any);
+        });
 
         const { result } = renderHook(() => useDiffView());
 
@@ -113,11 +110,11 @@ describe('useDiffView', () => {
     });
 
     it('should not toggle diffViewOpen and show error for PANDA when original response is missing', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({ process: 'PANDA' } as any);
-        vi.mocked(usePandaStore).mockReturnValue({
-            originalResponsePlaintext: undefined,
-            editedResponsePlaintext: 'edited'
-        } as any);
+        globalStore.setState({ process: 'PANDA' });
+        pandaStore.setState({
+            originalResponseMarkdown: undefined,
+            editedResponseMarkdown: 'edited'
+        });
 
         const { result } = renderHook(() => useDiffView());
 
@@ -133,11 +130,10 @@ describe('useDiffView', () => {
     });
 
     it('should not toggle diffViewOpen and show error for PANDA when edited response is missing', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({ process: 'PANDA' } as any);
-        vi.mocked(usePandaStore).mockReturnValue({
-            originalResponsePlaintext: 'original',
-            editedResponsePlaintext: undefined
-        } as any);
+        globalStore.setState({ process: 'PANDA' });
+        pandaStore.setState({
+            originalResponseMarkdown: undefined
+        });
 
         const { result } = renderHook(() => useDiffView());
 
@@ -153,7 +149,7 @@ describe('useDiffView', () => {
     });
 
     it('should not toggle diffViewOpen for unknown process', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({ process: 'Unknown' } as any);
+        globalStore.setState({ process: 'Unknown' });
 
         const { result } = renderHook(() => useDiffView());
 

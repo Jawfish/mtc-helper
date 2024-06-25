@@ -1,8 +1,6 @@
 import { selectTaskWindowElement } from '@lib/selectors';
 
-export const selectPandaSelectedResponseSaveButton = ():
-    | HTMLButtonElement
-    | undefined => {
+export const selectPandaSelectedResponseSaveButton = (): HTMLButtonElement | null => {
     const taskWindow = selectTaskWindowElement();
     const selectedResponseSaveButton = Array.from(
         taskWindow?.querySelectorAll('button') || []
@@ -14,30 +12,15 @@ export const selectPandaSelectedResponseSaveButton = ():
 
     return selectedResponseSaveButton instanceof HTMLButtonElement
         ? selectedResponseSaveButton
-        : undefined;
+        : null;
 };
 
-export const selectPandaSelectedResponse = (): HTMLDivElement | undefined => {
+export const selectPandaSelectedResponse = (): HTMLDivElement | null => {
     const saveButton = selectPandaSelectedResponseSaveButton();
 
     const selectedResponse = saveButton?.parentElement?.parentElement;
 
-    return selectedResponse instanceof HTMLDivElement ? selectedResponse : undefined;
-};
-
-export const selectPandaOriginalResponse = (): HTMLDivElement | undefined => {
-    const selectedResponse = selectPandaSelectedResponse();
-    const tab = selectedResponse?.querySelector('div[id="2"]');
-
-    // if tab doesn't have "text-theme-main" class, it is not selected, so the
-    // original content is not visible
-    if (!tab?.classList.contains('text-theme-main')) {
-        return undefined;
-    }
-
-    const element = selectedResponse?.querySelector('div[data-cy="tab"]');
-
-    return element instanceof HTMLDivElement ? element : undefined;
+    return selectedResponse instanceof HTMLDivElement ? selectedResponse : null;
 };
 
 export const selectAllPandaEditResponseButtons = (): HTMLButtonElement[] | [] => {

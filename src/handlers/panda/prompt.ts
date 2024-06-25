@@ -1,7 +1,7 @@
 import { MutHandler } from '@handlers/types';
 import Logger from '@src/lib/logging';
 import { getWordCount, doubleSpace } from '@lib/textProcessing';
-import Turndown from '@lib/turndown';
+import md from '@lib/markdown';
 import markdownToTxt from 'markdown-to-txt';
 
 import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..';
@@ -36,7 +36,7 @@ export const handlePandaPromptMutation: MutHandler = (mutation: Element) => {
     const plaintextCopyButton = getCopyButton('Copy Plaintext');
 
     markdownCopyButton.addEventListener('click', () => {
-        const markdown = Turndown.getInstance()?.turndown(promptElement);
+        const markdown = md.instance.htmlToMarkdown(promptElement, '');
         if (markdown) {
             navigator.clipboard.writeText(markdown);
         }

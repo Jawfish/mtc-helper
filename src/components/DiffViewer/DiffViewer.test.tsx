@@ -23,8 +23,7 @@ describe('DiffViewer', () => {
             originalResponse: 'original response'
         });
         pandaStore.setState({
-            editedResponsePlaintext: 'edited panda response',
-            originalResponsePlaintext: 'original panda response'
+            originalResponseMarkdown: 'original panda response'
         });
     });
 
