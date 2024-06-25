@@ -107,7 +107,7 @@ describe('useOrochiActions', () => {
             await result.current.copyAllAsPython();
         });
         expect(mockNotify).toHaveBeenCalledWith(
-            'Copied, but tests could not be found, reason could not be found',
+            'Copied, but tests could not be found, operator notes could not be found',
             'warning'
         );
     });
@@ -125,7 +125,7 @@ describe('useOrochiActions', () => {
             await result.current.copyAllAsPython();
         });
         expect(mockNotify).toHaveBeenCalledWith(
-            'Error copying task: prompt could not be found, code could not be found, tests could not be found, reason could not be found',
+            'Error copying task: prompt could not be found, code could not be found, tests could not be found, operator notes could not be found',
             'error'
         );
     });

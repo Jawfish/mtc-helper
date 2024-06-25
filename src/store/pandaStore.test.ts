@@ -22,35 +22,29 @@ vi.mock('./pandaStore', async importOriginal => {
 describe('pandaStore', () => {
     beforeEach(() => {
         pandaStore.setState({
-            editedResponsePlaintext: undefined,
             originalResponsePlaintext: undefined
         });
     });
 
     it('should initialize with correct default values', () => {
         const state = pandaStore.getState();
-        expect(state.editedResponsePlaintext).toBeUndefined();
         expect(state.originalResponsePlaintext).toBeUndefined();
     });
 
     it('should update state correctly', () => {
         pandaStore.setState({
-            editedResponsePlaintext: 'edited',
             originalResponsePlaintext: 'original'
         });
         const state = pandaStore.getState();
-        expect(state.editedResponsePlaintext).toBe('edited');
         expect(state.originalResponsePlaintext).toBe('original');
     });
 
     it('should reset state correctly', () => {
         pandaStore.setState({
-            editedResponsePlaintext: 'edited',
             originalResponsePlaintext: 'original'
         });
         pandaStore.getState().reset();
         const state = pandaStore.getState();
-        expect(state.editedResponsePlaintext).toBeUndefined();
         expect(state.originalResponsePlaintext).toBeUndefined();
     });
 
@@ -62,7 +56,6 @@ describe('pandaStore', () => {
         const [[mockSubscribeCallback]] = vi.mocked(globalStore.subscribe).mock.calls;
 
         pandaStore.setState({
-            editedResponsePlaintext: 'edited',
             originalResponsePlaintext: 'original'
         });
 
@@ -72,7 +65,6 @@ describe('pandaStore', () => {
         );
 
         const state = pandaStore.getState();
-        expect(state.editedResponsePlaintext).toBeUndefined();
         expect(state.originalResponsePlaintext).toBeUndefined();
     });
 
@@ -80,7 +72,6 @@ describe('pandaStore', () => {
         const [[mockSubscribeCallback]] = vi.mocked(globalStore.subscribe).mock.calls;
 
         pandaStore.setState({
-            editedResponsePlaintext: 'edited',
             originalResponsePlaintext: 'original'
         });
 
@@ -90,7 +81,6 @@ describe('pandaStore', () => {
         );
 
         const state = pandaStore.getState();
-        expect(state.editedResponsePlaintext).toBe('edited');
         expect(state.originalResponsePlaintext).toBe('original');
     });
 });

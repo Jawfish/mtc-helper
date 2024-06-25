@@ -62,19 +62,22 @@ export function useOrochiActions() {
             prompt: prompt || 'prompt could not be found',
             code: editedCode || 'code could not be found',
             tests: tests || 'tests could not be found',
-            reason: operatorNotes || 'reason could not be found'
+            operatorNotes: operatorNotes || 'operator notes could not be found'
         };
 
         const errors = Object.entries(content)
             .filter(([, value]) => value.includes('could not be found'))
-            .map(([key]) => `${key} could not be found`);
+            .map(
+                ([key]) =>
+                    `${key === 'operatorNotes' ? 'operator notes' : key} could not be found`
+            );
 
         try {
             const formattedContent = formatPythonConversation(
                 content.prompt,
                 content.code,
                 content.tests,
-                content.reason
+                content.operatorNotes
             );
             await copy(formattedContent);
 
@@ -106,17 +109,17 @@ const formatPythonConversation = (
     prompt: string,
     code: string,
     tests: string,
-    operatorReason: string
+    operatorNotes: string
 ) => {
     return `
 """
 ${prompt}
 """
 
-################################# REASON #################################
+############################# OPERATOR NOTES #############################
 
 """
-${operatorReason}
+${operatorNotes}
 """
 
 ################################ RESPONSE ################################

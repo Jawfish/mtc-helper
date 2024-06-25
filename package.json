@@ -105,7 +105,7 @@
         "package": "rimraf mtc-helper.zip; cd dist && zip -r ../mtc-helper.zip * && cd ..",
         "storybook": "storybook dev -p 6006",
         "style": "prettier --write .",
-        "test": "NODE_ENV=development vitest",
+        "test": "NODE_ENV=development vitest run",
         "test:coverage": "NODE_ENV=development vitest --coverage",
         "test:ui": "NODE_ENV=development vitest --ui",
         "test:watch": "NODE_ENV=development vitest --watch",

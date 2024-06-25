@@ -113,3 +113,12 @@ export const doubleSpace = (text: string): string =>
         .split('\n')
         .map(line => `${line}\n\n`)
         .join('');
+
+export const standardizeNewlines = (text: string) => {
+    const lines: string[] = text.split('\n');
+
+    return lines
+        .map(line => line.trim().replaceAll(/(\r\n|\r|\n)+/g, ''))
+        .filter(line => line.length > 0)
+        .join('\n');
+};

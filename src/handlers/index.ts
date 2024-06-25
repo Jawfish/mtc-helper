@@ -1,7 +1,3 @@
-import * as global from './global';
-import * as orochi from './orochi';
-import * as panda from './panda';
-
 /**
  * Handlers that satisfy this type will be  called by the MutationObserver on each
  * mutation where target.nodeType === Node.ELEMENT_NODE.
@@ -13,11 +9,25 @@ import * as panda from './panda';
  * These originally had selectors injected as an argument to help with testing. Given a
  * choice between mocking selectors and mocking the DOM, a mocked DOM that is structured
  * like the real DOM is more useful than fake selectors.
- *
- * TODO: look into creating selectors local to the mutation rather than the entire
- * document.
  */
-export type MutHandler = (target: Element) => void;
+
+import { handleAnyCloseButtonMutation } from './global/closeButton';
+import { handleAnySubmitButtonMutation } from './global/submitButton';
+import { handleAnyTaskWindowMutation } from './global/taskWindow';
+import { handleLanguageMutation } from './orochi/language';
+import { handlePromptMutation } from './orochi/prompt';
+import { handleResponseMutation } from './orochi/response';
+import { handleReturnTargetMutation } from './orochi/rework';
+import { handleScoreMutation } from './orochi/score';
+import { handleUsefulMetadataSection } from './orochi/usefulMetadata';
+import { handleUselessMetadataSection } from './orochi/uselessMetadata';
+import { handlePandaEditedResponseMutation } from './panda/editedResponse';
+import { handlePandaEditResponseButtonMutation } from './panda/editResponseButton';
+import { handlePandaOriginalResponseMutation } from './panda/originalResponse';
+import { handlePandaPromptMutation } from './panda/prompt';
+import { handlePandaSelectedResponseSaveButtonMutation } from './panda/saveButton';
+import { handlePandaUnselectedResponseMutation } from './panda/unselectedResponse';
+import { Handlers } from './types';
 
 export const addMtcHelperAttributeToElement = (element: Element) => {
     element.setAttribute('data-mtc-helper', 'true');
@@ -27,19 +37,27 @@ export const elementHasMtcHelperAttribute = (element: Element) => {
     return Boolean(element.attributes.getNamedItem('data-mtc-helper'));
 };
 
-export const standardizeNewlines = (text: string | undefined) => {
-    if (!text) {
-        return undefined;
-    }
-
-    const lines: string[] = text.split('\n');
-
-    return lines
-        .map(line => line.trim().replaceAll(/(\r\n|\r|\n)+/g, ''))
-        .filter(line => line.length > 0)
-        .join('\n');
+export const handlers: Handlers = {
+    global: [
+        handleAnyTaskWindowMutation,
+        handleAnyCloseButtonMutation,
+        handleAnySubmitButtonMutation
+    ],
+    orochi: [
+        handleLanguageMutation,
+        handleUselessMetadataSection,
+        handleUsefulMetadataSection,
+        handlePromptMutation,
+        handleResponseMutation,
+        handleReturnTargetMutation,
+        handleScoreMutation
+    ],
+    panda: [
+        handlePandaEditedResponseMutation,
+        handlePandaEditResponseButtonMutation,
+        handlePandaOriginalResponseMutation,
+        handlePandaPromptMutation,
+        handlePandaSelectedResponseSaveButtonMutation,
+        handlePandaUnselectedResponseMutation
+    ]
 };
-
-export const globalHandlers = [...Object.values(global)];
-export const orochiHandlers = [...Object.values(orochi)];
-export const pandaHandlers = [...Object.values(panda)];

@@ -5,15 +5,11 @@ import {
     MonacoMessage,
     URLMessage
 } from '@src/types/injectTypes';
-import {
-    MutHandler,
-    globalHandlers,
-    orochiHandlers,
-    pandaHandlers
-} from '@handlers/index';
+import { handlers } from '@handlers/index';
 import { selectGlobalObserverTarget } from '@lib/selectors';
 import { orochiStore } from '@src/store/orochiStore';
 import { globalStore } from '@src/store/globalStore';
+import { Handlers } from '@handlers/types';
 
 import Logger from './logging';
 import { updateProcess } from './process';
@@ -93,14 +89,7 @@ export function initializeMonacoObserver() {
  * an async IIFE to wait for the target to exist (MTC's Next.js root element). The
  * observer does not observe changes to the extension's own elements.
  */
-export function initializeMutationObserver(
-    handlers: {
-        orochi: MutHandler[];
-        panda: MutHandler[];
-        global: MutHandler[];
-    },
-    target: HTMLDivElement
-) {
+export function initializeMutationObserver(handlers: Handlers, target: HTMLDivElement) {
     Logger.debug('Creating MutationObserver');
     const observer = new MutationObserver(mutations => {
         const { process, taskIsOpen } = globalStore.getState();
@@ -156,14 +145,7 @@ export function initializeObservers() {
 
             const observerTarget = await selectGlobalObserverTarget();
 
-            initializeMutationObserver(
-                {
-                    global: globalHandlers,
-                    orochi: orochiHandlers,
-                    panda: pandaHandlers
-                },
-                observerTarget
-            );
+            initializeMutationObserver(handlers, observerTarget);
 
             initializeUrlObserver();
             initializeMonacoObserver();

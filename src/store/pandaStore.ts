@@ -4,7 +4,6 @@ import { createLogStore } from './storeMiddleware';
 import { globalStore } from './globalStore';
 
 export type State = {
-    editedResponsePlaintext: string | undefined;
     editedResponseMarkdown: string | undefined;
     originalResponsePlaintext: string | undefined;
     originalResponseMarkdown: string | undefined;
@@ -18,7 +17,6 @@ type Actions = {
 };
 
 const initialState: State = {
-    editedResponsePlaintext: undefined,
     editedResponseMarkdown: undefined,
     originalResponsePlaintext: undefined,
     originalResponseMarkdown: undefined,

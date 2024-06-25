@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import Toolbar from '@src/components/Toolbar';
 import { describe, it, vi, beforeEach, afterEach } from 'vitest';
-import { globalStore } from '@src/store/globalStore';
+import { globalStore, Process } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
 import { expect } from '@storybook/test';
 
@@ -61,22 +61,28 @@ describe('Toolbar', () => {
         expect(screen.getByText('Copy')).toBeInTheDocument();
     });
 
-    it('displays the View Diff button', () => {
-        render(
-            <Toolbar
-                toggleDiffView={mockToggleDiffView}
-                process='Unknown'
-            />
-        );
-        expect(screen.getByText('View Diff')).toBeInTheDocument();
-    });
+    it.each(['Orochi', 'PANDA'] as Process[])(
+        'displays the View Diff button for %s process',
+        process => {
+            globalStore.setState({ process });
+            render(
+                <Toolbar
+                    toggleDiffView={mockToggleDiffView}
+                    process={process}
+                />
+            );
+            expect(screen.getByText('View Diff')).toBeInTheDocument();
+        }
+    );
 
     it('calls toggleDiffView when View Diff button is clicked if it is enabled', () => {
         orochiStore.setState({ originalCode: 'some code' });
+        globalStore.setState({ process: 'Orochi' });
+
         render(
             <Toolbar
                 toggleDiffView={mockToggleDiffView}
-                process='Unknown'
+                process='Orochi'
             />
         );
         fireEvent.click(screen.getByText('View Diff'));
@@ -84,11 +90,12 @@ describe('Toolbar', () => {
     });
 
     it("doesn't call toggleDiffView when View Diff button is clicked if it is disabled", () => {
+        globalStore.setState({ process: 'Orochi' });
         orochiStore.setState({ originalCode: undefined });
         render(
             <Toolbar
                 toggleDiffView={mockToggleDiffView}
-                process='Unknown'
+                process='Orochi'
             />
         );
         fireEvent.click(screen.getByText('View Diff'));
@@ -114,6 +121,7 @@ describe('Toolbar', () => {
     });
 
     it('does not display Conversation option when language is not python', async () => {
+        globalStore.setState({ process: 'Orochi' });
         orochiStore.setState({ language: 'unknown' });
         render(
             <Toolbar

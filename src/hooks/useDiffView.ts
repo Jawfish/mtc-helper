@@ -27,9 +27,7 @@ export function useDiffView(): UseDiffViewReturn {
                 orochiState.originalResponse &&
                 orochiState.editedResponse;
             const canOpenPandaDiff =
-                currentProcess === 'PANDA' &&
-                pandaState.originalResponsePlaintext &&
-                pandaState.editedResponsePlaintext;
+                currentProcess === 'PANDA' && pandaState.originalResponsePlaintext;
 
             return canOpenOrochiDiff || canOpenPandaDiff;
         },
