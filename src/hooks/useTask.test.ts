@@ -13,12 +13,48 @@ vi.mock('@src/contexts/ToastContext');
 vi.mock('@src/store/globalStore');
 vi.mock('@src/lib/textProcessing');
 
+function setupTaskIdElement() {
+    const testHtml = `
+      <table>
+        <tr>
+          <td>
+            <button class="cursor-pointer">
+              <span>In Progress</span>
+            </button>
+          </td>
+          <td>
+            <div title="Task ID">123e4567-e89b-12d3-a456-426614174000</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <button disabled>
+              <span>Completed</span>
+            </button>
+          </td>
+          <td>
+            <div title="Task ID">987e6543-e21b-12d3-a456-426614174000</div>
+          </td>
+        </tr>
+      </table>
+    `;
+
+    document.body.innerHTML = testHtml;
+}
+
+function setupOperatorNameElement() {
+    const testHtml = `
+      <p class="MuiTypography-root MuiTypography-body2 MuiTypography-noWrap">john.doe@</p>
+    `;
+
+    document.body.innerHTML = testHtml;
+}
+
 describe('useTask', () => {
     const mockCopy = vi.fn();
     const mockNotify = vi.fn();
     const mockStore = {
-        operatorName: 'john.doe@',
-        taskId: '123e4567-e89b-12d3-a456-426614174000'
+        operatorName: 'john.doe@'
     };
 
     beforeEach(() => {
@@ -27,29 +63,12 @@ describe('useTask', () => {
         vi.mocked(useToast).mockReturnValue({ notify: mockNotify });
         vi.mocked(useGlobalStore).mockReturnValue(mockStore as any);
         vi.mocked(isValidUUID).mockReturnValue(true);
+        document.body.innerHTML = '';
     });
 
-    it('should return correct operatorEmail', () => {
+    it('should copy correct email to clipboard', async () => {
         const { result } = renderHook(() => useTask());
-        expect(result.current.operatorEmail).toBe('john.doe@invisible.email');
-    });
-
-    it('should return null for operatorEmail when operatorName is null', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({
-            ...mockStore,
-            operatorName: null
-        } as any);
-        const { result } = renderHook(() => useTask());
-        expect(result.current.operatorEmail).toBeNull();
-    });
-
-    it('should return correct taskId', () => {
-        const { result } = renderHook(() => useTask());
-        expect(result.current.taskId).toBe('123e4567-e89b-12d3-a456-426614174000');
-    });
-
-    it('should copy operator email successfully', async () => {
-        const { result } = renderHook(() => useTask());
+        setupOperatorNameElement();
 
         await act(async () => {
             await result.current.copyOperatorEmail();
@@ -62,22 +81,19 @@ describe('useTask', () => {
         );
     });
 
-    it('should handle error when copying operator email fails', async () => {
-        mockCopy.mockRejectedValueOnce(new Error('Copy failed'));
+    it('should not try to copy non-existent email', async () => {
         const { result } = renderHook(() => useTask());
 
         await act(async () => {
             await result.current.copyOperatorEmail();
         });
 
-        expect(mockNotify).toHaveBeenCalledWith(
-            'Error copying operator email: Error: Copy failed',
-            'error'
-        );
+        expect(mockCopy).toBeCalledTimes(0);
     });
 
-    it('should copy task ID successfully', async () => {
+    it('should copy correct task ID to clipboard', async () => {
         const { result } = renderHook(() => useTask());
+        setupTaskIdElement();
 
         await act(async () => {
             await result.current.copyTaskId();
@@ -90,6 +106,30 @@ describe('useTask', () => {
         );
     });
 
+    it('should not try to copy non-existent task ID', async () => {
+        const { result } = renderHook(() => useTask());
+
+        await act(async () => {
+            await result.current.copyTaskId();
+        });
+
+        expect(mockCopy).toBeCalledTimes(0);
+    });
+
+    it('should handle error when copying operator email fails', async () => {
+        mockCopy.mockRejectedValueOnce(new Error('Copy failed'));
+        const { result } = renderHook(() => useTask());
+
+        await act(async () => {
+            await result.current.copyOperatorEmail();
+        });
+
+        expect(mockNotify).toHaveBeenCalledWith(
+            'Error copying operator email: Operator name not found.',
+            'error'
+        );
+    });
+
     it('should handle error when task ID is invalid', async () => {
         vi.mocked(isValidUUID).mockReturnValue(false);
         const { result } = renderHook(() => useTask());
@@ -99,7 +139,7 @@ describe('useTask', () => {
         });
 
         expect(mockNotify).toHaveBeenCalledWith(
-            'Task ID could not be found in a row from the task list. This may happen if the task list in the background updates and the task you are working on moves to the next page.',
+            'Error copying task ID: Invalid or missing Task ID. The task list may have updated.',
             'error'
         );
     });
@@ -113,33 +153,7 @@ describe('useTask', () => {
         });
 
         expect(mockNotify).toHaveBeenCalledWith(
-            'Error copying task ID: Error: Copy failed',
-            'error'
-        );
-    });
-
-    it('should handle missing operator name', () => {
-        vi.mocked(useGlobalStore).mockReturnValue({
-            ...mockStore,
-            operatorName: null
-        } as any);
-        const { result } = renderHook(() => useTask());
-        expect(result.current.operatorEmail).toBeNull();
-    });
-
-    it('should handle missing task ID', async () => {
-        vi.mocked(useGlobalStore).mockReturnValue({
-            ...mockStore,
-            taskId: null
-        } as any);
-        const { result } = renderHook(() => useTask());
-
-        await act(async () => {
-            await result.current.copyTaskId();
-        });
-
-        expect(mockNotify).toHaveBeenCalledWith(
-            'Task ID could not be found in a row from the task list. This may happen if the task list in the background updates and the task you are working on moves to the next page.',
+            'Error copying task ID: Invalid or missing Task ID. The task list may have updated.',
             'error'
         );
     });

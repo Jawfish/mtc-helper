@@ -4,79 +4,70 @@ import { useOrochiStore } from '@src/store/orochiStore';
 
 import { useClipboard } from './useClipboard';
 
+type CopyAction =
+    | 'Edited Code'
+    | 'Original Code'
+    | 'Tests'
+    | 'Prompt'
+    | 'Operator Notes';
+
 export function useOrochiActions() {
     const { copy } = useClipboard();
     const { notify } = useToast();
-
     const { editedCode, originalCode, tests, prompt, operatorNotes } = useOrochiStore();
 
-    const copyEditedCode = useCallback(async () => {
-        try {
-            await copy(editedCode);
-            notify('Edited code copied to clipboard.', 'success');
-        } catch (error) {
-            notify(`Error copying edited code: ${error}`, 'error');
-        }
-    }, [copy, notify, editedCode]);
-
-    const copyOriginalCode = useCallback(async () => {
-        try {
-            await copy(originalCode);
-            notify('Original code copied to clipboard.', 'success');
-        } catch (error) {
-            if ((error as Error).message === 'No text to copy') {
+    const copyContent = useCallback(
+        async (content: string | null, action: CopyAction) => {
+            if (!content) {
                 notify(
-                    'No original code found. The original code must be viewed before it can be copied.',
+                    `No ${action.toLowerCase()} found. The ${action.toLowerCase()} must be viewed before it can be copied.`,
                     'error'
                 );
 
                 return;
             }
-            notify(`Error copying original code: ${error}`, 'error');
-        }
-    }, [copy, notify, originalCode]);
+            try {
+                await copy(content);
+                notify(`${action} copied to clipboard.`, 'success');
+            } catch (error) {
+                notify(`Error copying ${action.toLowerCase()}: ${error}`, 'error');
+            }
+        },
+        [copy, notify]
+    );
 
-    const copyPrompt = useCallback(async () => {
-        try {
-            await copy(prompt);
-            notify('Prompt copied to clipboard.', 'success');
-        } catch (error) {
-            notify(`Error copying prompt: ${error}`, 'error');
-        }
-    }, [copy, notify, prompt]);
-
-    const copyTests = useCallback(async () => {
-        try {
-            await copy(tests);
-            notify('Tests copied to clipboard.', 'success');
-        } catch (error) {
-            notify(`Error copying tests: ${error}`, 'error');
-        }
-    }, [copy, notify, tests]);
-
-    const copyOperatorNotes = useCallback(async () => {
-        try {
-            await copy(operatorNotes);
-            notify('Operator notes copied to clipboard.', 'success');
-        } catch (error) {
-            notify(`Error copying operator notes: ${error}`, 'error');
-        }
-    }, [copy, notify, operatorNotes]);
+    const copyEditedCode = useCallback(
+        () => copyContent(editedCode, 'Edited Code'),
+        [copyContent, editedCode]
+    );
+    const copyOriginalCode = useCallback(
+        () => copyContent(originalCode, 'Original Code'),
+        [copyContent, originalCode]
+    );
+    const copyPrompt = useCallback(
+        () => copyContent(prompt, 'Prompt'),
+        [copyContent, prompt]
+    );
+    const copyTests = useCallback(
+        () => copyContent(tests, 'Tests'),
+        [copyContent, tests]
+    );
+    const copyOperatorNotes = useCallback(
+        () => copyContent(operatorNotes, 'Operator Notes'),
+        [copyContent, operatorNotes]
+    );
 
     const copyAllAsPython = useCallback(async () => {
-        const errors: string[] = [];
         const content = {
             prompt: prompt || 'prompt could not be found',
             code: editedCode || 'code could not be found',
             tests: tests || 'tests could not be found',
-            reason: operatorNotes || 'operator reason could not be found'
+            reason: operatorNotes || 'reason could not be found'
         };
 
-        Object.entries(content).forEach(([, value]) => {
-            if (value.includes('could not be found')) {
-                errors.push(value);
-            }
-        });
+        const errors = Object.entries(content)
+            .filter(([, value]) => value.includes('could not be found'))
+            .map(([key]) => `${key} could not be found`);
 
         try {
             const formattedContent = formatPythonConversation(
@@ -117,7 +108,7 @@ const formatPythonConversation = (
     tests: string,
     operatorReason: string
 ) => {
-    const formattedText = `
+    return `
 """
 ${prompt}
 """
@@ -135,6 +126,4 @@ ${code}
 ################################# TESTS ##################################
 
 ${tests}`;
-
-    return formattedText;
 };

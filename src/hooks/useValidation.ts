@@ -12,8 +12,6 @@ enum ValidationMessage {
     NO_ISSUES = 'No issues detected.'
 }
 
-const ALIGNMENT_SCORE_THRESHOLD = 85;
-
 type NotificationStatus = 'success' | 'warning' | 'error';
 
 export function useValidation() {
@@ -26,15 +24,19 @@ export function useValidation() {
                 return [ValidationMessage.NO_CODE];
             }
 
-            const messages = [
-                ...(codeContainsMarkdownFence(code)
-                    ? [ValidationMessage.MARKDOWN_FENCE]
-                    : []),
-                ...(language === 'python' ? validatePython(code) : []),
-                // TODO: run this automatically on submit instead of in response validation
-                // checkAlignmentScore(ALIGNMENT_SCORE_THRESHOLD) ?? '',
-                ...(codeContainsHtml(code) ? [ValidationMessage.HTML_DETECTED] : [])
-            ].filter(Boolean);
+            const messages: string[] = [];
+
+            if (codeContainsMarkdownFence(code)) {
+                messages.push(ValidationMessage.MARKDOWN_FENCE);
+            }
+
+            if (codeContainsHtml(code)) {
+                messages.push(ValidationMessage.HTML_DETECTED);
+            }
+
+            if (language === 'python') {
+                messages.push(...validatePython(code));
+            }
 
             return messages;
         },
@@ -55,7 +57,10 @@ export function useValidation() {
             );
         } catch (error) {
             Logger.error(`Error checking response: ${error}`);
-            notify(`Error checking response: ${error}`, 'error');
+            notify(
+                `Error checking response: ${error instanceof Error ? error.message : String(error)}`,
+                'error'
+            );
         }
     }, [editedCode, notify, validateCode]);
 

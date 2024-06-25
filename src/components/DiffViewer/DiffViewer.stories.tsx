@@ -5,7 +5,7 @@ import { globalStore } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
 import { pandaStore } from '@src/store/pandaStore';
 
-import DiffViewer from './DiffViewer/DiffViewer';
+import { DiffViewer } from './DiffViewer';
 
 const meta: Meta<typeof DiffViewer> = {
     title: 'Components/DiffViewer',

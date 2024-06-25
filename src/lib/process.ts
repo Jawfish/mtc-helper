@@ -3,8 +3,7 @@ import { globalStore, Process } from '@src/store/globalStore';
 import Logger from './logging';
 
 /**
- * Returns the process based on the UUID found in the URL. Returns undefined if the
- * UUID is not found in the processUuidMap.
+ * Returns the process based on the UUID found in the URL.
  */
 export const getProcess = (url: string | undefined): Process => {
     if (!url) {

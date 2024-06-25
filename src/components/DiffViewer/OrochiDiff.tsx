@@ -7,9 +7,13 @@ import { DiffContainer } from './DiffLayout';
 
 type OrochiDiffProps = {
     diffMethod: DiffMethod;
+    disableWordDiff: boolean;
 };
 
-export const OrochiDiff: React.FC<OrochiDiffProps> = ({ diffMethod }) => {
+export const OrochiDiff: React.FC<OrochiDiffProps> = ({
+    diffMethod,
+    disableWordDiff
+}) => {
     const [activeTab, setActiveTab] = useState(0);
     const { editedCode, originalCode, editedResponse, originalResponse } =
         useOrochiStore();
@@ -27,6 +31,7 @@ export const OrochiDiff: React.FC<OrochiDiffProps> = ({ diffMethod }) => {
                     newValue={editedCode}
                     splitView={true}
                     compareMethod={diffMethod}
+                    disableWordDiff={disableWordDiff}
                 />
             )
         },

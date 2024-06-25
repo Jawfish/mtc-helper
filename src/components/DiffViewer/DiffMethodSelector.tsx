@@ -10,26 +10,34 @@ import {
 
 type DiffMethodSelectorProps = {
     value: DiffMethod;
-    onChange: (value: string) => void;
+    onChange: (value: DiffMethod) => void;
 };
+
+const diffMethodOptions = [
+    { value: DiffMethod.CHARS, label: 'Characters' },
+    { value: DiffMethod.WORDS, label: 'Words' },
+    { value: DiffMethod.LINES, label: 'Lines' },
+    { value: DiffMethod.SENTENCES, label: 'Sentences' }
+];
 
 export const DiffMethodSelector: React.FC<DiffMethodSelectorProps> = ({
     value,
     onChange
 }) => (
     <Select
-        onValueChange={onChange}
+        onValueChange={newValue => onChange(newValue as DiffMethod)}
         defaultValue={value}>
-        <SelectTrigger className='shadow-none border-solid border rounded-md border-mtc-primary bg-white text-mtc-primary w-36 focus:ring-mtc-primary'>
+        <SelectTrigger className='shadow-none border-solid border rounded-md border-mtc-primary bg-white !text-mtc-primary w-36 focus:!ring-mtc-primary'>
             <SelectValue />
         </SelectTrigger>
         <SelectContent className='z-[1300] bg-white text-mtc-primary'>
-            {Object.values(DiffMethod).map(method => (
+            {diffMethodOptions.map(({ value, label }) => (
                 <SelectItem
-                    key={method}
-                    className='hover:bg-mtc-faded text-mtc-primary'
-                    value={method}>
-                    {method.charAt(0).toUpperCase() + method.slice(1).toLowerCase()}
+                    key={value}
+                    // TODO: figure out how to not need to make these important
+                    className='hover:!bg-mtc-faded hover:!text-mtc-primary-strong'
+                    value={value}>
+                    {label}
                 </SelectItem>
             ))}
         </SelectContent>

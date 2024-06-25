@@ -1,18 +1,40 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback, RefObject } from 'react';
 
-const useKeyPress = (key: string, action: () => void) => {
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === key) {
-                action();
+type KeyPressOptions = {
+    target?: RefObject<HTMLElement> | null;
+    event?: 'keydown' | 'keyup';
+    preventDefault?: boolean;
+};
+
+const useKeyPress = (
+    key: string | string[],
+    action: (event: KeyboardEvent) => void,
+    options: KeyPressOptions = {}
+) => {
+    const { target = null, event = 'keydown', preventDefault = false } = options;
+
+    const handleKeyPress = useCallback(
+        (e: KeyboardEvent) => {
+            const keys = Array.isArray(key) ? key : [key];
+            if (keys.includes(e.key)) {
+                if (preventDefault) {
+                    e.preventDefault();
+                }
+                action(e);
             }
-        };
-        document.addEventListener('keydown', handleKeyDown);
+        },
+        [key, action, preventDefault]
+    );
+
+    useEffect(() => {
+        const targetElement = target?.current || document;
+
+        targetElement.addEventListener(event, handleKeyPress as EventListener);
 
         return () => {
-            document.removeEventListener('keydown', handleKeyDown);
+            targetElement.removeEventListener(event, handleKeyPress as EventListener);
         };
-    }, [key, action]);
+    }, [target, event, handleKeyPress]);
 };
 
 export default useKeyPress;

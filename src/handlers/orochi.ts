@@ -9,8 +9,9 @@ import {
     MutHandler
 } from '.';
 
-export const handlePromptMutation: MutHandler = (target: Element) => {
-    const element = target.querySelector(
+export const handlePromptMutation: MutHandler = (_target: Element) => {
+    // target.querySelector results in inconsistent behavior
+    const element = document.querySelector(
         'div.rounded-xl.bg-indigo-100 p.whitespace-pre-wrap'
     )?.parentElement;
 
@@ -106,12 +107,14 @@ export const handleOrochiTaskWindowMetadataSectionMutation: MutHandler = (
     orochiStore.setState({ operatorNotes, conversationTitle, errorLabels });
 };
 
-export const handleLanguageMutation: MutHandler = (_target: Element) => {
-    const hasPythonDiv = Array.from(document.querySelectorAll('div')).find(
-        div => div.textContent === 'Programming Language:Python'
+export const handleLanguageMutation: MutHandler = (target: Element) => {
+    const hasPythonString = Array.from(target.querySelectorAll('div')).find(
+        div =>
+            div.textContent?.includes('Programming Language:Python') ||
+            div.textContent?.includes('Programming Language*Python')
     );
 
-    if (hasPythonDiv) {
+    if (hasPythonString) {
         orochiStore.setState({ language: 'python' });
 
         return;
@@ -122,6 +125,16 @@ export const handleLanguageMutation: MutHandler = (_target: Element) => {
 
     if (pythonInClass) {
         orochiStore.setState({ language: 'python' });
+
+        return;
+    }
+
+    const monacoTestSection = selectMonacoTestSection();
+
+    if (monacoTestSection?.textContent?.includes('Python')) {
+        orochiStore.setState({ language: 'python' });
+
+        return;
     }
 };
 
@@ -215,6 +228,14 @@ const selectOrochiErrorLabels = (): HTMLDivElement | null => {
     const element =
         selectOrochiTaskWindowMetadataSectionElement()?.children[1]?.children[1]
             ?.lastElementChild;
+
+    return element instanceof HTMLDivElement ? element : null;
+};
+
+const selectMonacoTestSection = (): HTMLDivElement | null => {
+    const element = Array.from(document.querySelectorAll('div')).find(
+        div => div.textContent === 'Tests*'
+    )?.parentElement;
 
     return element instanceof HTMLDivElement ? element : null;
 };

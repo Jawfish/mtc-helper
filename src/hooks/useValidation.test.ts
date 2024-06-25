@@ -84,22 +84,4 @@ describe('response validation', () => {
         const mockNotify = vi.mocked(useToast().notify);
         expect(mockNotify).toHaveBeenCalledWith('No issues detected.', 'success');
     });
-
-    // TODO: move this to test separately along with moving the functionality of
-    // checking the alignment score on submit
-    // it('notifies when the task has a low score and is not marked as a rework', async () => {
-    //     orochiStore.setState({ editedCode: 'def valid_python():' });
-    //     orochiStore.setState({ score: 84, rework: false });
-
-    //     const { result } = renderHook(() => useValidation());
-
-    //     await act(async () => {
-    //         result.current.validateResponse();
-    //     });
-    //     const mockNotify = vi.mocked(useToast().notify);
-    //     expect(mockNotify).toHaveBeenCalledWith(
-    //         'The alignment score is 84, but the task is not marked as a rework.',
-    //         'warning'
-    //     );
-    // });
 });

@@ -7,9 +7,13 @@ import { DiffContainer } from './DiffLayout';
 
 type PandaDiffProps = {
     diffMethod: DiffMethod;
+    disableWordDiff: boolean;
 };
 
-export const PandaDiff: React.FC<PandaDiffProps> = ({ diffMethod }) => {
+export const PandaDiff: React.FC<PandaDiffProps> = ({
+    diffMethod,
+    disableWordDiff
+}) => {
     const [activeTab, setActiveTab] = useState(0);
     const {
         editedResponsePlaintext,
@@ -28,6 +32,7 @@ export const PandaDiff: React.FC<PandaDiffProps> = ({ diffMethod }) => {
                     splitView={true}
                     compareMethod={diffMethod}
                     extraLinesSurroundingDiff={0}
+                    disableWordDiff={disableWordDiff}
                 />
             )
         },

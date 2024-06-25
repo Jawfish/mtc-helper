@@ -69,6 +69,7 @@ describe('useDiffView', () => {
         });
 
         expect(result.current.diffViewOpen).toBe(true);
+        expect(Logger.debug).toHaveBeenCalledWith('Diff view toggled on');
     });
 
     it('should not toggle diffViewOpen and show error for Orochi when original response is missing', () => {
@@ -76,6 +77,46 @@ describe('useDiffView', () => {
         vi.mocked(useOrochiStore).mockReturnValue({
             originalResponse: null,
             editedResponse: 'edited'
+        } as any);
+
+        const { result } = renderHook(() => useDiffView());
+
+        act(() => {
+            result.current.toggleDiffView();
+        });
+
+        expect(result.current.diffViewOpen).toBe(false);
+        expect(mockNotify).toHaveBeenCalledWith(
+            'The original content must be viewed before a diff can be displayed.',
+            'error'
+        );
+    });
+
+    it('should not toggle diffViewOpen and show error for Orochi when edited response is missing', () => {
+        vi.mocked(useGlobalStore).mockReturnValue({ process: 'Orochi' } as any);
+        vi.mocked(useOrochiStore).mockReturnValue({
+            originalResponse: 'original',
+            editedResponse: null
+        } as any);
+
+        const { result } = renderHook(() => useDiffView());
+
+        act(() => {
+            result.current.toggleDiffView();
+        });
+
+        expect(result.current.diffViewOpen).toBe(false);
+        expect(mockNotify).toHaveBeenCalledWith(
+            'The original content must be viewed before a diff can be displayed.',
+            'error'
+        );
+    });
+
+    it('should not toggle diffViewOpen and show error for PANDA when original response is missing', () => {
+        vi.mocked(useGlobalStore).mockReturnValue({ process: 'PANDA' } as any);
+        vi.mocked(usePandaStore).mockReturnValue({
+            originalResponsePlaintext: undefined,
+            editedResponsePlaintext: 'edited'
         } as any);
 
         const { result } = renderHook(() => useDiffView());

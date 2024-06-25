@@ -5,7 +5,15 @@ import { useOrochiStore } from '@src/store/orochiStore';
 import { usePandaStore } from '@src/store/pandaStore';
 import { useCallback, useState } from 'react';
 
-export function useDiffView() {
+const DIFF_VIEW_ERROR =
+    'The original content must be viewed before a diff can be displayed.';
+
+type UseDiffViewReturn = {
+    diffViewOpen: boolean;
+    toggleDiffView: () => void;
+};
+
+export function useDiffView(): UseDiffViewReturn {
     const { process } = useGlobalStore();
     const { notify } = useToast();
     const [diffViewOpen, setDiffViewOpen] = useState(false);
@@ -30,10 +38,7 @@ export function useDiffView() {
 
     const toggleDiffView = useCallback(() => {
         if (!canOpenDiffView(process)) {
-            notify(
-                'The original content must be viewed before a diff can be displayed.',
-                'error'
-            );
+            notify(DIFF_VIEW_ERROR, 'error');
 
             return;
         }

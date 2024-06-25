@@ -22,27 +22,6 @@ export const selectTaskWindowElement = (): HTMLDivElement | undefined => {
     return taskWindow instanceof HTMLDivElement ? taskWindow : undefined;
 };
 
-export const selectTaskIdElement = (): HTMLDivElement | undefined => {
-    const buttons = document.querySelectorAll('button');
-
-    for (const button of buttons) {
-        if (
-            !button.disabled &&
-            button.querySelector('span') &&
-            button.classList.contains('cursor-pointer') &&
-            button.querySelector('span')?.textContent?.includes('In Progress')
-        ) {
-            const row = button.closest('tr');
-            if (row) {
-                const div = row.querySelector('div[title]');
-                if (div instanceof HTMLDivElement) {
-                    return div;
-                }
-            }
-        }
-    }
-};
-
 export const selectMetadataSectionElement = (): HTMLDivElement | undefined => {
     const h4Elements = Array.from(document.querySelectorAll('h4'));
     const metadataElement = h4Elements.find(h4 => {
@@ -96,12 +75,4 @@ export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
     )?.parentElement;
 
     return element instanceof HTMLButtonElement ? element : undefined;
-};
-
-export const selectOperatorNameElement = (): HTMLParagraphElement | null => {
-    const element = document.querySelector(
-        '.MuiTypography-root.MuiTypography-body2.MuiTypography-noWrap'
-    );
-
-    return element instanceof HTMLParagraphElement ? element : null;
 };

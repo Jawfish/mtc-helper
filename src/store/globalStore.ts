@@ -5,8 +5,6 @@ import { createLogStore } from './storeMiddleware';
 export type Process = 'Unknown' | 'Orochi' | 'PANDA' | 'STEM';
 
 type State = {
-    taskId: string | null;
-    operatorName: string | null;
     process: Process;
     taskIsOpen: boolean;
 };
@@ -16,8 +14,6 @@ type Actions = {
 };
 
 const initialState: State = {
-    taskId: null,
-    operatorName: null,
     process: 'Unknown',
     taskIsOpen: false
 };

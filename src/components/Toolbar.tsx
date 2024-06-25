@@ -65,7 +65,7 @@ const Dropdown = ({ process }: { process: Process }) => {
             <DropdownMenuTrigger asChild>
                 {/* NOTE: this needs to be a React.forwardRef component due to the use of asChild */}
                 <ShadButton
-                    className='bg-white border-mtc-primary text-mtc-primary border rounded-md shadow-none focus:!ring-mtc-primary cursor-pointer flex gap-3'
+                    className='bg-white border-mtc-primary text-mtc-primary border rounded-md shadow-none focus:!ring-mtc-primary cursor-pointer flex gap-3 !font-normal hover:!text-mtc-primary hover:!bg-mtc-faded'
                     variant={'outline'}
                     data-testid='dropdown-trigger'>
                     <span>Copy</span>
