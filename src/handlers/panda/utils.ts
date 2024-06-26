@@ -1,12 +1,12 @@
-export const getWordCountElement = (count: number) => {
+export const createWordCountElement = (count: number, label?: string) => {
     const wcElement = document.createElement('span');
-    wcElement.textContent = `${count.toString()} words`;
+    wcElement.textContent = `${count.toString()} words${label ? ` (${label})` : ''}`;
     wcElement.className = 'text-xs self-center';
 
     return wcElement;
 };
 
-export const getCopyButton = (label: string = 'Copy') => {
+export const createCopyButtonElement = (label: string = 'Copy') => {
     const copyButton = document.createElement('button');
     copyButton.textContent = label;
     copyButton.className =
@@ -15,7 +15,7 @@ export const getCopyButton = (label: string = 'Copy') => {
     return copyButton;
 };
 
-export const getControlsContainer = () => {
+export const createControlsContainerElement = () => {
     const controlsContainer = document.createElement('div');
     controlsContainer.className = 'flex gap-2 w-full justify-end mt-2 items-center';
 

@@ -6,7 +6,11 @@ import markdownToTxt from 'markdown-to-txt';
 
 import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..';
 
-import { getWordCountElement, getCopyButton, getControlsContainer } from './utils';
+import {
+    createWordCountElement,
+    createCopyButtonElement,
+    createControlsContainerElement
+} from './utils';
 
 export const handlePandaPromptMutation: MutHandler = (mutation: Element) => {
     const closeButton = Array.from(mutation.querySelectorAll('button')).find(
@@ -30,10 +34,10 @@ export const handlePandaPromptMutation: MutHandler = (mutation: Element) => {
     const promptContent = promptElement.textContent || '';
     const wordCount = getWordCount(promptContent);
 
-    const container = getControlsContainer();
-    const wcElement = getWordCountElement(wordCount);
-    const markdownCopyButton = getCopyButton('Copy Markdown');
-    const plaintextCopyButton = getCopyButton('Copy Plaintext');
+    const container = createControlsContainerElement();
+    const wcElement = createWordCountElement(wordCount);
+    const markdownCopyButton = createCopyButtonElement('Copy Markdown');
+    const plaintextCopyButton = createCopyButtonElement('Copy Plaintext');
 
     markdownCopyButton.addEventListener('click', () => {
         const markdown = md.instance.htmlToMarkdown(promptElement, '');

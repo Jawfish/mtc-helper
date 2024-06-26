@@ -7,7 +7,11 @@ import markdownToTxt from 'markdown-to-txt';
 
 import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..';
 
-import { getWordCountElement, getCopyButton, getControlsContainer } from './utils';
+import {
+    createWordCountElement,
+    createCopyButtonElement,
+    createControlsContainerElement
+} from './utils';
 
 export const handlePandaUnselectedResponseMutation: MutHandler = (
     mutation: Element
@@ -45,11 +49,11 @@ export const handlePandaUnselectedResponseMutation: MutHandler = (
         return;
     }
 
-    const container = getControlsContainer();
+    const container = createControlsContainerElement();
     const wordCount = getWordCount(unselectedResponsePlaintext);
-    const wcElement = getWordCountElement(wordCount);
-    const markdownCopyButton = getCopyButton('Copy Markdown');
-    const plaintextCopyButton = getCopyButton('Copy Plaintext');
+    const wcElement = createWordCountElement(wordCount);
+    const markdownCopyButton = createCopyButtonElement('Copy Markdown');
+    const plaintextCopyButton = createCopyButtonElement('Copy Plaintext');
 
     // update word count in the word count element when unselectedResponse changes
     pandaStore.subscribe(({ unselectedResponsePlaintext }) => {
