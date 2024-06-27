@@ -73,12 +73,7 @@ export function useOrochiActions() {
             );
 
         try {
-            const formattedContent = formatPythonConversation(
-                content.prompt,
-                content.code,
-                content.tests,
-                content.operatorNotes
-            );
+            const formattedContent = formatPythonConversation(content);
             await copy(formattedContent);
 
             if (errors.length === 4) {
@@ -105,28 +100,50 @@ export function useOrochiActions() {
     };
 }
 
-const formatPythonConversation = (
-    prompt: string,
-    code: string,
-    tests: string,
-    operatorNotes: string
-) => {
-    return `
-"""
-${prompt}
-"""
+type ConversationParts = {
+    prompt: string;
+    code: string;
+    tests: string;
+    operatorNotes: string;
+};
 
-############################# OPERATOR NOTES #############################
+type SectionType = 'commented' | 'uncommented';
 
-"""
-${operatorNotes}
-"""
+const createSection = (title: string, content: string, type: SectionType): string => {
+    const titleLength = title.length;
+    const padding = Math.floor((86 - titleLength) / 2);
 
-################################ RESPONSE ################################
+    let header = `${'#'.repeat(padding)} ${title} ${'#'.repeat(padding)}`;
+    // add extra # if title is odd length; theoretically should only ever need 1 more,
+    // but use .repeat to be sure
+    if (header.length < 88) {
+        header += '#'.repeat(88 - header.length);
+    }
+    const trimmedContent = content.trim();
 
-${code}
+    if (type === 'commented') {
+        return [header, '', '"""', trimmedContent, '"""'].join('\n');
+    } else {
+        return [header, '', trimmedContent].join('\n');
+    }
+};
 
-################################# TESTS ##################################
+const formatPythonConversation = ({
+    prompt,
+    code,
+    tests,
+    operatorNotes
+}: ConversationParts): string => {
+    const sections: string[] = [];
 
-${tests}`;
+    sections.push(createSection('PROMPT', prompt, 'commented'));
+
+    if (operatorNotes !== 'operator notes could not be found' && operatorNotes.trim()) {
+        sections.push(createSection('OPERATOR NOTES', operatorNotes, 'commented'));
+    }
+
+    sections.push(createSection('RESPONSE', code, 'uncommented'));
+    sections.push(createSection('TESTS', tests, 'uncommented'));
+
+    return sections.join('\n\n').trim();
 };

@@ -82,18 +82,74 @@ describe('useOrochiActions', () => {
         );
     });
 
-    it('should copy all content as Python successfully', async () => {
+    it('should copy all content as Python successfully with correct formatting', async () => {
         const { result } = renderHook(() => useOrochiActions());
         await act(async () => {
             await result.current.copyAllAsPython();
         });
-        expect(mockCopy).toHaveBeenCalledWith(expect.stringContaining('prompt text'));
-        expect(mockCopy).toHaveBeenCalledWith(expect.stringContaining('edited code'));
-        expect(mockCopy).toHaveBeenCalledWith(expect.stringContaining('test code'));
-        expect(mockCopy).toHaveBeenCalledWith(
-            expect.stringContaining('operator notes')
-        );
+        
+        const expectedContent = `############################# PROMPT #############################
+
+"""
+prompt text
+"""
+
+########################## OPERATOR NOTES ##########################
+
+"""
+operator notes
+"""
+
+############################ RESPONSE #############################
+
+edited code
+
+############################## TESTS ##############################
+
+test code`;
+
+        expect(mockCopy).toHaveBeenCalledWith(expectedContent);
         expect(mockNotify).toHaveBeenCalledWith('Conversation copied', 'success');
+    });
+
+    it('should format sections correctly when copying all content as Python', async () => {
+        vi.mocked(useOrochiStore).mockReturnValue({
+            ...mockStore,
+            prompt: 'This is a\nmultiline prompt',
+            editedCode: 'def example():\n    return "Hello, World!"',
+            tests: 'assert example() == "Hello, World!"',
+            operatorNotes: 'Some notes\nfor the operator'
+        } as any);
+
+        const { result } = renderHook(() => useOrochiActions());
+        await act(async () => {
+            await result.current.copyAllAsPython();
+        });
+
+        const expectedContent = `############################# PROMPT #############################
+
+"""
+This is a
+multiline prompt
+"""
+
+########################## OPERATOR NOTES ##########################
+
+"""
+Some notes
+for the operator
+"""
+
+############################ RESPONSE #############################
+
+def example():
+    return "Hello, World!"
+
+############################## TESTS ##############################
+
+assert example() == "Hello, World!"`;
+
+        expect(mockCopy).toHaveBeenCalledWith(expectedContent);
     });
 
     it('should handle partial content when copying all as Python', async () => {
