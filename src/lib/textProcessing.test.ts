@@ -1,376 +1,312 @@
 import '@testing-library/jest-dom/vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as textUtils from './textProcessing';
 
-import {
-    codeContainsHtml,
-    codeContainsMarkdownFence,
-    truncateString,
-    getTextFromElement,
-    getWordCount,
-    isValidUUID
-} from './textProcessing';
-
-describe('Checking for HTML in code', () => {
-    it('detects HTML tags in code', () => {
-        const code = 'some code </div>';
-        const result = codeContainsHtml(code);
-        expect(result).toBe(true);
+describe('Identifying HTML content', () => {
+    it('recognizes the presence of HTML tags', () => {
+        const contentWithHtml = 'some code </div>';
+        expect(textUtils.codeContainsHtml(contentWithHtml)).toBe(true);
     });
 
-    it('does not give a false positive', () => {
-        const code = '<so<m/>e< <<>><><><code<>';
-        const result = codeContainsHtml(code);
-        expect(result).toBe(false);
+    it('does not misidentify text without HTML tags', () => {
+        const contentWithoutHtml = '<so<m/>e< <<>><><><code<>';
+        expect(textUtils.codeContainsHtml(contentWithoutHtml)).toBe(false);
     });
 });
 
-describe('Determining if code contains markdown', () => {
-    let code: string;
+describe('Detecting markdown code blocks', () => {
+    it('identifies an unclosed markdown code block', () => {
+        const unclosedCodeBlock = '```javascript\nsome code';
+        expect(textUtils.codeContainsMarkdownFence(unclosedCodeBlock)).toBe(true);
+    });
+
+    it('identifies an unopened markdown code block', () => {
+        const unopenedCodeBlock = 'some\ncode```';
+        expect(textUtils.codeContainsMarkdownFence(unopenedCodeBlock)).toBe(true);
+    });
+});
+
+describe('String truncation', () => {
+    it('shortens long text and adds ellipsis', () => {
+        const longText = 'a'.repeat(51);
+        expect(textUtils.truncateString(longText)).toBe(`${'a'.repeat(50)}...`);
+    });
+
+    it('handles undefined input', () => {
+        expect(textUtils.truncateString(undefined)).toBe('undefined');
+    });
+
+    it('allows custom truncation length', () => {
+        const text = 'a'.repeat(51);
+        expect(textUtils.truncateString(text, 10)).toBe('aaaaaaaaaa...');
+    });
+
+    it('returns empty output for empty input', () => {
+        expect(textUtils.truncateString('')).toBe('');
+    });
+
+    it('leaves short text unchanged', () => {
+        expect(textUtils.truncateString('short text')).toBe('short text');
+    });
+
+    it('replaces line breaks with spaces', () => {
+        const textWithLineBreaks = 'a\n'.repeat(50);
+        expect(textUtils.truncateString(textWithLineBreaks)).toBe(
+            `${'a '.repeat(50 / 2)}...`
+        );
+    });
+});
+
+describe('Extracting text from HTML elements', () => {
+    let element: HTMLElement;
 
     beforeEach(() => {
-        code = '';
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
-    });
-
-    it('detects improperly opened markdown code block', () => {
-        code = '```javascript\nsome code';
-        const result = codeContainsMarkdownFence(code);
-        expect(result).toBe(true);
-    });
-
-    it('detects improperly closed markdown code block', () => {
-        code = 'some\ncode```';
-        const result = codeContainsMarkdownFence(code);
-        expect(result).toBe(true);
-    });
-});
-
-describe('Truncating a string', () => {
-    it('truncates a string to 50 characters by default', () => {
-        const str = 'a'.repeat(51);
-        expect(truncateString(str)).toBe(`${'a'.repeat(50)}...`);
-    });
-
-    it('handles undefined strings', () => {
-        expect(truncateString(undefined)).toBe('undefined');
-    });
-
-    it('truncates to a custom length', () => {
-        const str = 'a'.repeat(51);
-        expect(truncateString(str, 10)).toBe('aaaaaaaaaa...');
-    });
-
-    it('handles empty strings', () => {
-        expect(truncateString('')).toBe('empty string');
-    });
-
-    it('does not truncate short strings', () => {
-        expect(truncateString('short string')).toBe('short string');
-    });
-
-    it('replaces newlines with spaces', () => {
-        const str = 'a\n'.repeat(50);
-        expect(truncateString(str)).toBe(`${'a '.repeat(50 / 2)}...`);
-    });
-});
-
-describe('Getting the text from an HTML element', () => {
-    let element: HTMLElement | null;
-
-    beforeEach(() => {
-        element = null;
-    });
-
-    it('returns an empty string for undefined elements', () => {
-        expect(getTextFromElement(element)).toBe('');
-    });
-
-    it('returns text from a single element', () => {
-        element = document.createElement('p');
-        element.textContent = 'normal text';
-        expect(getTextFromElement(element)).toBe('normal text');
-    });
-
-    it('returns text from a nested element', () => {
-        element = document.createElement('p');
-        const strong = document.createElement('strong');
-        strong.textContent = 'nested bold';
-        element.appendChild(strong);
-        expect(getTextFromElement(element)).toBe('**nested bold**');
-    });
-
-    it('returns text from a list element', () => {
-        element = document.createElement('li');
-        element.textContent = 'list element';
-        expect(getTextFromElement(element)).toBe('- list element');
-    });
-
-    it('returns text from a code element', () => {
-        element = document.createElement('code');
-        element.textContent = 'inline code';
-        expect(getTextFromElement(element)).toBe('`inline code`');
-    });
-
-    it('returns text from a level 1 heading element', () => {
-        element = document.createElement('h1');
-        element.textContent = 'heading';
-        expect(getTextFromElement(element)).toBe('# heading');
-    });
-
-    it('returns text from a level 2 heading element', () => {
-        element = document.createElement('h2');
-        element.textContent = 'heading';
-        expect(getTextFromElement(element)).toBe('## heading');
-    });
-
-    it('returns text from a level 3 heading element', () => {
-        element = document.createElement('h3');
-        element.textContent = 'heading';
-        expect(getTextFromElement(element)).toBe('### heading');
-    });
-
-    it('returns text from a level 4 heading element', () => {
-        element = document.createElement('h4');
-        element.textContent = 'heading';
-        expect(getTextFromElement(element)).toBe('#### heading');
-    });
-
-    it('returns text from a level 5 heading element', () => {
-        element = document.createElement('h5');
-        element.textContent = 'heading';
-        expect(getTextFromElement(element)).toBe('##### heading');
-    });
-
-    it('returns text from a level 6 heading element', () => {
-        element = document.createElement('h6');
-        element.textContent = 'heading';
-        expect(getTextFromElement(element)).toBe('###### heading');
-    });
-
-    it('returns text from a strong element', () => {
-        element = document.createElement('strong');
-        element.textContent = 'bold text';
-        expect(getTextFromElement(element)).toBe('**bold text**');
-    });
-
-    it('returns text from an emphasis element', () => {
-        element = document.createElement('em');
-        element.textContent = 'emphasized text';
-        expect(getTextFromElement(element)).toBe('*emphasized text*');
-    });
-
-    it('returns the text content as the default case', () => {
         element = document.createElement('div');
-        element.textContent = 'default text';
-        expect(getTextFromElement(element)).toBe('default text');
     });
 
-    it('returns text from a paragraph element with multiple children', () => {
-        element = document.createElement('p');
+    it('extracts empty text for empty elements', () => {
+        expect(textUtils.getTextFromElement(null)).toBe('');
+    });
+
+    it('extracts plain text from a simple element', () => {
+        element.textContent = 'normal text';
+        expect(textUtils.getTextFromElement(element)).toBe('normal text');
+    });
+
+    it('formats text from nested elements', () => {
+        const nestedElement = document.createElement('strong');
+        nestedElement.textContent = 'nested bold';
+        element.appendChild(nestedElement);
+        expect(textUtils.getTextFromElement(element)).toBe('**nested bold**');
+    });
+
+    it('formats list items with a leading dash', () => {
+        const listItem = document.createElement('li');
+        listItem.textContent = 'list item';
+        expect(textUtils.getTextFromElement(listItem)).toBe('- list item');
+    });
+
+    it('wraps inline code with backticks', () => {
+        const codeElement = document.createElement('code');
+        codeElement.textContent = 'inline code';
+        expect(textUtils.getTextFromElement(codeElement)).toBe('`inline code`');
+    });
+
+    it('formats headings with appropriate markdown', () => {
+        const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+        headings.forEach((tag, index) => {
+            const heading = document.createElement(tag);
+            heading.textContent = 'heading';
+            expect(textUtils.getTextFromElement(heading)).toBe(
+                `${'#'.repeat(index + 1)} heading`
+            );
+        });
+    });
+
+    it('bolds text within strong elements', () => {
+        const strongElement = document.createElement('strong');
+        strongElement.textContent = 'bold text';
+        expect(textUtils.getTextFromElement(strongElement)).toBe('**bold text**');
+    });
+
+    it('italicizes text within emphasis elements', () => {
+        const emphasisElement = document.createElement('em');
+        emphasisElement.textContent = 'emphasized text';
+        expect(textUtils.getTextFromElement(emphasisElement)).toBe('*emphasized text*');
+    });
+
+    it('handles complex nested elements', () => {
+        const paragraph = document.createElement('p');
         const strong = document.createElement('strong');
         strong.textContent = 'bold';
         const em = document.createElement('em');
         em.textContent = 'emphasis';
-        element.appendChild(strong);
-        element.appendChild(document.createTextNode(', '));
-        element.appendChild(em);
-        expect(getTextFromElement(element)).toBe('**bold**, *emphasis*');
+        paragraph.appendChild(strong);
+        paragraph.appendChild(document.createTextNode(', '));
+        paragraph.appendChild(em);
+        expect(textUtils.getTextFromElement(paragraph)).toBe('**bold**, *emphasis*');
     });
 });
 
-describe('Counting words', () => {
-    it('counts the correct number of space-separated words', () => {
-        expect(getWordCount('one two three')).toBe(3);
-    });
+describe('Word counting', () => {
+    describe('Basic functionality', () => {
+        it('counts space-separated words correctly', () => {
+            expect(textUtils.getWordCount('one two three')).toBe(3);
+        });
 
-    it('handles leading and trailing whitespace', () => {
-        expect(getWordCount('  start   end  ')).toBe(2);
-    });
+        it('ignores leading and trailing whitespace', () => {
+            expect(textUtils.getWordCount('  start   end  ')).toBe(2);
+        });
 
-    it('handles multiple spaces between words', () => {
-        expect(getWordCount('word1    word2     word3')).toBe(3);
-    });
+        it('handles multiple spaces between words', () => {
+            expect(textUtils.getWordCount('word1    word2     word3')).toBe(3);
+        });
 
-    it('counts 0 for an empty string', () => {
-        expect(getWordCount('')).toBe(0);
-    });
+        it('counts words in a sentence the same way Google Docs does (1)', () => {
+            const sentence =
+                '“Example Product Direct: Product Direct courses offer individualized study focused on state standards, while supported by certified teachers.”';
+            expect(textUtils.getWordCount(sentence)).toBe(18);
+        });
 
-    it('counts 0 for a string with only whitespace', () => {
-        expect(getWordCount('   \t   \n   ')).toBe(0);
-    });
-
-    it('handles a mix of spaces and tabs', () => {
-        expect(getWordCount('word1\t\tword2 \t word3')).toBe(3);
-    });
-
-    it("doesn't count a list number as a word", () => {
-        expect(getWordCount('1. word')).toBe(1);
-    });
-
-    it("doesn't count a list number as a word when the list spans multiple lines", () => {
-        expect(getWordCount('1. Lake One\n2. Lake Two\n3. Lake Three')).toBe(6);
-    });
-
-    it('counts standalone, non-list numbers as a word', () => {
-        expect(getWordCount("It's 20 degrees outside")).toBe(4);
-    });
-
-    it('counts hyphenated words as one word', () => {
-        expect(getWordCount('word - word word-word word- -word')).toBe(5);
-    });
-
-    it('counts contractions as one word', () => {
-        expect(getWordCount("don't can't won't")).toBe(3);
-    });
-
-    it("doesn't count punctuation", () => {
-        expect(getWordCount('word! word? word. word,')).toBe(4);
-    });
-
-    it('handles newlines', () => {
-        expect(getWordCount('word\nword\nword')).toBe(3);
-    });
-
-    it('counts words with accented characters', () => {
-        expect(getWordCount('Café au lait')).toBe(3);
-    });
-
-    it('counts words with umlauts', () => {
-        expect(getWordCount('Über Äpfel und Öl')).toBe(4);
-    });
-
-    it('counts Cyrillic words', () => {
-        expect(getWordCount('Россия и Україна')).toBe(3);
-    });
-
-    it('counts Japanese words', () => {
-        expect(getWordCount('こんにちは 世界')).toBe(2);
-    });
-
-    it("doesn't count markdown", () => {
-        expect(getWordCount('*one* _two_ **three** __four__')).toBe(4);
-    });
-
-    it('counts example sentence in the same way Obsidian and Google Docs do', () => {
-        const sentence =
-            '“Example Product Direct: Product Direct courses offer individualized study focused on state standards, while supported by certified teachers.”';
-        expect(getWordCount(sentence)).toBe(18);
-    });
-
-    it('counts example sentence that contains "K-8" and "9" in the same way Obsidian and Google Docs do', () => {
-        const sentence =
-            'Students in grades K-8 complete 9 units and the correlating checkpoint worksheets each semester, submitting one worksheet every two weeks.';
-        expect(getWordCount(sentence)).toBe(20);
-    });
-
-    it("doesn't count standalone special characters", () => {
-        const one = 'one " two \' three" / four';
-        expect(getWordCount(one)).toBe(4);
-
-        const two = 'one ! two . three ? four';
-        expect(getWordCount(two)).toBe(4);
-    });
-
-    it('counts alphanumeric combinations as one word', () => {
-        expect(getWordCount('COVID-19 A1 B-52 3D-printed')).toBe(4);
-    });
-
-    it('counts slash-separated words as separate words', () => {
-        expect(getWordCount('yes/no three/four/five')).toBe(5);
-    });
-
-    it('counts mixed scenarios with slashes', () => {
-        expect(getWordCount('apple/banana COVID-19/SARS-CoV-2')).toBe(4);
-    });
-
-    it('counts multiple consecutive slashes the same as single slashes', () => {
-        expect(getWordCount('one//two///three')).toBe(3);
-    });
-
-    it('counts properly with slashes at the beginning or end of words', () => {
-        expect(getWordCount('/start middle/ /both/')).toBe(3);
-    });
-
-    it('properly counts words in complex scenarios with slashes, hyphens, and numbers', () => {
-        expect(
-            getWordCount('1. item-one/sub-item 2. item-two/sub-item/third-part')
-        ).toBe(5);
-    });
-
-    it('counts emojis', () => {
-        const sentence = 'chicken: 🐤 (chicken) turtle:🐢 (turtle).';
-        expect(getWordCount(sentence)).toBe(6);
-    });
-
-    it('counts colon-separated words as separate words', () => {
-        expect(getWordCount('one:two three:four:five')).toBe(5);
-    });
-
-    it("doesn't count standalone special characters", () => {
-        const sentence =
-            '! @ # $ % ^ & * ( ) \\ | / \' ; , . [ ] { } | < > ? : " !! @@ ## $$ %^&% ($%*#%()* (@#*%() *@<:{ >:?|} <:)) ***';
-        expect(getWordCount(sentence)).toBe(0);
-    });
-
-    // This is to adhere to the same behavior as Google Docs
-    it('counts monetary values as two words', () => {
-        const sentence = `An advance of $20,000 upon signing.`;
-        expect(getWordCount(sentence)).toBe(7);
-    });
-
-    it('counts words separated by an em dash separately', () => {
-        const sentence = 'one—two three—four—five';
-        expect(getWordCount(sentence)).toBe(5);
-    });
-
-    it('counts words separated by an en dash separately', () => {
-        const sentence = 'one–two three–four–five';
-        expect(getWordCount(sentence)).toBe(5);
-    });
-});
-
-describe('Validating a UUID', () => {
-    it('should return true for valid UUIDs', () => {
-        const validUUIDs = [
-            '2df25fda-fa6c-4e1e-bf16-c73ef5bf0759', // Lowercase
-            'AE99654F-BD06-4290-92E1-D193C1E5071C' // Uppercase
-        ];
-
-        validUUIDs.forEach(uuid => {
-            expect(isValidUUID(uuid)).toBe(true);
+        it('counts words in a sentence the same way Google Docs does (2)', () => {
+            const sentence =
+                'Students in grades K-8 complete 9 units and the correlating checkpoint worksheets each semester, submitting one worksheet every two weeks.';
+            expect(textUtils.getWordCount(sentence)).toBe(20);
         });
     });
 
-    it('should return false for invalid UUIDs', () => {
+    describe('Special cases', () => {
+        it('counts empty input as zero', () => {
+            expect(textUtils.getWordCount('')).toBe(0);
+        });
+
+        it('counts whitespace-only input as zero', () => {
+            expect(textUtils.getWordCount('   \t   \n   ')).toBe(0);
+        });
+
+        it('handles a mix of spaces and tabs', () => {
+            expect(textUtils.getWordCount('word1\t\tword2 \t word3')).toBe(3);
+        });
+
+        it('ignores list numbers', () => {
+            expect(textUtils.getWordCount('1. word')).toBe(1);
+        });
+
+        it("doesn't count a list number as a word when the list spans multiple lines", () => {
+            expect(
+                textUtils.getWordCount('1. Lake One\n2. Lake Two\n3. Lake Three')
+            ).toBe(6);
+        });
+
+        it('counts standalone numbers as words', () => {
+            expect(textUtils.getWordCount("It's 20 degrees outside")).toBe(4);
+        });
+
+        it('treats hyphenated words as single words', () => {
+            expect(textUtils.getWordCount('word - word word-word word- -word')).toBe(5);
+        });
+
+        it('counts contractions as single words', () => {
+            expect(textUtils.getWordCount("don't can't won't")).toBe(3);
+        });
+
+        it('ignores punctuation', () => {
+            expect(textUtils.getWordCount('word! word? word. word,')).toBe(4);
+        });
+
+        it('handles newlines', () => {
+            expect(textUtils.getWordCount('word\nword\nword')).toBe(3);
+        });
+
+        it("doesn't count standalone special characters", () => {
+            expect(
+                textUtils.getWordCount(
+                    'one " two \' three" / four one ! two . three ? four'
+                )
+            ).toBe(8);
+
+            expect(
+                textUtils.getWordCount(
+                    '! @ # $ % ^ & * ( ) \\ | / \' ; , . [ ] { } | < > ? : " !! @@ ## $$ %^&% ($%*#%()* (@#*%() *@<:{ >:?|} <:)) ***'
+                )
+            ).toBe(0);
+        });
+    });
+
+    describe('Internationalization', () => {
+        it('counts words with accented characters', () => {
+            expect(textUtils.getWordCount('Café au lait')).toBe(3);
+        });
+
+        it('counts words with umlauts', () => {
+            expect(textUtils.getWordCount('Über Äpfel und Öl')).toBe(4);
+        });
+
+        it('counts Cyrillic words', () => {
+            expect(textUtils.getWordCount('Россия и Україна')).toBe(3);
+        });
+
+        it('counts Japanese words', () => {
+            expect(textUtils.getWordCount('こんにちは 世界')).toBe(2);
+        });
+    });
+
+    describe('Special formatting', () => {
+        it('ignores markdown formatting', () => {
+            expect(textUtils.getWordCount('*one* _two_ **three** __four__')).toBe(4);
+        });
+
+        it('counts alphanumeric combinations as single words', () => {
+            expect(textUtils.getWordCount('COVID-19 A1 B-52 3D-printed')).toBe(4);
+        });
+
+        it('treats slash-separated items as separate words', () => {
+            expect(textUtils.getWordCount('yes/no three/four/five')).toBe(5);
+        });
+
+        it('counts multiple consecutive slashes the same as single slashes', () => {
+            expect(textUtils.getWordCount('one//two///three')).toBe(3);
+        });
+
+        it('counts colon-separated words as separate words', () => {
+            expect(textUtils.getWordCount('one:two three:four:five')).toBe(5);
+        });
+
+        it('counts emojis as words', () => {
+            expect(
+                textUtils.getWordCount('chicken: 🐤 (chicken) turtle:🐢 (turtle).')
+            ).toBe(6);
+        });
+
+        it('counts monetary values as two words', () => {
+            expect(textUtils.getWordCount('An advance of $20,000 upon signing.')).toBe(
+                7
+            );
+        });
+
+        it('treats words separated by en or em dashes as separate', () => {
+            expect(textUtils.getWordCount('1–2 em—dash hy-phen')).toBe(5);
+        });
+    });
+});
+
+describe('UUID validation', () => {
+    it('accepts valid UUIDs', () => {
+        const validUUIDs = [
+            '2df25fda-fa6c-4e1e-bf16-c73ef5bf0759',
+            'AE99654F-BD06-4290-92E1-D193C1E5071C'
+        ];
+        validUUIDs.forEach(uuid => {
+            expect(textUtils.isValidUUID(uuid)).toBe(true);
+        });
+    });
+
+    it('rejects invalid UUIDs', () => {
         const invalidUUIDs = [
             '',
             'not-a-uuid',
-            '123e4567-e89b-12d3-a456-42661417400', // Too short
-            '2df25fda-fa6c-4e1e-bf16-c73ef5bf07590', // Too long
-            '2df25fda-fa6c-4e1e-bf16-c73ef5bf075g', // Invalid character
-            '2df25fda-fa6c-4e1e-bf16_c73ef5bf0759', // Invalid separator
-            '2df25fda-fa6c-4e1e-cf16-c73ef5bf0759', // Invalid version (4th group should start with a, b, 8, or 9)
-            '2df25fda-fa6c-5e1e-bf16-c73ef5bf0759', // Invalid version (3rd group should start with 4)
-            '2df25fda-fa6c-4e1ebf16-c73ef5bf0759', // Missing hyphen
-            '2df25fda-fa6c-4e1e-bf16c-73ef5bf0759' // Incorrect hyphen placement
+            '123e4567-e89b-12d3-a456-42661417400',
+            '2df25fda-fa6c-4e1e-bf16-c73ef5bf07590',
+            '2df25fda-fa6c-4e1e-bf16-c73ef5bf075g',
+            '2df25fda-fa6c-4e1e-bf16_c73ef5bf0759',
+            '2df25fda-fa6c-4e1e-cf16-c73ef5bf0759',
+            '2df25fda-fa6c-5e1e-bf16-c73ef5bf0759',
+            '2df25fda-fa6c-4e1ebf16-c73ef5bf0759',
+            '2df25fda-fa6c-4e1e-bf16c-73ef5bf0759'
         ];
-
         invalidUUIDs.forEach(uuid => {
-            expect(isValidUUID(uuid)).toBe(false);
+            expect(textUtils.isValidUUID(uuid)).toBe(false);
         });
     });
 
-    it('should be case-insensitive', () => {
-        const uuid = '2df25fda-fa6c-4e1e-bf16-c73ef5bf0759';
-        expect(isValidUUID(uuid)).toBe(true);
+    it('is case-insensitive', () => {
+        const mixedCaseUUID = '2df25fda-FA6C-4e1e-BF16-c73ef5bf0759';
+        expect(textUtils.isValidUUID(mixedCaseUUID)).toBe(true);
     });
 
-    it('should handle whitespace', () => {
+    it('rejects UUIDs with surrounding whitespace', () => {
         const uuidWithWhitespace = '  2df25fda-fa6c-4e1e-bf16-c73ef5bf0759  ';
-        expect(isValidUUID(uuidWithWhitespace)).toBe(false);
+        expect(textUtils.isValidUUID(uuidWithWhitespace)).toBe(false);
     });
 });

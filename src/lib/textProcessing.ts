@@ -22,7 +22,7 @@ export function truncateString(str: string | undefined, num: number = 50): strin
         return 'undefined';
     }
     if (str.trim().length === 0) {
-        return 'empty string';
+        return '';
     }
     if (str.length <= num) {
         return str;
