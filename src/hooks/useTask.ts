@@ -11,13 +11,13 @@ const SELECTORS = {
     inProgressButton: 'button:not(:disabled)'
 };
 
-const selectElement = <T extends HTMLElement>(selector: string): T | null => {
+const selectElement = <T extends HTMLElement>(selector: string): T | undefined => {
     const element = document.querySelector(selector);
 
-    return element instanceof HTMLElement ? (element as T) : null;
+    return element instanceof HTMLElement ? (element as T) : undefined;
 };
 
-const findTaskIdElement = (): HTMLDivElement | null => {
+const findTaskIdElement = (): HTMLDivElement | undefined => {
     const buttons = document.querySelectorAll<HTMLButtonElement>(
         SELECTORS.inProgressButton
     );
@@ -26,12 +26,14 @@ const findTaskIdElement = (): HTMLDivElement | null => {
         if (span?.textContent?.includes('In Progress')) {
             const row = button.closest(SELECTORS.taskRow);
             if (row) {
-                return row.querySelector<HTMLDivElement>(SELECTORS.taskIdDiv) || null;
+                return (
+                    row.querySelector<HTMLDivElement>(SELECTORS.taskIdDiv) || undefined
+                );
             }
         }
     }
 
-    return null;
+    return undefined;
 };
 
 export function useTask() {
@@ -40,7 +42,7 @@ export function useTask() {
 
     const copyToClipboard = useCallback(
         async (
-            getValue: () => string | null,
+            getValue: () => string | undefined,
             successMessage: string,
             errorPrefix: string
         ): Promise<boolean> => {
@@ -69,7 +71,7 @@ export function useTask() {
         () =>
             copyToClipboard(
                 () => {
-                    const taskId = findTaskIdElement()?.textContent ?? null;
+                    const taskId = findTaskIdElement()?.textContent ?? undefined;
                     if (!taskId || !isValidUUID(taskId)) {
                         throw new Error(
                             'Invalid or missing Task ID. The task list may have updated.'
@@ -90,7 +92,7 @@ export function useTask() {
                 () => {
                     const operatorName =
                         selectElement<HTMLParagraphElement>(SELECTORS.operatorName)
-                            ?.textContent ?? null;
+                            ?.textContent ?? undefined;
                     if (!operatorName) {
                         throw new Error('Operator name not found.');
                     }

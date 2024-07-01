@@ -66,7 +66,7 @@ describe('Extracting text from HTML elements', () => {
     });
 
     it('extracts empty text for empty elements', () => {
-        expect(textUtils.getTextFromElement(null)).toBe('');
+        expect(textUtils.getTextFromElement(undefined)).toBe('');
     });
 
     it('extracts plain text from a simple element', () => {

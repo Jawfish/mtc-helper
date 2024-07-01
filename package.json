@@ -100,7 +100,7 @@
         "build:storybook": "storybook build",
         "build:package": "pnpm build && pnpm package",
         "dev": "nodemon",
-        "lint": "eslint src",
+        "lint": "eslint src && tsc --noEmit",
         "lint:fix": "eslint src --fix",
         "package": "rimraf mtc-helper.zip; cd dist && zip -r ../mtc-helper.zip * && cd ..",
         "storybook": "storybook dev -p 6006",

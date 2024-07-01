@@ -17,7 +17,7 @@ export function useOrochiActions() {
     const { editedCode, originalCode, tests, prompt, operatorNotes } = useOrochiStore();
 
     const copyContent = useCallback(
-        async (content: string | null, action: CopyAction) => {
+        async (content: string | undefined, action: CopyAction) => {
             if (!content) {
                 notify(
                     `No ${action.toLowerCase()} found. The ${action.toLowerCase()} must be viewed before it can be copied.`,

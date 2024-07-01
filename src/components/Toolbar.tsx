@@ -26,7 +26,8 @@ namespace Toolbar {
 export default function Toolbar({ toggleDiffView, process }: Toolbar.Props) {
     const { validateResponse } = useValidation();
     const { originalCode } = useOrochiStore();
-    const { originalResponseMarkdown } = useGeneralStore();
+    const store = useGeneralStore();
+    const { originalMarkdown } = store.selectedResponse;
 
     return (
         <ToolbarContainer>
@@ -42,9 +43,7 @@ export default function Toolbar({ toggleDiffView, process }: Toolbar.Props) {
                 <Button
                     tooltip='View the differences between the original and edited responses'
                     onClick={toggleDiffView}
-                    disabled={
-                        process === 'Orochi' ? !originalCode : !originalResponseMarkdown
-                    }>
+                    disabled={process === 'Orochi' ? !originalCode : !originalMarkdown}>
                     View Diff
                 </Button>
             )}

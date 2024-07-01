@@ -8,17 +8,17 @@ import { isStateEqual } from './utils';
 type Language = 'python' | 'unknown';
 
 type State = {
-    originalCode: string | null;
-    editedCode: string | null;
-    conversationTitle: string | null;
-    editedResponse: string | null;
-    errorLabels: string | null;
-    operatorNotes: string | null;
-    originalResponse: string | null;
-    prompt: string | null;
-    tests: string | null;
-    score: number | null;
-    rework: boolean | null;
+    originalCode: string | undefined;
+    editedCode: string | undefined;
+    conversationTitle: string | undefined;
+    editedResponse: string | undefined;
+    errorLabels: string | undefined;
+    operatorNotes: string | undefined;
+    originalResponse: string | undefined;
+    prompt: string | undefined;
+    tests: string | undefined;
+    score: number | undefined;
+    rework: boolean | undefined;
     metadataRemoved: boolean;
     language: Language;
 };
@@ -28,17 +28,17 @@ type Actions = {
 };
 
 const initialState: State = {
-    originalCode: null,
-    editedCode: null,
-    conversationTitle: null,
-    editedResponse: null,
-    errorLabels: null,
-    operatorNotes: null,
-    originalResponse: null,
-    prompt: null,
-    tests: null,
-    score: null,
-    rework: null,
+    originalCode: undefined,
+    editedCode: undefined,
+    conversationTitle: undefined,
+    editedResponse: undefined,
+    errorLabels: undefined,
+    operatorNotes: undefined,
+    originalResponse: undefined,
+    prompt: undefined,
+    tests: undefined,
+    score: undefined,
+    rework: undefined,
     language: 'unknown',
     metadataRemoved: false
 };

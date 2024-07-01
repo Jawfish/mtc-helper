@@ -24,6 +24,7 @@ export interface MonacoMessage extends Message {
 function isMessageFromInjectScript(obj: unknown): obj is Message {
     return (
         typeof obj === 'object' &&
+        obj !== undefined &&
         obj !== null &&
         'source' in obj &&
         obj['source'] === 'inject-script' &&

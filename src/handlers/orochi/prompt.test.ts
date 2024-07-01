@@ -30,13 +30,13 @@ describe('handlePromptMutation', () => {
             </div>
         `;
         handlePromptMutation(document.body);
-        expect(orochiStore.getState().prompt).toBeNull();
+        expect(orochiStore.getState().prompt).toBeUndefined();
     });
 
     it('should handle empty container', () => {
         document.body.innerHTML = '';
         handlePromptMutation(document.body);
-        expect(orochiStore.getState().prompt).toBeNull();
+        expect(orochiStore.getState().prompt).toBeUndefined();
     });
 
     it('should handle container with unrelated content', () => {
@@ -47,7 +47,7 @@ describe('handlePromptMutation', () => {
             </div>
         `;
         handlePromptMutation(document.body);
-        expect(orochiStore.getState().prompt).toBeNull();
+        expect(orochiStore.getState().prompt).toBeUndefined();
     });
 
     it('should handle multiple matching elements and use the first one', () => {

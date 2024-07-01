@@ -5,7 +5,7 @@ const TRUNCATE_LENGTH = 26;
 
 type ValidationResult = {
     isValid: boolean;
-    message: string | null;
+    message: string | undefined;
 };
 
 type ValidationRule = (line: string) => ValidationResult;
@@ -15,7 +15,7 @@ const truncateLine = (line: string): string =>
 
 const createValidationResult = (
     isValid: boolean,
-    message: string | null = null
+    message: string | undefined = undefined
 ): ValidationResult => ({
     isValid,
     message

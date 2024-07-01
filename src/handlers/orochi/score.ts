@@ -5,7 +5,7 @@ export const handleScoreMutation: MutHandler = (_target: Element) => {
     const element =
         Array.from(document.querySelectorAll('span')).find(
             span => span.textContent?.trim() === 'Alignment %'
-        )?.parentElement || null;
+        )?.parentElement || undefined;
 
     if (!element) {
         return;

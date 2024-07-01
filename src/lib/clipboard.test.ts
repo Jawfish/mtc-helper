@@ -27,8 +27,8 @@ describe('Attempting to copy content', () => {
         expect(writeTextSpy).toHaveBeenCalledWith(text);
     });
 
-    it('throws an error when trying to copy null', async () => {
-        await expect(copyToClipboard(null)).rejects.toThrow(ClipboardError);
+    it('throws an error when trying to copy undefined', async () => {
+        await expect(copyToClipboard(undefined)).rejects.toThrow(ClipboardError);
     });
 
     it('handles unexpected errors while copying to clipboard', async () => {

@@ -92,10 +92,10 @@ describe('handleResponseMutation', () => {
             createElement('div', {}, ['No response element here'])
         );
         handleResponseMutation(document.body);
-        expect(orochiStore.getState().originalResponse).toBeNull();
-        expect(orochiStore.getState().editedResponse).toBeNull();
-        expect(orochiStore.getState().originalCode).toBeNull();
-        expect(orochiStore.getState().editedCode).toBeNull();
+        expect(orochiStore.getState().originalResponse).toBeUndefined();
+        expect(orochiStore.getState().editedResponse).toBeUndefined();
+        expect(orochiStore.getState().originalCode).toBeUndefined();
+        expect(orochiStore.getState().editedCode).toBeUndefined();
     });
 
     it('should handle response element without code', () => {
@@ -108,6 +108,6 @@ describe('handleResponseMutation', () => {
         expect(orochiStore.getState().originalResponse).toBe(
             'This is a response without code'
         );
-        expect(orochiStore.getState().originalCode).toBeNull();
+        expect(orochiStore.getState().originalCode).toBeUndefined();
     });
 });

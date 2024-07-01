@@ -9,49 +9,49 @@ type ResponseElement = {
     isOriginal: boolean;
 };
 
-const selectResponseElement = (): HTMLDivElement | null => {
+const selectResponseElement = (): HTMLDivElement | undefined => {
     const taskElements = Array.from(document.querySelectorAll('div.rounded-xl'));
 
     return taskElements.length >= 2 && taskElements[1] instanceof HTMLDivElement
         ? taskElements[1]
-        : null;
+        : undefined;
 };
 
-const selectOriginalContentElement = (): HTMLDivElement | null => {
+const selectOriginalContentElement = (): HTMLDivElement | undefined => {
     const element = document.querySelector("div[data-cy='tab'] > div");
 
     return element instanceof HTMLDivElement &&
         element.getAttribute('contenteditable') !== 'true'
         ? element
-        : null;
+        : undefined;
 };
 
-const getResponseElement = (): ResponseElement | null => {
+const getResponseElement = (): ResponseElement | undefined => {
     const originalElement = selectOriginalContentElement();
     if (originalElement) return { element: originalElement, isOriginal: true };
 
     const editedElement = selectResponseElement();
     if (editedElement) return { element: editedElement, isOriginal: false };
 
-    return null;
+    return undefined;
 };
 
 const extractContent = (
     element: HTMLDivElement,
     isOriginal: boolean
-): string | null => {
-    const content = element.textContent || null;
+): string | undefined => {
+    const content = element.textContent || undefined;
 
-    return isOriginal ? content : content?.slice(1) || null;
+    return isOriginal ? content : content?.slice(1) || undefined;
 };
 
-const extractCode = (element: HTMLDivElement): string | null =>
-    element.querySelector('pre code')?.textContent || null;
+const extractCode = (element: HTMLDivElement): string | undefined =>
+    element.querySelector('pre code')?.textContent || undefined;
 
 const hasContentChanged = (
     isOriginal: boolean,
-    content: string | null,
-    code: string | null,
+    content: string | undefined,
+    code: string | undefined,
     state: ReturnType<typeof orochiStore.getState>
 ): boolean => {
     const { originalResponse, originalCode, editedResponse, editedCode } = state;

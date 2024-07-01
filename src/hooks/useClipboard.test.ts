@@ -43,15 +43,15 @@ describe('useClipboard', () => {
         expect(copyToClipboard).toHaveBeenCalledWith(testText);
     });
 
-    it('should handle null input', async () => {
+    it('should handle undefined input', async () => {
         const { result } = renderHook(() => useClipboard());
 
         await act(async () => {
-            const success = await result.current.copy(null);
-            expect(success).toBe(true);
+            const success = await result.current.copy(undefined);
+            expect(success).toBe(false);
         });
 
-        expect(copyToClipboard).toHaveBeenCalledWith(null);
+        expect(copyToClipboard).not.toHaveBeenCalled();
     });
 
     it('should handle undefined input', async () => {

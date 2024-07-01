@@ -28,7 +28,7 @@ describe('injectTypes', () => {
         });
 
         it('should return false for invalid messages', () => {
-            expect(isURLMessage(null)).toBe(false);
+            expect(isURLMessage(undefined)).toBe(false);
             expect(isURLMessage({})).toBe(false);
             expect(isURLMessage({ source: 'inject-script' })).toBe(false);
             expect(isURLMessage({ source: 'inject-script', type: 'url-changed' })).toBe(
@@ -55,7 +55,7 @@ describe('injectTypes', () => {
         });
 
         it('should return false for invalid messages', () => {
-            expect(isMonacoMessage(null)).toBe(false);
+            expect(isMonacoMessage(undefined)).toBe(false);
             expect(isMonacoMessage({})).toBe(false);
             expect(isMonacoMessage({ source: 'inject-script' })).toBe(false);
             expect(

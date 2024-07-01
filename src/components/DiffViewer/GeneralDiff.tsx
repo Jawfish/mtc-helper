@@ -12,15 +12,16 @@ type Props = {
 
 export const GeneralDiff: React.FC<Props> = ({ diffMethod, disableWordDiff }) => {
     const [activeTab, setActiveTab] = useState(0);
-    const { editedResponseMarkdown, originalResponseMarkdown } = useGeneralStore();
+    const store = useGeneralStore();
+    const { editedMarkdown, originalMarkdown } = store.selectedResponse;
 
     const tabs = [
         {
             label: 'Markdown',
             content: (
                 <ReactDiffViewer
-                    oldValue={originalResponseMarkdown}
-                    newValue={editedResponseMarkdown}
+                    oldValue={originalMarkdown}
+                    newValue={editedMarkdown}
                     splitView={true}
                     compareMethod={diffMethod}
                     extraLinesSurroundingDiff={0}

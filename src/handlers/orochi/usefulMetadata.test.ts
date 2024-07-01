@@ -59,9 +59,9 @@ describe('handleUsefulMetadataSection', () => {
     it('should handle empty document body', () => {
         document.body.innerHTML = '';
         handleUsefulMetadataSection(document.body);
-        expect(orochiStore.getState().errorLabels).toBeNull();
-        expect(orochiStore.getState().conversationTitle).toBeNull();
-        expect(orochiStore.getState().operatorNotes).toBeNull();
+        expect(orochiStore.getState().errorLabels).toBeUndefined();
+        expect(orochiStore.getState().conversationTitle).toBeUndefined();
+        expect(orochiStore.getState().operatorNotes).toBeUndefined();
     });
 
     it('should handle missing elements', () => {
@@ -79,9 +79,9 @@ describe('handleUsefulMetadataSection', () => {
 
         handleUsefulMetadataSection(document.body);
 
-        expect(orochiStore.getState().errorLabels).toBeNull();
+        expect(orochiStore.getState().errorLabels).toBeUndefined();
         expect(orochiStore.getState().conversationTitle?.trim()).toBe('some_title');
-        expect(orochiStore.getState().operatorNotes).toBeNull();
+        expect(orochiStore.getState().operatorNotes).toBeUndefined();
     });
 
     it('should handle malformed HTML structure', () => {
@@ -93,8 +93,8 @@ describe('handleUsefulMetadataSection', () => {
 
         handleUsefulMetadataSection(document.body);
 
-        expect(orochiStore.getState().errorLabels).toBeNull();
-        expect(orochiStore.getState().conversationTitle).toBeNull();
-        expect(orochiStore.getState().operatorNotes).toBeNull();
+        expect(orochiStore.getState().errorLabels).toBeUndefined();
+        expect(orochiStore.getState().conversationTitle).toBeUndefined();
+        expect(orochiStore.getState().operatorNotes).toBeUndefined();
     });
 });

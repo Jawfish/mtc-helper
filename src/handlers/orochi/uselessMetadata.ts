@@ -2,7 +2,7 @@ import { MutHandler } from '@handlers/types';
 import Logger from '@lib/logging';
 import { orochiStore } from '@src/store/orochiStore';
 
-const selectUselessMetadataSection = (): HTMLDivElement | null => {
+const selectUselessMetadataSection = (): HTMLDivElement | undefined => {
     const h4Elements = Array.from(document.querySelectorAll('h4'));
     const metadataElement = h4Elements.find(h4 => {
         const span = h4.querySelector('span');
@@ -12,7 +12,7 @@ const selectUselessMetadataSection = (): HTMLDivElement | null => {
 
     return metadataElement?.parentElement instanceof HTMLDivElement
         ? metadataElement.parentElement
-        : null;
+        : undefined;
 };
 
 export const handleUselessMetadataSection: MutHandler = (_target: Element) => {

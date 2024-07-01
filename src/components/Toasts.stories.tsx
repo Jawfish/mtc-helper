@@ -33,7 +33,7 @@ const ToastTrigger = () => {
         notify('This is a warning toast', 'warning');
     }, [notify]);
 
-    return null;
+    return undefined;
 };
 
 export const Default: Story = {

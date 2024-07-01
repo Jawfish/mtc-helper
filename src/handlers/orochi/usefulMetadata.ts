@@ -2,13 +2,14 @@ import { MutHandler } from '@handlers/types';
 import { getTextFromElement } from '@lib/textProcessing';
 import { orochiStore } from '@src/store/orochiStore';
 
-const selectUsefulMetadataSection = (): HTMLDivElement | null => {
+const selectUsefulMetadataSection = (): HTMLDivElement | undefined => {
     const conversationTitleElement = Array.from(document.querySelectorAll('div')).find(
         div => div.textContent === 'Conversations > Title'
     );
 
-    return conversationTitleElement?.parentElement
-        ?.parentElement as HTMLDivElement | null;
+    return conversationTitleElement?.parentElement?.parentElement as
+        | HTMLDivElement
+        | undefined;
 };
 
 export const handleUsefulMetadataSection: MutHandler = (_target: Element) => {
@@ -19,7 +20,7 @@ export const handleUsefulMetadataSection: MutHandler = (_target: Element) => {
     }
 
     const operatorNotesElement = metadataElement?.children[2]?.children[1]
-        ?.lastElementChild as HTMLElement | null;
+        ?.lastElementChild as HTMLElement | undefined;
 
     if (operatorNotesElement) {
         const operatorNotes = getTextFromElement(operatorNotesElement);
@@ -28,11 +29,11 @@ export const handleUsefulMetadataSection: MutHandler = (_target: Element) => {
 
     const conversationTitle =
         metadataElement?.children[0]?.children[1]?.lastElementChild?.textContent ||
-        null;
+        undefined;
 
     const errorLabels =
         metadataElement?.children[1]?.children[1]?.lastElementChild?.textContent ||
-        null;
+        undefined;
 
     orochiStore.setState({ conversationTitle, errorLabels });
 };

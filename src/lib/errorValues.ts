@@ -1,5 +1,5 @@
 /** Represents a result that can be either successful (with data) or failed (with an error). */
-type Result<T> = readonly [T | null, Error | null];
+type Result<T> = readonly [T | undefined, Error | undefined];
 
 /**
  * Creates an Error object from an unknown error value.
@@ -16,9 +16,9 @@ const createError = (error: unknown): Error =>
  */
 export const v = <T>(fn: () => T): Result<T> => {
     try {
-        return [fn(), null] as const;
+        return [fn(), undefined] as const;
     } catch (error) {
-        return [null, createError(error)] as const;
+        return [undefined, createError(error)] as const;
     }
 };
 
@@ -29,9 +29,9 @@ export const v = <T>(fn: () => T): Result<T> => {
  */
 export const vv = async <T>(promise: Promise<T>): Promise<Result<T>> => {
     try {
-        return [await promise, null] as const;
+        return [await promise, undefined] as const;
     } catch (error) {
-        return [null, createError(error)] as const;
+        return [undefined, createError(error)] as const;
     }
 };
 
@@ -40,7 +40,7 @@ export const vv = async <T>(promise: Promise<T>): Promise<Result<T>> => {
  * @param result - The Result to check.
  * @returns True if the Result is successful, false otherwise.
  */
-export const good = <T>([_, error]: Result<T>): boolean => error === null;
+export const good = <T>([_, error]: Result<T>): boolean => error === undefined;
 
 /**
  * Retries an async operation a specified number of times with exponential backoff.

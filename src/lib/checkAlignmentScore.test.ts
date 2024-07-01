@@ -10,9 +10,9 @@ describe('checkAlignmentScore', () => {
         vi.clearAllMocks();
     });
 
-    it('returns null when score is above threshold', () => {
+    it('returns undefined when score is above threshold', () => {
         orochiStore.setState({ score: 90, rework: false });
-        expect(checkAlignmentScore(85)).toBeNull();
+        expect(checkAlignmentScore(85)).toBeUndefined();
     });
 
     it('returns a message when score is below threshold and not marked as rework', () => {
@@ -22,23 +22,23 @@ describe('checkAlignmentScore', () => {
         );
     });
 
-    it('returns null when score is below threshold but marked as rework', () => {
+    it('returns undefined when score is below threshold but marked as rework', () => {
         orochiStore.setState({ score: 80, rework: true });
-        expect(checkAlignmentScore(85)).toBeNull();
+        expect(checkAlignmentScore(85)).toBeUndefined();
     });
 
-    it('returns an error message when score is null', () => {
-        orochiStore.setState({ score: null, rework: false });
+    it('returns an error message when score is undefined', () => {
+        orochiStore.setState({ score: undefined, rework: false });
         expect(checkAlignmentScore(85)).toBe('Unable to determine alignment score');
     });
 
-    it('returns an error message when rework is null', () => {
-        orochiStore.setState({ score: 90, rework: null });
+    it('returns an error message when rework is undefined', () => {
+        orochiStore.setState({ score: 90, rework: undefined });
         expect(checkAlignmentScore(85)).toBe('Unable to determine alignment score');
     });
 
-    it('returns an error message when both score and rework are null', () => {
-        orochiStore.setState({ score: null, rework: null });
+    it('returns an error message when both score and rework are undefined', () => {
+        orochiStore.setState({ score: undefined, rework: undefined });
         expect(checkAlignmentScore(85)).toBe('Unable to determine alignment score');
     });
 

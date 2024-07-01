@@ -46,12 +46,12 @@ describe('handleReturnTargetMutation', () => {
             </div>
         `;
         handleReturnTargetMutation(document.body);
-        expect(orochiStore.getState().rework).toBeNull();
+        expect(orochiStore.getState().rework).toBeUndefined();
     });
 
     it('should handle empty DOM', () => {
         handleReturnTargetMutation(document.body);
-        expect(orochiStore.getState().rework).toBeNull();
+        expect(orochiStore.getState().rework).toBeUndefined();
     });
 
     it('should handle DOM with unrelated content', () => {
@@ -61,7 +61,7 @@ describe('handleReturnTargetMutation', () => {
             </div>
         `;
         handleReturnTargetMutation(document.body);
-        expect(orochiStore.getState().rework).toBeNull();
+        expect(orochiStore.getState().rework).toBeUndefined();
     });
 
     it('should set rework to false when "Send case to" button is present but rework text is not', () => {
@@ -101,6 +101,6 @@ describe('handleReturnTargetMutation', () => {
     });
 
     it('should verify that the store is reset before each test', () => {
-        expect(orochiStore.getState().rework).toBeNull();
+        expect(orochiStore.getState().rework).toBeUndefined();
     });
 });

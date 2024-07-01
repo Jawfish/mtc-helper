@@ -1,7 +1,7 @@
 import { useEffect, useCallback, RefObject } from 'react';
 
 type KeyPressOptions = {
-    target?: RefObject<HTMLElement> | null;
+    target?: RefObject<HTMLElement> | undefined;
     event?: 'keydown' | 'keyup';
     preventDefault?: boolean;
 };
@@ -11,7 +11,7 @@ const useKeyPress = (
     action: (event: KeyboardEvent) => void,
     options: KeyPressOptions = {}
 ) => {
-    const { target = null, event = 'keydown', preventDefault = false } = options;
+    const { target = undefined, event = 'keydown', preventDefault = false } = options;
 
     const handleKeyPress = useCallback(
         (e: KeyboardEvent) => {

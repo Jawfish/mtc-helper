@@ -1,8 +1,8 @@
 import { orochiStore } from '@src/store/orochiStore';
 
 type AlignmentScore = {
-    score: number | null;
-    rework: boolean | null;
+    score: number | undefined;
+    rework: boolean | undefined;
 };
 
 type Result<T, E = string> = { ok: true; value: T } | { ok: false; error: E };
@@ -28,20 +28,20 @@ const getAlignmentScore = (): Result<AlignmentScore> => {
  * Validates the alignment score and rework status.
  * @param score - The alignment score.
  * @param rework - The rework status.
- * @returns A Result containing a validation message or null if valid.
+ * @returns A Result containing a validation message or undefined if valid.
  */
 const validateAlignmentScore = (
-    score: number | null,
-    rework: boolean | null
-): Result<null> => {
-    if (score === null || rework === null) {
+    score: number | undefined,
+    rework: boolean | undefined
+): Result<undefined> => {
+    if (score === undefined || rework === undefined) {
         return {
             ok: false,
             error: 'Unable to determine alignment score'
         };
     }
 
-    return { ok: true, value: null };
+    return { ok: true, value: undefined };
 };
 
 /**
@@ -49,13 +49,13 @@ const validateAlignmentScore = (
  * @param threshold - The alignment score threshold below which the response should be reworked.
  * @param score - The alignment score.
  * @param rework - The rework status.
- * @returns A Result containing a message if there's an issue, or null if everything is okay.
+ * @returns A Result containing a message if there's an issue, or undefined if everything is okay.
  */
 const checkScoreThreshold = (
     threshold: number,
     score: number,
     rework: boolean
-): Result<null> => {
+): Result<undefined> => {
     if (score < threshold && !rework) {
         return {
             ok: false,
@@ -63,15 +63,15 @@ const checkScoreThreshold = (
         };
     }
 
-    return { ok: true, value: null };
+    return { ok: true, value: undefined };
 };
 
 /**
  * Checks if the alignment score is below the threshold and the task is not marked as a rework.
  * @param threshold - The alignment score threshold below which the response should be reworked.
- * @returns A message if there's an issue with the alignment score, or null if everything is okay.
+ * @returns A message if there's an issue with the alignment score, or undefined if everything is okay.
  */
-export const checkAlignmentScore = (threshold: number): string | null => {
+export const checkAlignmentScore = (threshold: number): string | undefined => {
     const scoreResult = getAlignmentScore();
     if (!scoreResult.ok) return `Error checking alignment score: ${scoreResult.error}`;
 
@@ -80,10 +80,10 @@ export const checkAlignmentScore = (threshold: number): string | null => {
     const validationResult = validateAlignmentScore(score, rework);
     if (!validationResult.ok) return validationResult.error;
 
-    if (score !== null && rework !== null) {
+    if (score !== undefined && rework !== undefined) {
         const thresholdResult = checkScoreThreshold(threshold, score, rework);
         if (!thresholdResult.ok) return thresholdResult.error;
     }
 
-    return null;
+    return undefined;
 };

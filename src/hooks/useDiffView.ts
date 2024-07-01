@@ -27,7 +27,8 @@ export function useDiffView(): UseDiffViewReturn {
                 orochiState.originalResponse &&
                 orochiState.editedResponse;
             const canOpenGeneralDiff =
-                currentProcess === 'General' && generalState.originalResponseMarkdown;
+                currentProcess === 'General' &&
+                generalState.selectedResponse.originalMarkdown;
 
             return canOpenOrochiDiff || canOpenGeneralDiff;
         },

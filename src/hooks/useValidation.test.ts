@@ -31,7 +31,7 @@ describe('response validation', () => {
 
     it('handles when there is no code', () => {
         const { result } = renderHook(() => useValidation());
-        const messages = result.current.validateCode(null);
+        const messages = result.current.validateCode(undefined);
         expect(messages).toEqual(['No code found.']);
     });
 

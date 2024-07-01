@@ -5,7 +5,7 @@ export const handleReturnTargetMutation: MutHandler = (_target: Element) => {
     const element =
         Array.from(document.querySelectorAll('button')).find(
             button => button.textContent === 'Send case to'
-        )?.parentElement?.parentElement || null;
+        )?.parentElement?.parentElement || undefined;
 
     if (!element) {
         return;

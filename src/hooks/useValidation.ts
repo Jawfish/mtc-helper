@@ -19,7 +19,7 @@ export function useValidation() {
     const { editedCode, language } = useOrochiStore();
 
     const validateCode = useCallback(
-        (code: string | null): string[] => {
+        (code: string | undefined): string[] => {
             if (!code) {
                 return [ValidationMessage.NO_CODE];
             }

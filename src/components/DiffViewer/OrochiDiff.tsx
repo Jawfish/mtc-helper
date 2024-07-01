@@ -19,7 +19,7 @@ export const OrochiDiff: React.FC<OrochiDiffProps> = ({
         useOrochiStore();
 
     if (!editedCode || !originalCode || !editedResponse || !originalResponse) {
-        return null;
+        return undefined;
     }
 
     const tabs = [

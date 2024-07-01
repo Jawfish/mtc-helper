@@ -13,7 +13,7 @@ describe('handleGeneralOriginalResponseMutation', () => {
         });
         document.body.innerHTML = '';
         vi.spyOn(selectors, 'selectGeneralSelectedResponse').mockImplementation(() => {
-            return document.querySelector('div') || null;
+            return document.querySelector('div') || undefined;
         });
     });
 

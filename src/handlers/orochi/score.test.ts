@@ -34,12 +34,12 @@ describe('handleScoreMutation', () => {
             </div>
         `;
         handleScoreMutation(document.body);
-        expect(orochiStore.getState().score).toBeNull();
+        expect(orochiStore.getState().score).toBeUndefined();
     });
 
     it('should handle empty DOM', () => {
         handleScoreMutation(document.body);
-        expect(orochiStore.getState().score).toBeNull();
+        expect(orochiStore.getState().score).toBeUndefined();
     });
 
     it('should handle DOM with unrelated content', () => {
@@ -49,7 +49,7 @@ describe('handleScoreMutation', () => {
             </div>
         `;
         handleScoreMutation(document.body);
-        expect(orochiStore.getState().score).toBeNull();
+        expect(orochiStore.getState().score).toBeUndefined();
     });
 
     it('should handle "Alignment %" element without a valid score', () => {
@@ -90,6 +90,6 @@ describe('handleScoreMutation', () => {
     });
 
     it('should verify that the store is reset before each test', () => {
-        expect(orochiStore.getState().score).toBeNull();
+        expect(orochiStore.getState().score).toBeUndefined();
     });
 });

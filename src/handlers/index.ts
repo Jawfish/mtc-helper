@@ -25,8 +25,7 @@ import { handleGeneralEditedResponseMutation } from './general/editedResponse';
 import { handleGeneralEditResponseButtonMutation } from './general/editResponseButton';
 import { handleGeneralOriginalResponseMutation } from './general/originalResponse';
 import { handleGeneralPromptMutation } from './general/prompt';
-import { handleGeneralSelectedResponseSaveButtonMutation } from './general/saveButton';
-import { handleGeneralUnselectedResponseMutation } from './general/unselectedResponse';
+import { handleSaveButtonMutation } from './general/saveButton';
 import { Handlers } from './types';
 
 export const addMtcHelperAttributeToElement = (element: Element) => {
@@ -57,7 +56,6 @@ export const handlers: Handlers = {
         handleGeneralEditResponseButtonMutation,
         handleGeneralOriginalResponseMutation,
         handleGeneralPromptMutation,
-        handleGeneralSelectedResponseSaveButtonMutation,
-        handleGeneralUnselectedResponseMutation
+        handleSaveButtonMutation
     ]
 };

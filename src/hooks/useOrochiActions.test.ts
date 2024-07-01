@@ -70,7 +70,7 @@ describe('useOrochiActions', () => {
     it('should handle missing content', async () => {
         vi.mocked(useOrochiStore).mockReturnValue({
             ...mockStore,
-            editedCode: null
+            editedCode: undefined
         } as any);
         const { result } = renderHook(() => useOrochiActions());
         await act(async () => {
@@ -188,8 +188,8 @@ assert example() == "Hello, World!"`;
     it('should handle partial content when copying all as Python', async () => {
         vi.mocked(useOrochiStore).mockReturnValue({
             ...mockStore,
-            tests: null,
-            operatorNotes: null
+            tests: undefined,
+            operatorNotes: undefined
         } as any);
         const { result } = renderHook(() => useOrochiActions());
         await act(async () => {
@@ -203,11 +203,11 @@ assert example() == "Hello, World!"`;
 
     it('should handle error when all content is missing for copyAllAsPython', async () => {
         vi.mocked(useOrochiStore).mockReturnValue({
-            editedCode: null,
-            originalCode: null,
-            tests: null,
-            prompt: null,
-            operatorNotes: null
+            editedCode: undefined,
+            originalCode: undefined,
+            tests: undefined,
+            prompt: undefined,
+            operatorNotes: undefined
         } as any);
         const { result } = renderHook(() => useOrochiActions());
         await act(async () => {

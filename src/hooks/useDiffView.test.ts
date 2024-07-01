@@ -72,7 +72,7 @@ describe('useDiffView', () => {
     it('should not toggle diffViewOpen and show error for Orochi when original response is missing', () => {
         globalStore.setState({ process: 'Orochi' });
         orochiStore.setState({
-            originalResponse: null,
+            originalResponse: undefined,
             editedResponse: 'edited'
         });
 
@@ -93,7 +93,7 @@ describe('useDiffView', () => {
         globalStore.setState({ process: 'Orochi' });
         orochiStore.setState({
             originalResponse: 'original',
-            editedResponse: null
+            editedResponse: undefined
         });
 
         const { result } = renderHook(() => useDiffView());

@@ -32,7 +32,7 @@ export function truncateString(str: string | undefined, num: number = 50): strin
     return `${str.slice(0, num)}...`;
 }
 
-export const getTextFromElement = (element: HTMLElement | null): string => {
+export const getTextFromElement = (element: HTMLElement | undefined): string => {
     let text = '';
 
     if (!element) {

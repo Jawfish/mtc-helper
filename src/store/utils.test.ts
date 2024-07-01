@@ -25,15 +25,15 @@ describe('Store state equality checker', () => {
     });
 
     type ComplexState = {
-        user: { name: string; age: number } | null;
+        user: { name: string; age: number } | undefined;
         preferences: { theme: 'light' | 'dark'; notifications: boolean };
-        lastLogin: Date | null;
+        lastLogin: Date | undefined;
     };
 
     const complexInitialState: ComplexState = {
-        user: null,
+        user: undefined,
         preferences: { theme: 'light', notifications: true },
-        lastLogin: null
+        lastLogin: undefined
     };
 
     it('should return true for identical complex states', () => {
@@ -48,7 +48,7 @@ describe('Store state equality checker', () => {
         expect(isStateEqual(modifiedState, complexInitialState)).toBe(false);
     });
 
-    it('should return false when an object property changes from null', () => {
+    it('should return false when an object property changes from undefined', () => {
         const modifiedState = {
             ...complexInitialState,
             user: { name: 'John', age: 30 }

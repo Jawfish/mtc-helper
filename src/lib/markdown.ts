@@ -9,7 +9,7 @@ type Options = {
 };
 
 class HTMLToMarkdown {
-    private static _instance: HTMLToMarkdown | null = null;
+    private static _instance: HTMLToMarkdown | undefined = undefined;
 
     private turndownService: TurndownService;
 

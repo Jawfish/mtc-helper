@@ -5,7 +5,7 @@ export class ClipboardError extends Error {
     }
 }
 
-export async function copyToClipboard(text: string | null): Promise<void> {
+export async function copyToClipboard(text: string | undefined): Promise<void> {
     if (!text) {
         throw new ClipboardError('No text to copy');
     }

@@ -2,7 +2,7 @@ import { copyToClipboard } from '@lib/clipboard';
 import Logger from '@lib/logging';
 import { useCallback } from 'react';
 
-type ClipboardContent = string | null | undefined;
+type ClipboardContent = string | undefined;
 
 export function useClipboard() {
     const copy = useCallback(async (content: ClipboardContent): Promise<boolean> => {

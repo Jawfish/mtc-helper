@@ -14,18 +14,18 @@ export const selectGlobalObserverTarget = async () => {
     return element as HTMLDivElement;
 };
 
-export const selectTaskWindowElement = (): HTMLDivElement | null => {
+export const selectTaskWindowElement = (): HTMLDivElement | undefined => {
     const taskWindow = document.querySelector(
         '#__next > div > div > div > div > div.fixed.top-0.left-0.flex.h-screen.w-screen.items-center.justify-center'
     );
 
-    return taskWindow instanceof HTMLDivElement ? taskWindow : null;
+    return taskWindow instanceof HTMLDivElement ? taskWindow : undefined;
 };
 
-export const selectTaskWindowCloseButton = (): SVGElement | null => {
+export const selectTaskWindowCloseButton = (): SVGElement | undefined => {
     const closeButton = selectTaskWindowHeaderControlsElement()?.children[2];
 
-    return closeButton instanceof SVGElement ? closeButton : null;
+    return closeButton instanceof SVGElement ? closeButton : undefined;
 };
 
 /**
@@ -33,33 +33,33 @@ export const selectTaskWindowCloseButton = (): SVGElement | null => {
  * task window is.
  * @returns The snooze button element.
  */
-const selectSnoozeButtonElement = (): HTMLButtonElement | null => {
+const selectSnoozeButtonElement = (): HTMLButtonElement | undefined => {
     const button = document.querySelector("button[title='Snooze']");
 
-    return button instanceof HTMLButtonElement ? button : null;
+    return button instanceof HTMLButtonElement ? button : undefined;
 };
 
-const selectTaskWindowHeaderElement = (): HTMLDivElement | null => {
+const selectTaskWindowHeaderElement = (): HTMLDivElement | undefined => {
     const header =
         selectSnoozeButtonElement()?.parentElement?.parentElement?.parentElement;
 
-    return header instanceof HTMLDivElement ? header : null;
+    return header instanceof HTMLDivElement ? header : undefined;
 };
-const selectTaskWindowHeaderControlsElement = (): HTMLDivElement | null => {
+const selectTaskWindowHeaderControlsElement = (): HTMLDivElement | undefined => {
     const controls = selectTaskWindowHeaderElement()?.children[1];
 
-    return controls instanceof HTMLDivElement ? controls : null;
+    return controls instanceof HTMLDivElement ? controls : undefined;
 };
 
 /**
  * Select the main task submission button element from a QA task.
- * @returns The task submit button element if found, otherwise `null`.
+ * @returns The task submit button element if found, otherwise `undefined`.
  */
 
-export const selectSubmitButtonElement = (): HTMLButtonElement | null => {
+export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
     const element = Array.from(document.querySelectorAll('span')).find(span =>
         span.textContent?.trim()?.includes('Submit QA Task')
     )?.parentElement;
 
-    return element instanceof HTMLButtonElement ? element : null;
+    return element instanceof HTMLButtonElement ? element : undefined;
 };
