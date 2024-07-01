@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { globalStore } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 import { useToast } from '@src/contexts/ToastContext';
 import Logger from '@lib/logging';
 
@@ -18,7 +18,7 @@ describe('useDiffView', () => {
         vi.resetAllMocks();
         vi.mocked(useToast).mockReturnValue({ notify: mockNotify });
         vi.mocked(Logger.debug).mockImplementation(() => {});
-        pandaStore.getState().reset();
+        generalStore.getState().reset();
         orochiStore.getState().reset();
         globalStore.setState({ process: 'Unknown' });
     });
@@ -53,9 +53,9 @@ describe('useDiffView', () => {
         expect(Logger.debug).toHaveBeenCalledWith('Diff view toggled off');
     });
 
-    it('should toggle diffViewOpen when conditions are met for PANDA', () => {
-        globalStore.setState({ process: 'PANDA' });
-        pandaStore.setState({
+    it('should toggle diffViewOpen when conditions are met for General', () => {
+        globalStore.setState({ process: 'General' });
+        generalStore.setState({
             originalResponseMarkdown: 'original'
         });
 
@@ -109,9 +109,9 @@ describe('useDiffView', () => {
         );
     });
 
-    it('should not toggle diffViewOpen and show error for PANDA when original response is missing', () => {
-        globalStore.setState({ process: 'PANDA' });
-        pandaStore.setState({
+    it('should not toggle diffViewOpen and show error for General when original response is missing', () => {
+        globalStore.setState({ process: 'General' });
+        generalStore.setState({
             originalResponseMarkdown: undefined,
             editedResponseMarkdown: 'edited'
         });
@@ -129,9 +129,9 @@ describe('useDiffView', () => {
         );
     });
 
-    it('should not toggle diffViewOpen and show error for PANDA when edited response is missing', () => {
-        globalStore.setState({ process: 'PANDA' });
-        pandaStore.setState({
+    it('should not toggle diffViewOpen and show error for General when edited response is missing', () => {
+        globalStore.setState({ process: 'General' });
+        generalStore.setState({
             originalResponseMarkdown: undefined
         });
 

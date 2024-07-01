@@ -8,7 +8,7 @@ import Button from '../shared/Button';
 import { DiffBackground, DiffForeground, DiffControls } from './DiffLayout';
 import { DiffMethodSelector } from './DiffMethodSelector';
 import { OrochiDiff } from './OrochiDiff';
-import { PandaDiff } from './PandaDiff';
+import { GeneralDiff } from './GeneralDiff';
 import { HighlightToggle } from './WordDiffToggle';
 
 type DiffViewerProps = {
@@ -18,7 +18,7 @@ type DiffViewerProps = {
 export const DiffViewer: React.FC<DiffViewerProps> = ({ toggleDiffView }) => {
     const { process } = useGlobalStore();
     const [diffMethod, setDiffMethod] = useState<DiffMethod>(
-        process === 'PANDA' ? DiffMethod.WORDS : DiffMethod.LINES
+        process === 'General' ? DiffMethod.WORDS : DiffMethod.LINES
     );
     const [disableWordDiff, setDisableWordDiff] = useState(false);
 
@@ -37,8 +37,8 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ toggleDiffView }) => {
                         disableWordDiff={disableWordDiff}
                     />
                 )}
-                {process === 'PANDA' && (
-                    <PandaDiff
+                {process === 'General' && (
+                    <GeneralDiff
                         diffMethod={diffMethod}
                         disableWordDiff={disableWordDiff}
                     />

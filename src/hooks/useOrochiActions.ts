@@ -138,6 +138,7 @@ const formatPythonConversation = ({
 
     sections.push(createSection('PROMPT', prompt, 'commented'));
 
+    // TODO: I don't like the string matching here
     if (operatorNotes !== 'operator notes could not be found' && operatorNotes.trim()) {
         sections.push(createSection('OPERATOR NOTES', operatorNotes, 'commented'));
     }

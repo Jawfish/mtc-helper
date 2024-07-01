@@ -12,7 +12,7 @@ import { useTask } from '@hooks/useTask';
 import { useValidation } from '@hooks/useValidation';
 import { useOrochiStore } from '@src/store/orochiStore';
 import { DropdownMenuItemProps } from '@radix-ui/react-dropdown-menu';
-import { usePandaStore } from '@src/store/pandaStore';
+import { useGeneralStore } from '@src/store/generalStore';
 
 import Button from './shared/Button';
 
@@ -26,7 +26,7 @@ namespace Toolbar {
 export default function Toolbar({ toggleDiffView, process }: Toolbar.Props) {
     const { validateResponse } = useValidation();
     const { originalCode } = useOrochiStore();
-    const { originalResponseMarkdown } = usePandaStore();
+    const { originalResponseMarkdown } = useGeneralStore();
 
     return (
         <ToolbarContainer>
@@ -38,7 +38,7 @@ export default function Toolbar({ toggleDiffView, process }: Toolbar.Props) {
                     Check Response
                 </Button>
             )}
-            {(process === 'Orochi' || process === 'PANDA') && (
+            {(process === 'Orochi' || process === 'General') && (
                 <Button
                     tooltip='View the differences between the original and edited responses'
                     onClick={toggleDiffView}

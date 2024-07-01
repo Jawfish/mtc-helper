@@ -1,6 +1,6 @@
 import { MutHandler } from '@handlers/types';
 import Logger from '@lib/logging';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 import { getWordCount } from '@lib/textProcessing';
 
 import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..';
@@ -38,13 +38,13 @@ const createAndAppendControls = (
 };
 
 const setupWordCountSubscription = (wcElement: HTMLSpanElement) => {
-    return pandaStore.subscribe(({ editedResponseMarkdown }) => {
+    return generalStore.subscribe(({ editedResponseMarkdown }) => {
         wcElement.textContent = `${getWordCount(editedResponseMarkdown || '')} words (edited)`;
     });
 };
 
 const setupCopyButtonSubscription = (copyOriginalButton: HTMLButtonElement) => {
-    return pandaStore.subscribe(({ originalResponseMarkdown }) => {
+    return generalStore.subscribe(({ originalResponseMarkdown }) => {
         copyOriginalButton.disabled = !originalResponseMarkdown;
     });
 };
@@ -54,14 +54,14 @@ const setupCopyButtonListeners = (
     copyOriginalButton: HTMLButtonElement
 ) => {
     copyEditedButton.addEventListener('click', () => {
-        const { editedResponseMarkdown } = pandaStore.getState();
+        const { editedResponseMarkdown } = generalStore.getState();
         if (editedResponseMarkdown) {
             navigator.clipboard.writeText(editedResponseMarkdown);
         }
     });
 
     copyOriginalButton.addEventListener('click', () => {
-        const { originalResponseMarkdown } = pandaStore.getState();
+        const { originalResponseMarkdown } = generalStore.getState();
         if (originalResponseMarkdown) {
             navigator.clipboard.writeText(originalResponseMarkdown);
         }
@@ -70,8 +70,8 @@ const setupCopyButtonListeners = (
 
 const setupSaveButtonListener = (saveButton: HTMLButtonElement) => {
     saveButton.addEventListener('click', () => {
-        Logger.debug('Handling click on panda selected response save button.');
-        pandaStore.setState({
+        Logger.debug('Handling click on general selected response save button.');
+        generalStore.setState({
             editedResponseMarkdown: undefined,
             originalResponseMarkdown: undefined,
             unselectedResponsePlaintext: undefined
@@ -79,7 +79,7 @@ const setupSaveButtonListener = (saveButton: HTMLButtonElement) => {
     });
 };
 
-export const handlePandaSelectedResponseSaveButtonMutation: MutHandler = (
+export const handleGeneralSelectedResponseSaveButtonMutation: MutHandler = (
     mutation: Element
 ) => {
     const saveButton = selectSaveButton(mutation);

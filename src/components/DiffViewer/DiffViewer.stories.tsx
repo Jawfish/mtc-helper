@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { globalStore } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 
 import { DiffViewer } from './DiffViewer';
 
@@ -70,14 +70,14 @@ export const OrochiDiffWithLongResponse: Story = {
     ]
 };
 
-export const PandaDiff: Story = {
+export const GeneralDiff: Story = {
     args: {
         toggleDiffView: fn().mockName('toggleDiffView')
     },
     decorators: [
         Story => {
-            globalStore.setState({ process: 'PANDA' });
-            pandaStore.setState({
+            globalStore.setState({ process: 'General' });
+            generalStore.setState({
                 originalResponseMarkdown: 'This is the original response.',
                 editedResponseMarkdown: 'This is the edited response with some changes.'
             });
@@ -87,14 +87,14 @@ export const PandaDiff: Story = {
     ]
 };
 
-export const PandaDiffWithMarkdown: Story = {
+export const GeneralDiffWithMarkdown: Story = {
     args: {
         toggleDiffView: fn().mockName('toggleDiffView')
     },
     decorators: [
         Story => {
-            globalStore.setState({ process: 'PANDA' });
-            pandaStore.setState({
+            globalStore.setState({ process: 'General' });
+            generalStore.setState({
                 originalResponseMarkdown:
                     '# Title\n\nParagraph with **bold** and *italic* text.\n\n- Item 1\n- Item 2',
                 editedResponseMarkdown:
@@ -106,14 +106,14 @@ export const PandaDiffWithMarkdown: Story = {
     ]
 };
 
-export const PandaDiffWithLongResponse: Story = {
+export const GeneralDiffWithLongResponse: Story = {
     args: {
         toggleDiffView: fn().mockName('toggleDiffView')
     },
     decorators: [
         Story => {
-            globalStore.setState({ process: 'PANDA' });
-            pandaStore.setState({
+            globalStore.setState({ process: 'General' });
+            generalStore.setState({
                 originalResponseMarkdown: 'This is the original response.'.repeat(100),
                 editedResponseMarkdown:
                     'This is the edited response with some changes.'.repeat(100)

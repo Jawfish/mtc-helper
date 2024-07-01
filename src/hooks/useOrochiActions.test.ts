@@ -87,24 +87,24 @@ describe('useOrochiActions', () => {
         await act(async () => {
             await result.current.copyAllAsPython();
         });
-        
-        const expectedContent = `############################# PROMPT #############################
+
+        const expectedContent = `######################################## PROMPT ########################################
 
 """
 prompt text
 """
 
-########################## OPERATOR NOTES ##########################
+#################################### OPERATOR NOTES ####################################
 
 """
 operator notes
 """
 
-############################ RESPONSE #############################
+####################################### RESPONSE #######################################
 
 edited code
 
-############################## TESTS ##############################
+######################################## TESTS #########################################
 
 test code`;
 
@@ -118,7 +118,7 @@ test code`;
             prompt: 'This is a\nmultiline prompt',
             editedCode: 'def example():\n    return "Hello, World!"',
             tests: 'assert example() == "Hello, World!"',
-            operatorNotes: 'Some notes\nfor the operator'
+            operatorNotes: 'Some notes\nfrom the operator'
         } as any);
 
         const { result } = renderHook(() => useOrochiActions());
@@ -126,26 +126,59 @@ test code`;
             await result.current.copyAllAsPython();
         });
 
-        const expectedContent = `############################# PROMPT #############################
+        const expectedContent = `######################################## PROMPT ########################################
 
 """
 This is a
 multiline prompt
 """
 
-########################## OPERATOR NOTES ##########################
+#################################### OPERATOR NOTES ####################################
 
 """
 Some notes
-for the operator
+from the operator
 """
 
-############################ RESPONSE #############################
+####################################### RESPONSE #######################################
 
 def example():
     return "Hello, World!"
 
-############################## TESTS ##############################
+######################################## TESTS #########################################
+
+assert example() == "Hello, World!"`;
+
+        expect(mockCopy).toHaveBeenCalledWith(expectedContent);
+    });
+
+    it('should omit operator notes if none were found', async () => {
+        vi.mocked(useOrochiStore).mockReturnValue({
+            ...mockStore,
+            prompt: 'This is a\nmultiline prompt',
+            editedCode: 'def example():\n    return "Hello, World!"',
+            tests: 'assert example() == "Hello, World!"',
+            operatorNotes: 'operator notes could not be found'
+        } as any);
+
+        const { result } = renderHook(() => useOrochiActions());
+        await act(async () => {
+            await result.current.copyAllAsPython();
+        });
+
+        const expectedContent = `######################################## PROMPT ########################################
+
+"""
+This is a
+multiline prompt
+"""
+
+####################################### RESPONSE #######################################
+
+def example():
+    return "Hello, World!"
+
+######################################## TESTS #########################################
 
 assert example() == "Hello, World!"`;
 

@@ -1,8 +1,8 @@
 import { MutHandler } from '@handlers/types';
 import Logger from '@src/lib/logging';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 
-const selectPandaEditedResponse = (): HTMLDivElement | null => {
+const selectGeneralEditedResponse = (): HTMLDivElement | null => {
     const element = document.querySelector('div[contenteditable="true"]');
 
     if (element instanceof HTMLDivElement) {
@@ -12,8 +12,8 @@ const selectPandaEditedResponse = (): HTMLDivElement | null => {
     return null;
 };
 
-export const handlePandaEditedResponseMutation: MutHandler = (_target: Element) => {
-    const editedResponseElement = selectPandaEditedResponse();
+export const handleGeneralEditedResponseMutation: MutHandler = (_target: Element) => {
+    const editedResponseElement = selectGeneralEditedResponse();
 
     if (!editedResponseElement) {
         return;
@@ -25,15 +25,15 @@ export const handlePandaEditedResponseMutation: MutHandler = (_target: Element) 
         return;
     }
 
-    const { editedResponseMarkdown: markdownInStore } = pandaStore.getState();
+    const { editedResponseMarkdown: markdownInStore } = generalStore.getState();
 
     if (editedResponseFromDOM === markdownInStore) {
         return;
     }
 
-    Logger.debug('Handling change in panda edited response state.');
+    Logger.debug('Handling change in general edited response state.');
 
-    pandaStore.setState({
+    generalStore.setState({
         editedResponseMarkdown: editedResponseFromDOM
     });
 };

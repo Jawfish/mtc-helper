@@ -1,6 +1,6 @@
 import { selectTaskWindowElement } from '@lib/selectors';
 
-export const selectPandaSelectedResponseSaveButton = (): HTMLButtonElement | null => {
+export const selectGeneralSelectedResponseSaveButton = (): HTMLButtonElement | null => {
     const taskWindow = selectTaskWindowElement();
     const selectedResponseSaveButton = Array.from(
         taskWindow?.querySelectorAll('button') || []
@@ -15,15 +15,15 @@ export const selectPandaSelectedResponseSaveButton = (): HTMLButtonElement | nul
         : null;
 };
 
-export const selectPandaSelectedResponse = (): HTMLDivElement | null => {
-    const saveButton = selectPandaSelectedResponseSaveButton();
+export const selectGeneralSelectedResponse = (): HTMLDivElement | null => {
+    const saveButton = selectGeneralSelectedResponseSaveButton();
 
     const selectedResponse = saveButton?.parentElement?.parentElement;
 
     return selectedResponse instanceof HTMLDivElement ? selectedResponse : null;
 };
 
-export const selectAllPandaEditResponseButtons = (): HTMLButtonElement[] | [] => {
+export const selectAllGeneralEditResponseButtons = (): HTMLButtonElement[] | [] => {
     const editButtons = Array.from(
         document.querySelectorAll('button[title="Edit"]')
     ).filter(button => button.querySelector('svg'));

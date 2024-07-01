@@ -43,8 +43,8 @@ describe('Watermark', () => {
         const { rerender } = render(<Watermark version='1.0.0' />);
         expect(screen.getByText(/Current process: Unknown/)).toBeInTheDocument();
 
-        globalStore.setState({ process: 'PANDA' });
+        globalStore.setState({ process: 'General' });
         rerender(<Watermark version='1.0.0' />);
-        expect(screen.getByText(/Current process: PANDA/)).toBeInTheDocument();
+        expect(screen.getByText(/Current process: General/)).toBeInTheDocument();
     });
 });

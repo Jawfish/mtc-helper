@@ -12,7 +12,7 @@ import {
     createControlsContainerElement
 } from './utils';
 
-export const handlePandaPromptMutation: MutHandler = (mutation: Element) => {
+export const handleGeneralPromptMutation: MutHandler = (mutation: Element) => {
     const closeButton = Array.from(mutation.querySelectorAll('button')).find(
         button => button.textContent === 'Close'
     );
@@ -21,7 +21,7 @@ export const handlePandaPromptMutation: MutHandler = (mutation: Element) => {
         return;
     }
 
-    Logger.debug('Handling panda prompt mutation.');
+    Logger.debug('Handling general prompt mutation.');
     addMtcHelperAttributeToElement(closeButton);
 
     const promptElement = closeButton.parentElement?.parentElement?.children[1];

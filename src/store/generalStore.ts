@@ -25,18 +25,18 @@ const initialState: State = {
     unselectedResponseMarkdown: undefined
 };
 
-export const pandaStore = createLogStore<State & Actions>('Panda store')(set => ({
+export const generalStore = createLogStore<State & Actions>('General store')(set => ({
     ...initialState,
     reset: () => set({ ...initialState })
 }));
 
-export const usePandaStore = () => useStore(pandaStore);
+export const useGeneralStore = () => useStore(generalStore);
 
 globalStore.subscribe(({ taskIsOpen: taskOpen }) => {
-    if (!taskOpen && !isStateEqual(pandaStore.getState(), initialState)) {
+    if (!taskOpen && !isStateEqual(generalStore.getState(), initialState)) {
         Logger.debug(
-            'Resetting Panda store due to state change from subscription to global store'
+            'Resetting General store due to state change from subscription to global store'
         );
-        pandaStore.getState().reset();
+        generalStore.getState().reset();
     }
 });

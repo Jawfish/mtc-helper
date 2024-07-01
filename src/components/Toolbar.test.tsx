@@ -5,7 +5,7 @@ import { describe, it, vi, beforeEach } from 'vitest';
 import { globalStore, Process } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
 import { expect } from '@storybook/test';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 
 vi.mock('@hooks/useOrochiActions', () => ({
     useOrochiActions: () => ({
@@ -59,7 +59,7 @@ describe('Toolbar', () => {
         expect(screen.getByText('Copy')).toBeInTheDocument();
     });
 
-    it.each(['Orochi', 'PANDA'] as Process[])(
+    it.each(['Orochi', 'General'] as Process[])(
         'displays the View Diff button for %s process',
         process => {
             globalStore.setState({ process });
@@ -73,7 +73,7 @@ describe('Toolbar', () => {
         }
     );
 
-    it.each(['Orochi', 'PANDA'] as Process[])(
+    it.each(['Orochi', 'General'] as Process[])(
         'calls toggleDiffView when View Diff button is clicked if it is enabled',
         process => {
             globalStore.setState({ process });
@@ -82,8 +82,8 @@ describe('Toolbar', () => {
             // changes in the global store
             if (process === 'Orochi') {
                 orochiStore.setState({ originalCode: 'some code' });
-            } else if (process === 'PANDA') {
-                pandaStore.setState({ originalResponseMarkdown: 'some markdown' });
+            } else if (process === 'General') {
+                generalStore.setState({ originalResponseMarkdown: 'some markdown' });
             }
 
             render(
@@ -99,7 +99,7 @@ describe('Toolbar', () => {
         }
     );
 
-    it.each(['Orochi', 'PANDA'] as Process[])(
+    it.each(['Orochi', 'General'] as Process[])(
         "doesn't call toggleDiffView when View Diff button is clicked if it is disabled",
         process => {
             globalStore.setState({ process });
@@ -116,7 +116,7 @@ describe('Toolbar', () => {
         }
     );
 
-    it.each(['Orochi', 'PANDA', 'Unknown'] as Process[])(
+    it.each(['Orochi', 'General', 'Unknown'] as Process[])(
         'displays Check Response button only for Orochi process',
         process => {
             render(

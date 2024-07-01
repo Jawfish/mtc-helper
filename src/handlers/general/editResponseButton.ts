@@ -1,13 +1,15 @@
 import { MutHandler } from '@handlers/types';
 import Logger from '@src/lib/logging';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 
 import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..';
 
-import { selectAllPandaEditResponseButtons } from './selectors';
+import { selectAllGeneralEditResponseButtons } from './selectors';
 
-export const handlePandaEditResponseButtonMutation: MutHandler = (_target: Element) => {
-    const editResponseButtons = selectAllPandaEditResponseButtons();
+export const handleGeneralEditResponseButtonMutation: MutHandler = (
+    _target: Element
+) => {
+    const editResponseButtons = selectAllGeneralEditResponseButtons();
     if (!editResponseButtons.length) {
         return;
     }
@@ -21,9 +23,9 @@ export const handlePandaEditResponseButtonMutation: MutHandler = (_target: Eleme
         addMtcHelperAttributeToElement(button);
 
         button.addEventListener('click', () => {
-            Logger.debug('Handling click on panda edit response button.');
+            Logger.debug('Handling click on general edit response button.');
 
-            pandaStore.getState().reset();
+            generalStore.getState().reset();
         });
     });
 };

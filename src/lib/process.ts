@@ -13,8 +13,10 @@ export const getProcess = (url: string | undefined): Process => {
     type ProcessUuidMap = Record<string, Process>;
 
     const processUuidMap: ProcessUuidMap = {
-        'ddc93c48-e857-4ffb-a442-9b2b34ac3c83': 'Orochi',
-        '1ba3bd1f-243e-46de-9f8f-eec133766f64': 'PANDA'
+        '01031f59-fb94-4484-bcee-58df8b66787a': 'General',
+        '1ba3bd1f-243e-46de-9f8f-eec133766f64': 'General',
+        'b10050a9-254d-4af8-b343-913b06475de2': 'General',
+        'ddc93c48-e857-4ffb-a442-9b2b34ac3c83': 'Orochi'
     };
 
     const [cleanUrl] = url.split('?');

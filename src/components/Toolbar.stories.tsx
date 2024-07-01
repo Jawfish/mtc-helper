@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { ToastProvider } from '@src/contexts/ToastContext';
 import { orochiStore } from '@src/store/orochiStore';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 
 import Toolbar from './Toolbar';
 
@@ -17,7 +17,7 @@ orochiStore.setState({
     operatorNotes: 'operator notes'
 });
 
-pandaStore.setState({
+generalStore.setState({
     originalResponseMarkdown: 'original response',
     editedResponseMarkdown: 'edited response'
 });
@@ -35,7 +35,7 @@ const meta: Meta<typeof Toolbar> = {
     argTypes: {
         process: {
             control: 'radio',
-            options: ['Orochi', 'PANDA', 'Unknown']
+            options: ['Orochi', 'General', 'Unknown']
         }
     }
 };
@@ -70,9 +70,9 @@ export const OrochiPython: Story = {
     ]
 };
 
-export const Panda: Story = {
+export const General: Story = {
     args: {
-        process: 'PANDA',
+        process: 'General',
         toggleDiffView: fn().mockName('toggleDiffView')
     }
 };

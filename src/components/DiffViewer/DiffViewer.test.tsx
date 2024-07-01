@@ -4,7 +4,7 @@ import { DiffViewer } from '@components/DiffViewer/DiffViewer';
 import { describe, it, vi, beforeEach, afterEach } from 'vitest';
 import { globalStore } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 import { expect } from '@storybook/test';
 
 vi.mock('@hooks/useKeyPress', () => ({
@@ -22,8 +22,8 @@ describe('DiffViewer', () => {
             editedResponse: 'edited response',
             originalResponse: 'original response'
         });
-        pandaStore.setState({
-            originalResponseMarkdown: 'original panda response'
+        generalStore.setState({
+            originalResponseMarkdown: 'original general response'
         });
     });
 
@@ -59,8 +59,8 @@ describe('DiffViewer', () => {
     //     expect(screen.getByText('Full Response')).toBeInTheDocument();
     // });
 
-    it('displays PANDA diff when process is PANDA', () => {
-        globalStore.setState({ process: 'PANDA' });
+    it('displays General diff when process is General', () => {
+        globalStore.setState({ process: 'General' });
         render(<DiffViewer toggleDiffView={mockToggleDiffView} />);
         expect(screen.queryByText('Code')).not.toBeInTheDocument();
         expect(screen.queryByText('Full Response')).not.toBeInTheDocument();

@@ -114,8 +114,8 @@ export function initializeMutationObserver(handlers: Handlers, target: HTMLDivEl
                 });
             }
 
-            if (process === 'PANDA') {
-                handlers.panda.forEach(handler => {
+            if (process === 'General') {
+                handlers.general.forEach(handler => {
                     handler(target);
                 });
             }

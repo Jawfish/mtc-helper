@@ -21,12 +21,12 @@ import { handleReturnTargetMutation } from './orochi/rework';
 import { handleScoreMutation } from './orochi/score';
 import { handleUsefulMetadataSection } from './orochi/usefulMetadata';
 import { handleUselessMetadataSection } from './orochi/uselessMetadata';
-import { handlePandaEditedResponseMutation } from './panda/editedResponse';
-import { handlePandaEditResponseButtonMutation } from './panda/editResponseButton';
-import { handlePandaOriginalResponseMutation } from './panda/originalResponse';
-import { handlePandaPromptMutation } from './panda/prompt';
-import { handlePandaSelectedResponseSaveButtonMutation } from './panda/saveButton';
-import { handlePandaUnselectedResponseMutation } from './panda/unselectedResponse';
+import { handleGeneralEditedResponseMutation } from './general/editedResponse';
+import { handleGeneralEditResponseButtonMutation } from './general/editResponseButton';
+import { handleGeneralOriginalResponseMutation } from './general/originalResponse';
+import { handleGeneralPromptMutation } from './general/prompt';
+import { handleGeneralSelectedResponseSaveButtonMutation } from './general/saveButton';
+import { handleGeneralUnselectedResponseMutation } from './general/unselectedResponse';
 import { Handlers } from './types';
 
 export const addMtcHelperAttributeToElement = (element: Element) => {
@@ -52,12 +52,12 @@ export const handlers: Handlers = {
         handleReturnTargetMutation,
         handleScoreMutation
     ],
-    panda: [
-        handlePandaEditedResponseMutation,
-        handlePandaEditResponseButtonMutation,
-        handlePandaOriginalResponseMutation,
-        handlePandaPromptMutation,
-        handlePandaSelectedResponseSaveButtonMutation,
-        handlePandaUnselectedResponseMutation
+    general: [
+        handleGeneralEditedResponseMutation,
+        handleGeneralEditResponseButtonMutation,
+        handleGeneralOriginalResponseMutation,
+        handleGeneralPromptMutation,
+        handleGeneralSelectedResponseSaveButtonMutation,
+        handleGeneralUnselectedResponseMutation
     ]
 };

@@ -15,7 +15,7 @@ describe('Identifying HTML content', () => {
     });
 });
 
-describe('Detecting markdown code blocks', () => {
+describe('Detecting malformed markdown code blocks', () => {
     it('identifies an unclosed markdown code block', () => {
         const unclosedCodeBlock = '```javascript\nsome code';
         expect(textUtils.codeContainsMarkdownFence(unclosedCodeBlock)).toBe(true);
@@ -211,6 +211,10 @@ describe('Word counting', () => {
                     '! @ # $ % ^ & * ( ) \\ | / \' ; , . [ ] { } | < > ? : " !! @@ ## $$ %^&% ($%*#%()* (@#*%() *@<:{ >:?|} <:)) ***'
                 )
             ).toBe(0);
+        });
+
+        it('counts latex numbers as two words to keep parity with Google Docs', () => {
+            expect(textUtils.getWordCount('$$99.2$$')).toBe(2);
         });
     });
 

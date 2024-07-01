@@ -1,36 +1,36 @@
 import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 
-import { handlePandaOriginalResponseMutation } from './originalResponse';
+import { handleGeneralOriginalResponseMutation } from './originalResponse';
 import * as selectors from './selectors';
 
-describe('handlePandaOriginalResponseMutation', () => {
+describe('handleGeneralOriginalResponseMutation', () => {
     beforeEach(() => {
-        pandaStore.getState().reset();
-        pandaStore.setState({
+        generalStore.getState().reset();
+        generalStore.setState({
             editedResponseMarkdown: 'Test content'
         });
         document.body.innerHTML = '';
-        vi.spyOn(selectors, 'selectPandaSelectedResponse').mockImplementation(() => {
+        vi.spyOn(selectors, 'selectGeneralSelectedResponse').mockImplementation(() => {
             return document.querySelector('div') || null;
         });
     });
 
     it('should not update store if originalResponseElement is not found', () => {
-        handlePandaOriginalResponseMutation(document.body);
-        expect(pandaStore.getState().originalResponseHtml).toBeUndefined();
-        expect(pandaStore.getState().originalResponseHtml).toBeUndefined();
+        handleGeneralOriginalResponseMutation(document.body);
+        expect(generalStore.getState().originalResponseHtml).toBeUndefined();
+        expect(generalStore.getState().originalResponseHtml).toBeUndefined();
     });
 
     it('should not update store if originalResponse is empty', () => {
         document.body.innerHTML =
             '<div><div id="2" class="text-theme-main"></div><div data-cy="tab"></div></div>';
 
-        handlePandaOriginalResponseMutation(document.body);
+        handleGeneralOriginalResponseMutation(document.body);
 
-        expect(pandaStore.getState().originalResponseHtml).toBeUndefined();
-        expect(pandaStore.getState().originalResponseHtml).toBeUndefined();
+        expect(generalStore.getState().originalResponseHtml).toBeUndefined();
+        expect(generalStore.getState().originalResponseHtml).toBeUndefined();
     });
 
     it('should update store with markdown and HTML when content is present', () => {
@@ -40,8 +40,8 @@ describe('handlePandaOriginalResponseMutation', () => {
                 <div data-cy="tab"><p>Test content</p></div>
             </div>
         `;
-        handlePandaOriginalResponseMutation(document.body);
-        const newState = pandaStore.getState();
+        handleGeneralOriginalResponseMutation(document.body);
+        const newState = generalStore.getState();
         expect(newState.originalResponseMarkdown).toBe('Test content');
         expect(newState.originalResponseHtml).toBe('<p>Test content</p>');
     });
@@ -60,8 +60,8 @@ describe('handlePandaOriginalResponseMutation', () => {
                 </div>
             </div>
         `;
-        handlePandaOriginalResponseMutation(document.body);
-        const newState = pandaStore.getState();
+        handleGeneralOriginalResponseMutation(document.body);
+        const newState = generalStore.getState();
         expect(newState.originalResponseMarkdown).toBe(
             '# Title\n\nParagraph with **bold** and *italic* text.\n\n- Item 1\n- Item 2'
         );
@@ -79,8 +79,8 @@ describe('handlePandaOriginalResponseMutation', () => {
                 </div>
             </div>
         `;
-        handlePandaOriginalResponseMutation(document.body);
-        const newState = pandaStore.getState();
+        handleGeneralOriginalResponseMutation(document.body);
+        const newState = generalStore.getState();
         expect(newState.originalResponseMarkdown).toBe(
             '```\nfunction test() {\n    console.log("Hello, world!");\n}\n```'
         );
@@ -97,8 +97,8 @@ describe('handlePandaOriginalResponseMutation', () => {
                 </div>
             </div>
         `;
-        handlePandaOriginalResponseMutation(document.body);
-        const newState = pandaStore.getState();
+        handleGeneralOriginalResponseMutation(document.body);
+        const newState = generalStore.getState();
         expect(newState.originalResponseMarkdown).toBe(
             'First paragraph\n\nThird paragraph'
         );
@@ -113,8 +113,8 @@ describe('handlePandaOriginalResponseMutation', () => {
                 </div>
             </div>
         `;
-        handlePandaOriginalResponseMutation(document.body);
-        const newState = pandaStore.getState();
+        handleGeneralOriginalResponseMutation(document.body);
+        const newState = generalStore.getState();
         expect(newState.originalResponseMarkdown).toBe(
             'Special characters: & < > " \''
         );
@@ -127,8 +127,8 @@ describe('handlePandaOriginalResponseMutation', () => {
                 <div data-cy="tab"><p>Test content</p></div>
             </div>
         `;
-        handlePandaOriginalResponseMutation(document.body);
-        expect(pandaStore.getState().originalResponseHtml).toBeUndefined();
-        expect(pandaStore.getState().originalResponseHtml).toBeUndefined();
+        handleGeneralOriginalResponseMutation(document.body);
+        expect(generalStore.getState().originalResponseHtml).toBeUndefined();
+        expect(generalStore.getState().originalResponseHtml).toBeUndefined();
     });
 });

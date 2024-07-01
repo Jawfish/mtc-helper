@@ -1,14 +1,14 @@
 import { MutHandler } from '@handlers/types';
 import Logger from '@src/lib/logging';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 import MarkdownConverter from '@lib/markdown';
 import { getWordCount } from '@lib/textProcessing';
 
-import { selectPandaSelectedResponse } from './selectors';
+import { selectGeneralSelectedResponse } from './selectors';
 import { createWordCountElement } from './utils';
 
-const selectPandaOriginalResponse = (): HTMLDivElement | null => {
-    const selectedResponse = selectPandaSelectedResponse();
+const selectGeneralOriginalResponse = (): HTMLDivElement | null => {
+    const selectedResponse = selectGeneralSelectedResponse();
     const tab = selectedResponse?.querySelector('div[id="2"]');
 
     // if tab doesn't have "text-theme-main" class, it is not selected, so the
@@ -36,13 +36,13 @@ const insertOriginalResponseWordCount = (text: string) => {
     container.insertBefore(wcElement, container.children[1]);
 };
 
-export const handlePandaOriginalResponseMutation: MutHandler = (_target: Element) => {
-    const originalResponseElement = selectPandaOriginalResponse();
+export const handleGeneralOriginalResponseMutation: MutHandler = (_target: Element) => {
+    const originalResponseElement = selectGeneralOriginalResponse();
     if (!originalResponseElement) {
         return;
     }
 
-    const { editedResponseMarkdown } = pandaStore.getState();
+    const { editedResponseMarkdown } = generalStore.getState();
     if (!editedResponseMarkdown) {
         return;
     }
@@ -54,14 +54,14 @@ export const handlePandaOriginalResponseMutation: MutHandler = (_target: Element
 
     if (
         !htmlAsMarkdown ||
-        htmlAsMarkdown === pandaStore.getState().originalResponseMarkdown
+        htmlAsMarkdown === generalStore.getState().originalResponseMarkdown
     ) {
         return;
     }
 
-    Logger.debug('Handling change in panda original response state.');
+    Logger.debug('Handling change in general original response state.');
 
-    pandaStore.setState({
+    generalStore.setState({
         originalResponseMarkdown: htmlAsMarkdown,
         originalResponseHtml: originalResponseElement.innerHTML
     });

@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
-import { usePandaStore } from '@src/store/pandaStore';
+import { useGeneralStore } from '@src/store/generalStore';
 
 import { DiffTabs } from './DiffTabs';
 import { DiffContainer } from './DiffLayout';
 
-type PandaDiffProps = {
+type Props = {
     diffMethod: DiffMethod;
     disableWordDiff: boolean;
 };
 
-export const PandaDiff: React.FC<PandaDiffProps> = ({
-    diffMethod,
-    disableWordDiff
-}) => {
+export const GeneralDiff: React.FC<Props> = ({ diffMethod, disableWordDiff }) => {
     const [activeTab, setActiveTab] = useState(0);
-    const { editedResponseMarkdown, originalResponseMarkdown } = usePandaStore();
+    const { editedResponseMarkdown, originalResponseMarkdown } = useGeneralStore();
 
     const tabs = [
         {

@@ -36,9 +36,9 @@ describe('Getting the process from the UUID', () => {
         expect(getProcess(`https://a.b.c/process/${orochiUuid}`)).toBe('Orochi');
     });
 
-    it('returns correct process for PANDA UUID', () => {
-        const pandaUuid = '1ba3bd1f-243e-46de-9f8f-eec133766f64';
-        expect(getProcess(`https://a.b.c/process/${pandaUuid}`)).toBe('PANDA');
+    it('returns correct process for General UUID', () => {
+        const generalUuid = '1ba3bd1f-243e-46de-9f8f-eec133766f64';
+        expect(getProcess(`https://a.b.c/process/${generalUuid}`)).toBe('General');
     });
 
     it('ignores query parameters in URL', () => {
@@ -90,10 +90,10 @@ describe('Updating the process by UUID', () => {
         expect(getProcessFromStore()).toBe('Orochi');
     });
 
-    it('sets correct process for PANDA UUID', () => {
-        const pandaUuid = '1ba3bd1f-243e-46de-9f8f-eec133766f64';
-        updateProcess(`https://a.b.c/process/${pandaUuid}`);
-        expect(getProcessFromStore()).toBe('PANDA');
+    it('sets correct process for General UUID', () => {
+        const generalUuid = '1ba3bd1f-243e-46de-9f8f-eec133766f64';
+        updateProcess(`https://a.b.c/process/${generalUuid}`);
+        expect(getProcessFromStore()).toBe('General');
     });
 
     it('ignores query parameters in URL', () => {

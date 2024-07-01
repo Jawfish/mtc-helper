@@ -95,16 +95,23 @@ export const isValidUUID = (uuid: string): boolean => {
 
     return uuidRegex.test(uuid);
 };
-
 export const getWordCount = (text: string): number => {
     const WORD_PATTERN = /(?<!^|\n)\d+\.|\S+/gu;
     const IGNORE_PATTERN = /^[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]+$/;
+    const LATEX_NUMBER_PATTERN = /^\$\$\d+(?:\.\d+)?\$\$$/;
+
     const matches = text.match(WORD_PATTERN);
     if (!matches) return 0;
 
     return matches
         .filter(match => !/^\d+\.$/.test(match))
-        .flatMap(word => word.split(/[/:—–,]/))
+        .flatMap(word => {
+            if (LATEX_NUMBER_PATTERN.test(word)) {
+                return [word, word]; // Count LaTeX numbers as two words
+            }
+
+            return word.split(/[/:—–,]/);
+        })
         .filter(word => word.length > 0 && !IGNORE_PATTERN.test(word)).length;
 };
 

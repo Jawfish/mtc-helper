@@ -2,7 +2,7 @@ import Logger from '@lib/logging';
 import { useToast } from '@src/contexts/ToastContext';
 import { Process, useGlobalStore } from '@src/store/globalStore';
 import { useOrochiStore } from '@src/store/orochiStore';
-import { usePandaStore } from '@src/store/pandaStore';
+import { useGeneralStore } from '@src/store/generalStore';
 import { useCallback, useState } from 'react';
 
 const DIFF_VIEW_ERROR =
@@ -18,7 +18,7 @@ export function useDiffView(): UseDiffViewReturn {
     const { notify } = useToast();
     const [diffViewOpen, setDiffViewOpen] = useState(false);
     const orochiState = useOrochiStore();
-    const pandaState = usePandaStore();
+    const generalState = useGeneralStore();
 
     const canOpenDiffView = useCallback(
         (currentProcess: Process) => {
@@ -26,12 +26,12 @@ export function useDiffView(): UseDiffViewReturn {
                 currentProcess === 'Orochi' &&
                 orochiState.originalResponse &&
                 orochiState.editedResponse;
-            const canOpenPandaDiff =
-                currentProcess === 'PANDA' && pandaState.originalResponseMarkdown;
+            const canOpenGeneralDiff =
+                currentProcess === 'General' && generalState.originalResponseMarkdown;
 
-            return canOpenOrochiDiff || canOpenPandaDiff;
+            return canOpenOrochiDiff || canOpenGeneralDiff;
         },
-        [orochiState, pandaState]
+        [orochiState, generalState]
     );
 
     const toggleDiffView = useCallback(() => {

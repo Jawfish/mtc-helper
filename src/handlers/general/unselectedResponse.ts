@@ -1,6 +1,6 @@
 import { MutHandler } from '@handlers/types';
 import Logger from '@src/lib/logging';
-import { pandaStore } from '@src/store/pandaStore';
+import { generalStore } from '@src/store/generalStore';
 import { getWordCount } from '@lib/textProcessing';
 import md from '@lib/markdown';
 import markdownToTxt from 'markdown-to-txt';
@@ -13,7 +13,7 @@ import {
     createControlsContainerElement
 } from './utils';
 
-export const handlePandaUnselectedResponseMutation: MutHandler = (
+export const handleGeneralUnselectedResponseMutation: MutHandler = (
     mutation: Element
 ) => {
     const selectButton = Array.from(mutation.querySelectorAll('button')).find(
@@ -56,12 +56,12 @@ export const handlePandaUnselectedResponseMutation: MutHandler = (
     const plaintextCopyButton = createCopyButtonElement('Copy Plaintext');
 
     // update word count in the word count element when unselectedResponse changes
-    pandaStore.subscribe(({ unselectedResponsePlaintext }) => {
+    generalStore.subscribe(({ unselectedResponsePlaintext }) => {
         wcElement.textContent = `${getWordCount(unselectedResponsePlaintext || '')} words`;
     });
 
     markdownCopyButton.addEventListener('click', () => {
-        const { unselectedResponseMarkdown } = pandaStore.getState();
+        const { unselectedResponseMarkdown } = generalStore.getState();
         if (!unselectedResponseMarkdown) {
             return;
         }
@@ -69,7 +69,7 @@ export const handlePandaUnselectedResponseMutation: MutHandler = (
     });
 
     plaintextCopyButton.addEventListener('click', () => {
-        const { unselectedResponsePlaintext } = pandaStore.getState();
+        const { unselectedResponsePlaintext } = generalStore.getState();
         if (!unselectedResponsePlaintext) {
             return;
         }
@@ -84,9 +84,9 @@ export const handlePandaUnselectedResponseMutation: MutHandler = (
     container.appendChild(markdownCopyButton);
     buttonContainer?.insertAdjacentElement('afterend', container);
 
-    Logger.debug('Handling panda unselected response mutation.');
+    Logger.debug('Handling general unselected response mutation.');
 
-    pandaStore.setState({
+    generalStore.setState({
         unselectedResponsePlaintext,
         unselectedResponseMarkdown: md.instance.htmlToMarkdown(
             unselectedResponseElement as HTMLElement,
