@@ -94,6 +94,14 @@ export function initializeMutationObserver(handlers: Handlers, target: HTMLDivEl
     const observer = new MutationObserver(mutations => {
         const { process, taskIsOpen } = globalStore.getState();
         mutations.forEach(mutation => {
+            // Rapidly-updating elements within the Monaco editor (i.e. while scrolling)
+            // can cause some slowdown and it is not necessary to observe them.
+            const monacoEditor = document.querySelector('.monaco-editor');
+            if (monacoEditor?.contains(mutation.target)) {
+                return;
+            }
+            Logger.debug('MutationObserver: Mutation detected');
+
             if (mutation.target.nodeType !== Node.ELEMENT_NODE) {
                 return;
             }

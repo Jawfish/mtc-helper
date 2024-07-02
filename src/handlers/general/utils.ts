@@ -145,3 +145,22 @@ export const createControlsContainerElement = () => {
 
     return controlsContainer;
 };
+
+export function debounce<T extends (...args: unknown[]) => void>(
+    func: T,
+    wait: number
+): (...args: Parameters<T>) => void {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    return (...args: Parameters<T>) => {
+        const later = () => {
+            timeoutId = undefined;
+            func(...args);
+        };
+
+        if (timeoutId !== undefined) {
+            clearTimeout(timeoutId);
+        }
+        timeoutId = setTimeout(later, wait);
+    };
+}

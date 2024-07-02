@@ -25,14 +25,28 @@ const createControls = (saveButton: HTMLButtonElement): void => {
 
 const setupSelectedWordCountListener = (contentElement: Element | undefined) => {
     Logger.debug('Setting up selected word count listener.');
-
     if (!contentElement) {
         Logger.warn('Content element not found.');
 
         return;
     }
 
-    const updateSelectedWordCount = () => {
+    const throttle = <T extends (...args: unknown[]) => void>(
+        func: T,
+        limit: number
+    ): T => {
+        let inThrottle = false;
+
+        return function (this: unknown, ...args: Parameters<T>): void {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => (inThrottle = false), limit);
+            }
+        } as T;
+    };
+
+    const updateSelectedWordCount = throttle(() => {
         const selection = window.getSelection();
         const selectedText = selection?.toString() || '';
         generalStore.setState(state => ({
@@ -41,11 +55,10 @@ const setupSelectedWordCountListener = (contentElement: Element | undefined) => 
                 selection: selectedText
             }
         }));
-    };
+    }, 100);
 
     document.addEventListener('selectionchange', updateSelectedWordCount);
     contentElement.addEventListener('mouseup', updateSelectedWordCount);
-    contentElement.addEventListener('blur', () => {});
 };
 
 const setupSaveButtonListener = (saveButton: HTMLButtonElement) => {
