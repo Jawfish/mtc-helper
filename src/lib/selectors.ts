@@ -14,6 +14,10 @@ export const selectGlobalObserverTarget = async () => {
     return element as HTMLDivElement;
 };
 
+/**
+ * Select the task window element that contains the conversation.
+ * @returns The task window element if found, otherwise `undefined`.
+ */
 export const selectTaskWindowElement = (): HTMLDivElement | undefined => {
     const taskWindow = document.querySelector(
         '#__next > div > div > div > div > div.fixed.top-0.left-0.flex.h-screen.w-screen.items-center.justify-center'
@@ -22,6 +26,10 @@ export const selectTaskWindowElement = (): HTMLDivElement | undefined => {
     return taskWindow instanceof HTMLDivElement ? taskWindow : undefined;
 };
 
+/**
+ * Select the task window close button element.
+ * @returns The task window close button element if found, otherwise `undefined`.
+ */
 export const selectTaskWindowCloseButton = (): SVGElement | undefined => {
     const closeButton = selectTaskWindowHeaderControlsElement()?.children[2];
 
@@ -45,6 +53,7 @@ const selectTaskWindowHeaderElement = (): HTMLDivElement | undefined => {
 
     return header instanceof HTMLDivElement ? header : undefined;
 };
+
 const selectTaskWindowHeaderControlsElement = (): HTMLDivElement | undefined => {
     const controls = selectTaskWindowHeaderElement()?.children[1];
 
@@ -55,7 +64,6 @@ const selectTaskWindowHeaderControlsElement = (): HTMLDivElement | undefined => 
  * Select the main task submission button element from a QA task.
  * @returns The task submit button element if found, otherwise `undefined`.
  */
-
 export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
     const element = Array.from(document.querySelectorAll('span')).find(span =>
         span.textContent?.trim()?.includes('Submit QA Task')
@@ -63,3 +71,10 @@ export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
 
     return element instanceof HTMLButtonElement ? element : undefined;
 };
+
+/**
+ * Select the response code element from the bot response.
+ * @returns The response code element if found, otherwise `undefined`.
+ */
+export const selectResponseCodeElement = () =>
+    document.querySelector('div.rounded-xl.bg-pink-100 pre code');

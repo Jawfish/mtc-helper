@@ -11,10 +11,10 @@ type State = {
     originalCode: string | undefined;
     editedCode: string | undefined;
     conversationTitle: string | undefined;
-    editedResponse: string | undefined;
+    operatorResponse: string | undefined;
     errorLabels: string | undefined;
     operatorNotes: string | undefined;
-    originalResponse: string | undefined;
+    modelResponse: string | undefined;
     prompt: string | undefined;
     tests: string | undefined;
     score: number | undefined;
@@ -31,10 +31,10 @@ const initialState: State = {
     originalCode: undefined,
     editedCode: undefined,
     conversationTitle: undefined,
-    editedResponse: undefined,
+    operatorResponse: undefined,
     errorLabels: undefined,
     operatorNotes: undefined,
-    originalResponse: undefined,
+    modelResponse: undefined,
     prompt: undefined,
     tests: undefined,
     score: undefined,

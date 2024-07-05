@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
 
-export const DiffBackground = ({
-    children,
-    onClick
-}: React.PropsWithChildren<{ onClick: () => void }>) => {
+type Props = {
+    onClick: () => void;
+    children: React.ReactNode;
+};
+
+export const DiffBackground = ({ children, onClick }: Props) => {
     // Ensure the full click happens on the background to avoid mouseup triggering the
     // onClick event if elements shift during the click
     const [isMouseDownOnBackground, setIsMouseDownOnBackground] = useState(false);

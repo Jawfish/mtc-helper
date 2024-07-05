@@ -1,37 +1,48 @@
 /**
- * Handlers that satisfy this type will be  called by the MutationObserver on each
- * mutation where target.nodeType === Node.ELEMENT_NODE.
+ * Handlers will be called by the MutationObserver on each mutation where
+ * target.nodeType === Node.ELEMENT_NODE.
  *
- * The imported files should ONLY contain handlers that implement this type. They are
- * all exported as arrays below so that they can be passed to the MutationObserver. This
- * is so that they can automatically be treated as handlers once defined.
- *
- * These originally had selectors injected as an argument to help with testing. Given a
- * choice between mocking selectors and mocking the DOM, a mocked DOM that is structured
- * like the real DOM is more useful than fake selectors.
+ * The handlers are exported as arrays associated with their project so that they can be
+ * passed to the MutationObserver and run only when a relevant mutation is detected.
  */
 
 import { handleAnyCloseButtonMutation } from './global/closeButton';
 import { handleAnySubmitButtonMutation } from './global/submitButton';
 import { handleAnyTaskWindowMutation } from './global/taskWindow';
 import { handleLanguageMutation } from './orochi/language';
-import { handlePromptMutation } from './orochi/prompt';
 import { handleResponseMutation } from './orochi/response';
+import { handlePromptMutation as handleOrochiPromptMutation } from './orochi/prompt';
 import { handleReturnTargetMutation } from './orochi/rework';
 import { handleScoreMutation } from './orochi/score';
 import { handleUsefulMetadataSection } from './orochi/usefulMetadata';
 import { handleUselessMetadataSection } from './orochi/uselessMetadata';
-import { handleGeneralEditedResponseMutation } from './general/editedResponse';
-import { handleGeneralEditResponseButtonMutation } from './general/editResponseButton';
-import { handleGeneralOriginalResponseMutation } from './general/originalResponse';
-import { handleGeneralPromptMutation } from './general/prompt';
+import { handleOperatorResponseMutation } from './general/operatorResponse';
+import { handleEditResponseButtonMutation } from './general/editResponseButton';
+import { handleModelResponseMutation } from './general/modelResponse';
+import { handlePromptMutation as handleGeneralPromptMutation } from './general/prompt';
 import { handleSaveButtonMutation } from './general/saveButton';
-import { Handlers } from './types';
+import { handleUnselectedResponseMutation } from './general/unselectedResponse';
 
+export type MutHandler = (target: Element) => void;
+
+export interface Handlers {
+    global: MutHandler[];
+    orochi: MutHandler[];
+    general: MutHandler[];
+}
+
+/**
+ * Add a data-mtc-helper attribute to an element to indicate that it has been handled by
+ * the extension.
+ */
 export const addMtcHelperAttributeToElement = (element: Element) => {
     element.setAttribute('data-mtc-helper', 'true');
 };
 
+/**
+ * Check if an element has a data-mtc-helper attribute, indicating that it has been
+ * handled by the extension.
+ */
 export const elementHasMtcHelperAttribute = (element: Element) => {
     return Boolean(element.attributes.getNamedItem('data-mtc-helper'));
 };
@@ -44,18 +55,20 @@ export const handlers: Handlers = {
     ],
     orochi: [
         handleLanguageMutation,
-        handleUselessMetadataSection,
-        handleUsefulMetadataSection,
-        handlePromptMutation,
+        handleModelResponseMutation,
+        handleOrochiPromptMutation,
         handleResponseMutation,
         handleReturnTargetMutation,
-        handleScoreMutation
+        handleScoreMutation,
+        handleUsefulMetadataSection,
+        handleUselessMetadataSection
     ],
     general: [
-        handleGeneralEditedResponseMutation,
-        handleGeneralEditResponseButtonMutation,
-        handleGeneralOriginalResponseMutation,
+        handleOperatorResponseMutation,
+        handleEditResponseButtonMutation,
+        handleModelResponseMutation,
         handleGeneralPromptMutation,
-        handleSaveButtonMutation
+        handleSaveButtonMutation,
+        handleUnselectedResponseMutation
     ]
 };

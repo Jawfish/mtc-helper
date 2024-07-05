@@ -15,16 +15,20 @@ describe('DiffViewer', () => {
     const mockToggleDiffView = vi.fn();
 
     beforeEach(() => {
-        globalStore.setState({ process: 'Unknown' });
+        globalStore.setState({ process: 'General' });
         orochiStore.setState({
             editedCode: 'edited code',
             originalCode: 'original code',
-            editedResponse: 'edited response',
-            originalResponse: 'original response'
+            operatorResponse: 'edited response',
+            modelResponse: 'original response'
         });
-        generalStore.setState({
-            originalResponseMarkdown: 'original general response'
-        });
+        generalStore.setState(state => ({
+            ...state,
+            selectedResponse: {
+                ...state.selectedResponse,
+                modelResponseMarkdown: 'original general response'
+            }
+        }));
     });
 
     afterEach(() => {

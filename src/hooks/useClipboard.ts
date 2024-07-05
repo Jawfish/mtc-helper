@@ -4,6 +4,9 @@ import { useCallback } from 'react';
 
 type ClipboardContent = string | undefined;
 
+/**
+ * Custom hook for copying content to the clipboard.
+ */
 export function useClipboard() {
     const copy = useCallback(async (content: ClipboardContent): Promise<boolean> => {
         if (content === undefined) {

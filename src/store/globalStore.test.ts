@@ -14,7 +14,7 @@ vi.mock('./globalStore', async importOriginal => {
 describe('globalStore', () => {
     it('should initialize with correct default values', () => {
         const state = globalStore.getState();
-        expect(state.process).toBe('Unknown');
+        expect(state.process).toBe('General');
         expect(state.taskIsOpen).toBe(false);
     });
 

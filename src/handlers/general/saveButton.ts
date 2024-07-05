@@ -1,11 +1,44 @@
-import { MutHandler } from '@handlers/types';
+import { MutHandler } from '@handlers/index';
 import Logger from '@lib/logging';
 import { generalStore } from '@src/store/generalStore';
 
 import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..';
 
-import { createControlsContainerElement } from './utils';
+import { createCopyButtonElement, createWordCountElement } from './utils';
 
+const createControlsContainerElement = () => {
+    const controlsContainer = document.createElement('div');
+    controlsContainer.className = 'flex gap-2 w-full justify-end mt-2 items-center';
+
+    const editedWordCounter = createWordCountElement('edited');
+    const originalWordCounter = createWordCountElement('original');
+    const selectedWordCounter = createWordCountElement('selected');
+    const copyEdited = createCopyButtonElement('edited');
+    const copyOriginal = createCopyButtonElement('original');
+
+    controlsContainer.appendChild(editedWordCounter.element);
+    controlsContainer.appendChild(originalWordCounter.element);
+    controlsContainer.appendChild(selectedWordCounter.element);
+    controlsContainer.appendChild(copyEdited.element);
+    controlsContainer.appendChild(copyOriginal.element);
+
+    generalStore.setState(state => ({
+        selectedResponse: {
+            ...state.selectedResponse,
+            elements: {
+                ...state.selectedResponse.elements,
+                controlsContainer,
+                operatorResponseWordCounter: editedWordCounter,
+                modelResponseWordCounter: originalWordCounter,
+                selectionWordCounter: selectedWordCounter,
+                copyEdited,
+                copyOriginal
+            }
+        }
+    }));
+
+    return controlsContainer;
+};
 const selectSaveButton = (mutation: Element): HTMLButtonElement | undefined => {
     return Array.from(mutation.querySelectorAll('button')).find(
         button => button.textContent === 'Save' && button.classList.contains('text-xs')
@@ -55,7 +88,7 @@ const setupSelectedWordCountListener = (contentElement: Element | undefined) => 
                 selection: selectedText
             }
         }));
-    }, 100);
+    }, 10);
 
     document.addEventListener('selectionchange', updateSelectedWordCount);
     contentElement.addEventListener('mouseup', updateSelectedWordCount);

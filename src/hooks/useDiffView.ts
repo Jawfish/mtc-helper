@@ -24,11 +24,11 @@ export function useDiffView(): UseDiffViewReturn {
         (currentProcess: Process) => {
             const canOpenOrochiDiff =
                 currentProcess === 'Orochi' &&
-                orochiState.originalResponse &&
-                orochiState.editedResponse;
+                orochiState.modelResponse &&
+                orochiState.operatorResponse;
             const canOpenGeneralDiff =
                 currentProcess === 'General' &&
-                generalState.selectedResponse.originalMarkdown;
+                generalState.selectedResponse.modelResponseMarkdown;
 
             return canOpenOrochiDiff || canOpenGeneralDiff;
         },

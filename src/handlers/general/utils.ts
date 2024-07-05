@@ -6,7 +6,7 @@ export type WordCounter = {
     unsubscribe: () => void;
 };
 
-type WordCountType = 'edited' | 'original' | 'selected' | 'prompt';
+type WordCountType = 'edited' | 'original' | 'selected' | 'prompt' | 'unselected';
 
 export const createWordCountElement = (type: WordCountType): WordCounter => {
     const wcElement = document.createElement('span');
@@ -19,22 +19,26 @@ export const createWordCountElement = (type: WordCountType): WordCounter => {
 
         switch (type) {
             case 'edited':
-                text = state.selectedResponse.editedMarkdown;
+                text = state.selectedResponse.operatorResponseMarkdown;
                 break;
             case 'original':
-                text = state.selectedResponse.originalMarkdown;
+                text = state.selectedResponse.modelResponseMarkdown;
                 break;
             case 'selected':
                 text = state.selectedResponse.selection;
                 break;
             case 'prompt':
+                // eslint-disable-next-line prefer-destructuring
                 text = state.prompt.text;
+                break;
+            case 'unselected':
+                text = state.unselectedResponse.textContent;
                 break;
         }
 
         const count = text ? getWordCount(text) : undefined;
         const countText = count === undefined || count === 0 ? '?' : count.toString();
-        wcElement.textContent = `${countText} words ${type !== 'prompt' ? `(${type})` : ''}`;
+        wcElement.textContent = `${countText} words ${type !== 'prompt' && type !== 'unselected' ? `(${type})` : ''}`;
     };
 
     calculateAndUpdateDisplay(generalStore.getState());
@@ -67,10 +71,10 @@ export const createCopyButtonElement = (type: CopyButtonType): CopyButton => {
 
         switch (type) {
             case 'edited':
-                content = state.selectedResponse.editedMarkdown;
+                content = state.selectedResponse.operatorResponseMarkdown;
                 break;
             case 'original':
-                content = state.selectedResponse.originalMarkdown;
+                content = state.selectedResponse.modelResponseMarkdown;
                 break;
             case 'prompt':
                 content = state.prompt.text;
@@ -86,10 +90,10 @@ export const createCopyButtonElement = (type: CopyButtonType): CopyButton => {
 
         switch (type) {
             case 'edited':
-                content = state.selectedResponse.editedMarkdown;
+                content = state.selectedResponse.operatorResponseMarkdown;
                 break;
             case 'original':
-                content = state.selectedResponse.originalMarkdown;
+                content = state.selectedResponse.modelResponseMarkdown;
                 break;
             case 'prompt':
                 content = state.prompt.text;
@@ -110,40 +114,6 @@ export const createCopyButtonElement = (type: CopyButtonType): CopyButton => {
         update,
         unsubscribe
     };
-};
-
-export const createControlsContainerElement = () => {
-    const controlsContainer = document.createElement('div');
-    controlsContainer.className = 'flex gap-2 w-full justify-end mt-2 items-center';
-
-    const editedWordCounter = createWordCountElement('edited');
-    const originalWordCounter = createWordCountElement('original');
-    const selectedWordCounter = createWordCountElement('selected');
-    const copyEdited = createCopyButtonElement('edited');
-    const copyOriginal = createCopyButtonElement('original');
-
-    controlsContainer.appendChild(editedWordCounter.element);
-    controlsContainer.appendChild(originalWordCounter.element);
-    controlsContainer.appendChild(selectedWordCounter.element);
-    controlsContainer.appendChild(copyEdited.element);
-    controlsContainer.appendChild(copyOriginal.element);
-
-    generalStore.setState(state => ({
-        selectedResponse: {
-            ...state.selectedResponse,
-            elements: {
-                ...state.selectedResponse.elements,
-                controlsContainer,
-                editedWordCounter,
-                originalWordCounter,
-                selectedWordCounter,
-                copyEdited,
-                copyOriginal
-            }
-        }
-    }));
-
-    return controlsContainer;
 };
 
 export function debounce<T extends (...args: unknown[]) => void>(

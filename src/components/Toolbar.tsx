@@ -27,7 +27,7 @@ export default function Toolbar({ toggleDiffView, process }: Toolbar.Props) {
     const { validateResponse } = useValidation();
     const { originalCode } = useOrochiStore();
     const store = useGeneralStore();
-    const { originalMarkdown } = store.selectedResponse;
+    const { modelResponseMarkdown: modelResponseMarkdown } = store.selectedResponse;
 
     return (
         <ToolbarContainer>
@@ -43,7 +43,9 @@ export default function Toolbar({ toggleDiffView, process }: Toolbar.Props) {
                 <Button
                     tooltip='View the differences between the original and edited responses'
                     onClick={toggleDiffView}
-                    disabled={process === 'Orochi' ? !originalCode : !originalMarkdown}>
+                    disabled={
+                        process === 'Orochi' ? !originalCode : !modelResponseMarkdown
+                    }>
                     View Diff
                 </Button>
             )}
@@ -71,7 +73,6 @@ const Dropdown = ({ process }: { process: Process }) => {
                 {/* NOTE: this needs to be a React.forwardRef component due to the use of asChild */}
                 <ShadButton
                     className='bg-white border-mtc-primary text-mtc-primary border rounded-md shadow-none focus:!ring-mtc-primary cursor-pointer flex gap-3 !font-normal hover:!text-mtc-primary hover:!bg-mtc-faded'
-                    variant={'outline'}
                     data-testid='dropdown-trigger'>
                     <span>Copy</span>
                     <ChevronDown

@@ -1,4 +1,4 @@
-import { MutHandler } from '@handlers/types';
+import { MutHandler } from '@handlers/index';
 import Logger from '@lib/logging';
 import { orochiStore } from '@src/store/orochiStore';
 
@@ -15,6 +15,10 @@ const selectUselessMetadataSection = (): HTMLDivElement | undefined => {
         : undefined;
 };
 
+/**
+ * This handler removes the empty metadata section with the non-functioning save button
+ * at the bottom of a response while editing it.
+ */
 export const handleUselessMetadataSection: MutHandler = (_target: Element) => {
     const { metadataRemoved } = orochiStore.getState();
     if (metadataRemoved) {

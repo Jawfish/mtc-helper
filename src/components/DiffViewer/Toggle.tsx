@@ -1,15 +1,13 @@
 import React from 'react';
 import { Checkbox } from '@src/external/components/ui/checkbox';
 
-type HighlightToggleProps = {
+type Props = {
+    children: React.ReactNode;
     checked: boolean;
     onCheckedChange: (checked: boolean) => void;
 };
 
-export const HighlightToggle: React.FC<HighlightToggleProps> = ({
-    checked,
-    onCheckedChange
-}) => (
+export const Toggle: React.FC<Props> = ({ children, checked, onCheckedChange }) => (
     <div className='flex items-center gap-2'>
         <Checkbox
             id='diff-highlight-enabled'
@@ -20,7 +18,7 @@ export const HighlightToggle: React.FC<HighlightToggleProps> = ({
         <label
             htmlFor='diff-highlight-enabled'
             className='text-mtc-primary text-sm'>
-            Highlight
+            {children}
         </label>
     </div>
 );

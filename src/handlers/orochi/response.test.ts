@@ -44,14 +44,14 @@ describe('handleResponseMutation', () => {
         document.body.appendChild(tab);
 
         handleResponseMutation(document.body);
-        expect(orochiStore.getState().originalResponse).toBe(
+        expect(orochiStore.getState().modelResponse).toBe(
             'This is the original response intro.def original_code()This is the original response outro.'
         );
         expect(orochiStore.getState().originalCode).toBe('def original_code()');
     });
 
     it('should handle edited response element', () => {
-        const editedResponse = createElement('div', { class: 'rounded-xl' }, [
+        const operatorResponse = createElement('div', { class: 'rounded-xl' }, [
             createElement('div', { class: 'rounded-xl' }, [
                 createElement('div', {}, [
                     '1This is the edited response intro.',
@@ -60,13 +60,13 @@ describe('handleResponseMutation', () => {
                 ])
             ])
         ]);
-        document.body.appendChild(editedResponse);
+        document.body.appendChild(operatorResponse);
 
         handleResponseMutation(document.body);
 
         // The first character is cut off because in the real DOM it's the number of the
         // response
-        expect(orochiStore.getState().editedResponse?.trim()).toBe(
+        expect(orochiStore.getState().operatorResponse?.trim()).toBe(
             'This is the edited response intro.def edited_code()This is the edited response outro.'
         );
 
@@ -92,8 +92,8 @@ describe('handleResponseMutation', () => {
             createElement('div', {}, ['No response element here'])
         );
         handleResponseMutation(document.body);
-        expect(orochiStore.getState().originalResponse).toBeUndefined();
-        expect(orochiStore.getState().editedResponse).toBeUndefined();
+        expect(orochiStore.getState().modelResponse).toBeUndefined();
+        expect(orochiStore.getState().operatorResponse).toBeUndefined();
         expect(orochiStore.getState().originalCode).toBeUndefined();
         expect(orochiStore.getState().editedCode).toBeUndefined();
     });
@@ -105,7 +105,7 @@ describe('handleResponseMutation', () => {
         document.body.appendChild(tab);
 
         handleResponseMutation(document.body);
-        expect(orochiStore.getState().originalResponse).toBe(
+        expect(orochiStore.getState().modelResponse).toBe(
             'This is a response without code'
         );
         expect(orochiStore.getState().originalCode).toBeUndefined();

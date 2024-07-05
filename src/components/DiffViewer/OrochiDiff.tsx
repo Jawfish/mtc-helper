@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
 import { useOrochiStore } from '@src/store/orochiStore';
 
@@ -10,15 +10,12 @@ type OrochiDiffProps = {
     disableWordDiff: boolean;
 };
 
-export const OrochiDiff: React.FC<OrochiDiffProps> = ({
-    diffMethod,
-    disableWordDiff
-}) => {
+export const OrochiDiff = ({ diffMethod, disableWordDiff }: OrochiDiffProps) => {
     const [activeTab, setActiveTab] = useState(0);
-    const { editedCode, originalCode, editedResponse, originalResponse } =
+    const { editedCode, originalCode, operatorResponse, modelResponse } =
         useOrochiStore();
 
-    if (!editedCode || !originalCode || !editedResponse || !originalResponse) {
+    if (!editedCode || !originalCode || !operatorResponse || !modelResponse) {
         return undefined;
     }
 
@@ -39,8 +36,8 @@ export const OrochiDiff: React.FC<OrochiDiffProps> = ({
             label: 'Full Response',
             content: (
                 <ReactDiffViewer
-                    oldValue={originalResponse}
-                    newValue={editedResponse}
+                    oldValue={modelResponse}
+                    newValue={operatorResponse}
                     splitView={true}
                     compareMethod={diffMethod}
                 />
