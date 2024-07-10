@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { fn } from '@storybook/test';
 import { ToastProvider } from '@src/contexts/ToastContext';
 import { orochiStore } from '@src/store/orochiStore';
 import { generalStore } from '@src/store/generalStore';
@@ -48,8 +47,7 @@ type Story = StoryObj<typeof Toolbar>;
 
 export const Orochi: Story = {
     args: {
-        process: 'Orochi',
-        toggleDiffView: fn().mockName('toggleDiffView')
+        process: 'Orochi'
     },
     decorators: [
         Story => {
@@ -62,7 +60,6 @@ export const Orochi: Story = {
 
 export const General: Story = {
     args: {
-        process: 'General',
-        toggleDiffView: fn().mockName('toggleDiffView')
+        process: 'General'
     }
 };

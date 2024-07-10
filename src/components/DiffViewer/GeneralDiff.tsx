@@ -13,13 +13,10 @@ type Props = {
 
 type Direction = 'ltr' | 'rtl';
 
-export const GeneralDiff: React.FC<Props> = ({ diffMethod, disableWordDiff }) => {
+export const GeneralDiff = ({ diffMethod, disableWordDiff }: Props) => {
     const [activeTab, setActiveTab] = useState(0);
     const store = useGeneralStore();
-    const {
-        operatorResponseMarkdown: editedMarkdown,
-        modelResponseMarkdown: modelResponseMarkdown
-    } = store.selectedResponse;
+    const { operatorResponseMarkdown, modelResponseMarkdown } = store.selectedResponse;
 
     const direction: Direction = isRTL(modelResponseMarkdown!) ? 'rtl' : 'ltr';
 
@@ -29,7 +26,7 @@ export const GeneralDiff: React.FC<Props> = ({ diffMethod, disableWordDiff }) =>
             content: (
                 <ReactDiffViewer
                     oldValue={modelResponseMarkdown}
-                    newValue={editedMarkdown}
+                    newValue={operatorResponseMarkdown}
                     splitView={true}
                     compareMethod={diffMethod}
                     extraLinesSurroundingDiff={0}

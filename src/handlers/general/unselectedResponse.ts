@@ -4,8 +4,6 @@ import { generalStore } from '@src/store/generalStore';
 
 import { addMtcHelperAttributeToElement, elementHasMtcHelperAttribute } from '..';
 
-import { createWordCountElement } from './utils';
-
 const selectSelectButton = (): HTMLButtonElement | undefined => {
     const button = Array.from(document.querySelectorAll('button')).find(
         button => button.querySelector('span')?.textContent === 'Select'
@@ -27,26 +25,6 @@ const selectUnselectedResponse = (): HTMLDivElement | undefined => {
     }
 
     return undefined;
-};
-
-const createWordCounterContainer = () => {
-    const controlsContainer = document.createElement('div');
-    controlsContainer.className = 'flex gap-2 w-full justify-end mt-2 items-center';
-
-    const wordCounter = createWordCountElement('unselected');
-
-    controlsContainer.appendChild(wordCounter.element);
-
-    generalStore.setState(state => ({
-        unselectedResponse: {
-            ...state.unselectedResponse,
-            elements: {
-                wordCounter
-            }
-        }
-    }));
-
-    return controlsContainer;
 };
 
 export const handleUnselectedResponseMutation: MutHandler = (_target: Element) => {
@@ -75,17 +53,10 @@ export const handleUnselectedResponseMutation: MutHandler = (_target: Element) =
         return;
     }
 
-    const selectButton = selectSelectButton();
-
-    const wordCounterContainer = createWordCounterContainer();
-    selectButton?.parentElement?.insertAdjacentElement(
-        'afterend',
-        wordCounterContainer
-    );
-
     Logger.debug('Handling change in general edited response state.');
 
     generalStore.setState(state => ({
+        ...state,
         unselectedResponse: {
             ...state.unselectedResponse,
             textContent: textContentFromDOM

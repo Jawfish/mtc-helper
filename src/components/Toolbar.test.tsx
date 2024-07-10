@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, RenderResult } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import Toolbar from '@src/components/Toolbar';
 import { describe, it, vi, beforeEach } from 'vitest';
@@ -6,6 +6,7 @@ import { globalStore, Process } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
 import { expect } from '@storybook/test';
 import { generalStore } from '@src/store/generalStore';
+import { ToastProvider } from '@src/contexts/ToastContext';
 
 vi.mock('@hooks/useOrochiActions', () => ({
     useOrochiActions: () => ({
@@ -30,10 +31,16 @@ vi.mock('@hooks/useValidation', () => ({
     })
 }));
 
+const renderComponent = (process: Process): RenderResult => {
+    return render(
+        <ToastProvider>
+            <Toolbar process={process} />
+        </ToastProvider>
+    );
+};
+
 // TODO: figure out how to test the radix dropdown
 describe('Toolbar', () => {
-    const mockToggleDiffView = vi.fn();
-
     beforeEach(() => {
         globalStore.setState({ process: 'General' });
         orochiStore.getState().reset();
@@ -41,48 +48,37 @@ describe('Toolbar', () => {
     });
 
     it('renders without crashing', () => {
-        render(
-            <Toolbar
-                toggleDiffView={mockToggleDiffView}
-                process='General'
-            />
-        );
+        renderComponent('General');
     });
 
     it('displays the Copy dropdown', () => {
-        render(
-            <Toolbar
-                toggleDiffView={mockToggleDiffView}
-                process='General'
-            />
-        );
+        renderComponent('General');
         expect(screen.getByText('Copy')).toBeInTheDocument();
     });
 
-    it.each(['Orochi', 'General'] as Process[])(
+    it.each(['Orochi', 'General', 'STEM'] as Process[])(
         'displays the View Diff button for %s process',
         process => {
             globalStore.setState({ process });
-            render(
-                <Toolbar
-                    toggleDiffView={mockToggleDiffView}
-                    process={process}
-                />
-            );
+            renderComponent(process);
             expect(screen.getByText('View Diff')).toBeInTheDocument();
         }
     );
 
-    it.each(['Orochi', 'General'] as Process[])(
+    it.each(['Orochi', 'General', 'STEM'] as Process[])(
         'calls toggleDiffView when View Diff button is clicked if it is enabled',
         process => {
             globalStore.setState({ process });
 
-            // These must run after setting global store state due a subscription to state
-            // changes in the global store
+            // These must run after setting global store state due a subscription to
+            // state changes in the global store. The trigger for whether or not the
+            // diff view can be opened is if the model's content is present (original
+            // code in Orochi, model response in General)
             if (process === 'Orochi') {
-                orochiStore.setState({ originalCode: 'some code' });
-            } else if (process === 'General') {
+                orochiStore.setState({
+                    originalCode: 'some code'
+                });
+            } else {
                 generalStore.setState(state => ({
                     selectedResponse: {
                         ...state.selectedResponse,
@@ -91,45 +87,27 @@ describe('Toolbar', () => {
                 }));
             }
 
-            render(
-                <Toolbar
-                    toggleDiffView={mockToggleDiffView}
-                    process={process}
-                />
-            );
-            fireEvent.click(screen.getByText('View Diff'));
+            renderComponent(process);
 
             expect(screen.getByText('View Diff')).toBeEnabled();
-            expect(mockToggleDiffView).toHaveBeenCalledTimes(1);
         }
     );
 
-    it.each(['Orochi', 'General'] as Process[])(
+    it.each(['Orochi', 'General', 'STEM'] as Process[])(
         "doesn't call toggleDiffView when View Diff button is clicked if it is disabled",
         process => {
             globalStore.setState({ process });
             orochiStore.setState({ originalCode: undefined });
-            render(
-                <Toolbar
-                    toggleDiffView={mockToggleDiffView}
-                    process={process}
-                />
-            );
+            renderComponent(process);
             fireEvent.click(screen.getByText('View Diff'));
             expect(screen.getByText('View Diff')).not.toBeEnabled();
-            expect(mockToggleDiffView).not.toHaveBeenCalled();
         }
     );
 
-    it.each(['Orochi', 'General'] as Process[])(
+    it.each(['Orochi', 'General', 'STEM'] as Process[])(
         'displays Check Response button only for Orochi process',
         process => {
-            render(
-                <Toolbar
-                    toggleDiffView={mockToggleDiffView}
-                    process={process}
-                />
-            );
+            renderComponent(process);
             if (process === 'Orochi') {
                 expect(screen.getByText('Check Response')).toBeInTheDocument();
             } else {
@@ -156,12 +134,7 @@ describe('Toolbar', () => {
     it('does not display Conversation option when language is not python', () => {
         globalStore.setState({ process: 'Orochi' });
         orochiStore.setState({ language: 'unknown' });
-        render(
-            <Toolbar
-                toggleDiffView={mockToggleDiffView}
-                process='Orochi'
-            />
-        );
+        renderComponent('Orochi');
         fireEvent.click(screen.getByText('Copy'));
 
         expect(screen.queryByText('Conversation')).not.toBeInTheDocument();

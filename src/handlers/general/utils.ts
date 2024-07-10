@@ -1,55 +1,4 @@
-import { getWordCount } from '@lib/textProcessing';
 import { generalStore } from '@src/store/generalStore';
-
-export type WordCounter = {
-    element: HTMLSpanElement;
-    unsubscribe: () => void;
-};
-
-type WordCountType = 'edited' | 'original' | 'selected' | 'prompt' | 'unselected';
-
-export const createWordCountElement = (type: WordCountType): WordCounter => {
-    const wcElement = document.createElement('span');
-    wcElement.className = 'text-xs self-center';
-
-    const calculateAndUpdateDisplay = (
-        state: ReturnType<typeof generalStore.getState>
-    ) => {
-        let text: string | undefined;
-
-        switch (type) {
-            case 'edited':
-                text = state.selectedResponse.operatorResponseMarkdown;
-                break;
-            case 'original':
-                text = state.selectedResponse.modelResponseMarkdown;
-                break;
-            case 'selected':
-                text = state.selectedResponse.selection;
-                break;
-            case 'prompt':
-                // eslint-disable-next-line prefer-destructuring
-                text = state.prompt.text;
-                break;
-            case 'unselected':
-                text = state.unselectedResponse.textContent;
-                break;
-        }
-
-        const count = text ? getWordCount(text) : undefined;
-        const countText = count === undefined || count === 0 ? '?' : count.toString();
-        wcElement.textContent = `${countText} words ${type !== 'prompt' && type !== 'unselected' ? `(${type})` : ''}`;
-    };
-
-    calculateAndUpdateDisplay(generalStore.getState());
-
-    const unsubscribe = generalStore.subscribe(calculateAndUpdateDisplay);
-
-    return {
-        element: wcElement,
-        unsubscribe
-    };
-};
 
 export type CopyButton = {
     element: HTMLButtonElement;
@@ -57,7 +6,7 @@ export type CopyButton = {
     unsubscribe: () => void;
 };
 
-type CopyButtonType = 'edited' | 'original' | 'prompt';
+type CopyButtonType = "operator's" | "model's" | 'prompt';
 
 export const createCopyButtonElement = (type: CopyButtonType): CopyButton => {
     const copyButton = document.createElement('button');
@@ -70,10 +19,10 @@ export const createCopyButtonElement = (type: CopyButtonType): CopyButton => {
         let content: string | undefined;
 
         switch (type) {
-            case 'edited':
+            case "operator's":
                 content = state.selectedResponse.operatorResponseMarkdown;
                 break;
-            case 'original':
+            case "model's":
                 content = state.selectedResponse.modelResponseMarkdown;
                 break;
             case 'prompt':
@@ -89,10 +38,10 @@ export const createCopyButtonElement = (type: CopyButtonType): CopyButton => {
         let content: string | undefined;
 
         switch (type) {
-            case 'edited':
+            case "operator's":
                 content = state.selectedResponse.operatorResponseMarkdown;
                 break;
-            case 'original':
+            case "model's":
                 content = state.selectedResponse.modelResponseMarkdown;
                 break;
             case 'prompt':

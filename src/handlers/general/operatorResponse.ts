@@ -36,6 +36,7 @@ export const handleOperatorResponseMutation: MutHandler = (_target: Element) => 
     Logger.debug('Handling change in general edited response state.');
 
     generalStore.setState(state => ({
+        ...state,
         selectedResponse: {
             ...state.selectedResponse,
             operatorResponseMarkdown: operatorResponseFromDOM

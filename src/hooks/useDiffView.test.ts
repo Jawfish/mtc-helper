@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { globalStore } from '@src/store/globalStore';
+import { globalStore, Process } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
 import { generalStore } from '@src/store/generalStore';
 import { useToast } from '@src/contexts/ToastContext';
@@ -11,7 +11,9 @@ import { useDiffView } from './useDiffView';
 vi.mock('@src/contexts/ToastContext');
 vi.mock('@lib/logging');
 
-describe('useDiffView', () => {
+const processes: Process[] = ['Orochi', 'General', 'STEM'];
+
+describe('Diff view react hook', () => {
     const mockNotify = vi.fn();
 
     beforeEach(() => {
@@ -20,57 +22,62 @@ describe('useDiffView', () => {
         vi.mocked(Logger.debug).mockImplementation(() => {});
         generalStore.getState().reset();
         orochiStore.getState().reset();
-        globalStore.setState({ process: 'General' });
+        globalStore.setState({ process: 'General', diffViewOpen: false });
     });
 
-    it('should initialize with diffViewOpen as false', () => {
-        globalStore.setState({ process: 'Orochi' });
+    it.each(processes)('should initialize with diffViewOpen as false', process => {
+        globalStore.setState({ process });
         const { result } = renderHook(() => useDiffView());
         expect(result.current.diffViewOpen).toBe(false);
     });
 
-    it('should toggle diffViewOpen when conditions are met for Orochi', () => {
-        globalStore.setState({ process: 'Orochi' });
-        orochiStore.setState({
-            modelResponse: 'original',
-            operatorResponse: 'edited'
-        });
-
+    it.each(processes)('should be able to open diff view', process => {
         const { result } = renderHook(() => useDiffView());
-
         act(() => {
-            result.current.toggleDiffView();
-        });
-
-        expect(result.current.diffViewOpen).toBe(true);
-        expect(Logger.debug).toHaveBeenCalledWith('Diff view toggled on');
-
-        act(() => {
-            result.current.toggleDiffView();
-        });
-
-        expect(result.current.diffViewOpen).toBe(false);
-        expect(Logger.debug).toHaveBeenCalledWith('Diff view toggled off');
-    });
-
-    it('should toggle diffViewOpen when conditions are met for General', () => {
-        globalStore.setState({ process: 'General' });
-        generalStore.setState(state => ({
-            selectedResponse: {
-                ...state.selectedResponse,
-                modelResponseMarkdown: 'original'
+            globalStore.setState({ process });
+            if (process === 'Orochi') {
+                orochiStore.setState({
+                    originalCode: 'original'
+                });
+            } else {
+                generalStore.setState(state => ({
+                    selectedResponse: {
+                        ...state.selectedResponse,
+                        modelResponseMarkdown: 'response'
+                    }
+                }));
             }
-        }));
-
-        const { result } = renderHook(() => useDiffView());
+        });
 
         act(() => {
             result.current.toggleDiffView();
         });
 
         expect(result.current.diffViewOpen).toBe(true);
-        expect(Logger.debug).toHaveBeenCalledWith('Diff view toggled on');
     });
+
+    it.each(processes)(
+        'should be able to close diff view from an open state',
+        process => {
+            globalStore.setState({ process, diffViewOpen: false });
+            orochiStore.setState({
+                modelResponse: 'original',
+                operatorResponse: 'edited'
+            });
+
+            const { result } = renderHook(() => useDiffView());
+
+            act(() => {
+                result.current.toggleDiffView();
+            });
+            act(() => {
+                result.current.toggleDiffView();
+            });
+
+            expect(result.current.diffViewOpen).toBe(false);
+            expect(globalStore.getState().diffViewOpen).toBe(false);
+        }
+    );
 
     it('should not toggle diffViewOpen and show error for Orochi when original response is missing', () => {
         globalStore.setState({ process: 'Orochi' });

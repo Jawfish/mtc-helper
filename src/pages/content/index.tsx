@@ -4,10 +4,16 @@ import Toasts from '@src/components/Toasts';
 import { Tooltip } from 'react-tooltip';
 import { DiffViewer } from '@components/DiffViewer/DiffViewer';
 import { useDiffView } from '@hooks/useDiffView';
-import { initializeObservers } from '@lib/init';
 import { ToastProvider } from '@src/contexts/ToastContext';
 import Toolbar from '@components/Toolbar';
 import { useGlobalStore } from '@src/store/globalStore';
+import { useLatexView } from '@hooks/useLatexView';
+import LatexViewer from '@components/Latex/LatexViewer';
+import useAppObserver from '@hooks/useAppObserver';
+import { handlers } from '@handlers/index';
+import useMonacoObserver from '@hooks/useMonacoObserver';
+import useTitleObserver from '@hooks/useTitleObserver';
+import { WordCounter } from '@components/WordCounter';
 
 const div = document.createElement('div');
 div.id = 'mtc-helper-root';
@@ -18,10 +24,15 @@ if (!rootContainer) throw new Error("Can't find Content root element");
 const root = createRoot(rootContainer);
 
 const App = () => {
-    const { diffViewOpen, toggleDiffView } = useDiffView();
-    const { taskIsOpen: taskOpen, process } = useGlobalStore();
+    useAppObserver(handlers);
+    useMonacoObserver();
+    useTitleObserver();
 
-    if (!taskOpen) return null;
+    const { diffViewOpen } = useDiffView();
+    const { latexViewOpen } = useLatexView();
+    const { taskIsOpen, process } = useGlobalStore();
+
+    if (!taskIsOpen) return null;
 
     return (
         <>
@@ -36,11 +47,10 @@ const App = () => {
                 openEvents={{ focus: false, mouseover: true, mouseenter: true }}
             />
             <Toasts />
-            <Toolbar
-                toggleDiffView={toggleDiffView}
-                process={process}
-            />
-            {diffViewOpen && <DiffViewer toggleDiffView={toggleDiffView} />}
+            <Toolbar process={process} />
+            {diffViewOpen && <DiffViewer />}
+            {latexViewOpen && <LatexViewer />}
+            {process !== 'Orochi' && <WordCounter />}
         </>
     );
 };
@@ -50,5 +60,3 @@ root.render(
         <App />
     </ToastProvider>
 );
-
-initializeObservers();

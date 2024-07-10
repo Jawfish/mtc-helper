@@ -4,6 +4,7 @@ import { fn } from '@storybook/test';
 import { globalStore } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
 import { generalStore } from '@src/store/generalStore';
+import { ToastProvider } from '@src/contexts/ToastContext';
 
 import { DiffViewer } from './DiffViewer';
 
@@ -12,9 +13,11 @@ const meta: Meta<typeof DiffViewer> = {
     component: DiffViewer,
     decorators: [
         Story => (
-            <div style={{ height: '100vh', width: '100vw' }}>
-                <Story />
-            </div>
+            <ToastProvider>
+                <div style={{ height: '100vh', width: '100vw' }}>
+                    <Story />
+                </div>
+            </ToastProvider>
         )
     ],
     parameters: {
@@ -152,6 +155,31 @@ export const GeneralDiffRTL: Story = {
                     modelResponseMarkdown:
                         '10. بريتوريا (العاصمة التنفيذية) بلومفونتين (العاصمة القضائية) كيب تاون (العاصمة التشريعية)، جنوب أفريقيا ',
                     operatorResponseMarkdown: '10. بريتوريا، جنوب أفريقيا'
+                }
+            }));
+
+            return <Story />;
+        }
+    ]
+};
+
+export const STEMDiff: Story = {
+    args: {
+        toggleDiffView: fn().mockName('toggleDiffView')
+    },
+    decorators: [
+        Story => {
+            globalStore.setState({ process: 'STEM' });
+            generalStore.setState(state => ({
+                ...state,
+                selectedResponse: {
+                    ...state.selectedResponse,
+                    operatorResponseMarkdown: `Here is the mathematical expression 3*9 written in LaTeX:
+\`\`\`
+$3 \\times 9$
+\`\`\``,
+                    modelResponseMarkdown:
+                        'This is the edited response with some changes.'
                 }
             }));
 

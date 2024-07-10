@@ -56,7 +56,10 @@ class HTMLToMarkdown {
         let markdown = this.turndownService.turndown(html);
         markdown = this.postProcessMarkdown(markdown, options);
 
-        return markdown;
+        // remove all backslashes that precede asterisks, square brackets, underscores,
+        // and other backslashes; turndown inserts these to escape the characters and
+        // we don't want them to show in the diff view
+        return markdown.replace(/\\([*_[\]\\])/g, '$1');
     }
 
     /**

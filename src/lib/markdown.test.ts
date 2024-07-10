@@ -116,4 +116,13 @@ describe('HTML to markdown converter', () => {
             '# Title\n\nParagraph with [link](https://example.com)\n\n```\nconst x = 1;\n```'
         );
     });
+
+    it('should not insert escape characters for certain symbols', () => {
+        const symbols = '! @ # $ % ^ & * ( ) _ + { } | : " < > ? - = [ ] \\ ; \' , . /';
+        const html = `<p>${symbols}</p>`;
+
+        const result = md.htmlToMarkdown(html, symbols);
+
+        expect(result).toBe(symbols);
+    });
 });

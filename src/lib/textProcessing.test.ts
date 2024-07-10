@@ -169,15 +169,35 @@ describe('Word counting', () => {
             expect(textUtils.getWordCount('word1\t\tword2 \t word3')).toBe(3);
         });
 
-        it('ignores list numbers', () => {
-            expect(textUtils.getWordCount('1. word')).toBe(1);
-            expect(textUtils.getWordCount('10. word')).toBe(1);
-            expect(textUtils.getWordCount('100. word')).toBe(1);
+        it('includes list numbers by default', () => {
+            expect(textUtils.getWordCount('1. word')).toBe(2);
+            expect(textUtils.getWordCount('10. word')).toBe(2);
+            expect(textUtils.getWordCount('100. word')).toBe(2);
         });
 
-        it("doesn't count a list number as a word when the list spans multiple lines", () => {
+        it('counts list numbers that only have a space following them', () => {
+            expect(textUtils.getWordCount('1. ')).toBe(1);
+        });
+
+        it("doesn't list numbers that only have a space following them when list items are ignored", () => {
+            expect(textUtils.getWordCount('1. ', true)).toBe(0);
+        });
+
+        it('optionally ignores list numbers', () => {
+            expect(textUtils.getWordCount('1. word', true)).toBe(1);
+            expect(textUtils.getWordCount('10. word', true)).toBe(1);
+            expect(textUtils.getWordCount('100. word', true)).toBe(1);
+        });
+
+        it('counts a list number as a word when the list spans multiple lines', () => {
             expect(
                 textUtils.getWordCount('1. Lake One\n2. Lake Two\n3. Lake Three')
+            ).toBe(9);
+        });
+
+        it("doesn't count a list number as a word when the list spans multiple lines if list numbers are ignored", () => {
+            expect(
+                textUtils.getWordCount('1. Lake One\n2. Lake Two\n3. Lake Three', true)
             ).toBe(6);
         });
 
@@ -187,6 +207,10 @@ describe('Word counting', () => {
 
         it('treats hyphenated words as single words', () => {
             expect(textUtils.getWordCount('word - word word-word word- -word')).toBe(5);
+        });
+
+        it('treats underscored words as single words', () => {
+            expect(textUtils.getWordCount('word _ word word_word word_ _word')).toBe(5);
         });
 
         it('counts contractions as single words', () => {
@@ -261,6 +285,31 @@ $$`;
                     "If F(x) is the definite integral of f(x), then F'(x) = f(x)."
                 )
             ).toBe(15);
+        });
+
+        it('counts a number followed by a word separated by a backslash as two words', () => {
+            const latex = '1535\\mathrm';
+            expect(textUtils.getWordCount(latex)).toBe(2);
+        });
+
+        it('counts equations in parity with Google Docs', () => {
+            const slash = '1/2';
+            const asterisk = '1*2';
+            const minus = '1-2';
+            const plus = '1+2';
+            const ampersand = '1&2';
+            const equals = '1=2';
+            const circumflex = '1^2';
+            const equation = '1+2-3*4/5';
+
+            expect(textUtils.getWordCount(slash)).toBe(2);
+            expect(textUtils.getWordCount(asterisk)).toBe(2);
+            expect(textUtils.getWordCount(minus)).toBe(1);
+            expect(textUtils.getWordCount(plus)).toBe(2);
+            expect(textUtils.getWordCount(ampersand)).toBe(2);
+            expect(textUtils.getWordCount(equals)).toBe(2);
+            expect(textUtils.getWordCount(circumflex)).toBe(2);
+            expect(textUtils.getWordCount(equation)).toBe(4);
         });
 
         it('counts LaTeX numbers as two words to keep parity with Google Docs', () => {

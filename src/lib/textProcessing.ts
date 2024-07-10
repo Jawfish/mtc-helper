@@ -102,7 +102,7 @@ export const isRTL = (text: string): boolean => {
     return rtlRegex.test(text);
 };
 
-export const getWordCount = (text: string): number => {
+export const getWordCount = (text: string, ignoreListNumbers?: boolean): number => {
     // Remove any numbering at the start of each line (e.g. "1. "; LTR only)
     const PREPROCESS_PATTERN = /^\d+\. /gm;
 
@@ -113,7 +113,8 @@ export const getWordCount = (text: string): number => {
     const IGNORE_PATTERN = /^[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~“”]+$/;
 
     // Use the preprocessed text for LTR languages, otherwise use the original text
-    const preprocessedText = isRTL(text) ? text : text.replace(PREPROCESS_PATTERN, '');
+    const preprocessedText =
+        isRTL(text) || !ignoreListNumbers ? text : text.replace(PREPROCESS_PATTERN, '');
     const matches = preprocessedText.match(WORD_PATTERN);
     if (!matches) return 0;
 
@@ -124,8 +125,9 @@ export const getWordCount = (text: string): number => {
                 return word.replace(/\.$/, '').split('.');
             }
 
-            // Split on delimiters
-            return word.split(/[[\]/:—–,.^(){}]/);
+            // If two numbers/words are separated by one of these, count them as two
+            // words
+            return word.split(/[[\]/:—–,.^(){}+*/&=\\]/);
         })
         .filter(word => word.length > 0 && !IGNORE_PATTERN.test(word)).length;
 };

@@ -5,7 +5,7 @@ import { generalStore } from '@src/store/generalStore';
 
 import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..';
 
-import { createWordCountElement, createCopyButtonElement } from './utils';
+import { createCopyButtonElement } from './utils';
 
 export const handlePromptMutation: MutHandler = (mutation: Element) => {
     const closeButton = Array.from(mutation.querySelectorAll('button')).find(
@@ -29,12 +29,10 @@ export const handlePromptMutation: MutHandler = (mutation: Element) => {
     // const plaintext = doubleSpace(markdownToTxt(promptContent));
 
     const container = document.createElement('div');
-    const wordCounter = createWordCountElement('prompt');
     const copyPrompt = createCopyButtonElement('prompt');
 
     container.className = 'flex gap-2 w-full justify-end mt-2 items-center';
 
-    container.appendChild(wordCounter.element);
     container.appendChild(copyPrompt.element);
 
     closeButton.parentElement?.insertAdjacentElement('afterend', container);
@@ -45,7 +43,6 @@ export const handlePromptMutation: MutHandler = (mutation: Element) => {
             text,
             elements: {
                 controlsContainer: container,
-                wordCounter,
                 copy: copyPrompt
             }
         }

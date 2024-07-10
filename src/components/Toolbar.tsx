@@ -12,22 +12,19 @@ import { useTask } from '@hooks/useTask';
 import { useValidation } from '@hooks/useValidation';
 import { useOrochiStore } from '@src/store/orochiStore';
 import { DropdownMenuItemProps } from '@radix-ui/react-dropdown-menu';
-import { useGeneralStore } from '@src/store/generalStore';
+import { useLatexView } from '@hooks/useLatexView';
+import { useDiffView } from '@hooks/useDiffView';
 
 import Button from './shared/Button';
 
-namespace Toolbar {
-    export interface Props {
-        toggleDiffView: () => void;
-        process: Process;
-    }
-}
+type Props = {
+    process: Process;
+};
 
-export default function Toolbar({ toggleDiffView, process }: Toolbar.Props) {
+export default function Toolbar({ process }: Props) {
     const { validateResponse } = useValidation();
-    const { originalCode } = useOrochiStore();
-    const store = useGeneralStore();
-    const { modelResponseMarkdown: modelResponseMarkdown } = store.selectedResponse;
+    const { canOpenLatexView, toggleLatexView } = useLatexView();
+    const { canOpenDiffView, toggleDiffView } = useDiffView();
 
     return (
         <ToolbarContainer>
@@ -39,17 +36,20 @@ export default function Toolbar({ toggleDiffView, process }: Toolbar.Props) {
                     Check Response
                 </Button>
             )}
-            {(process === 'Orochi' || process === 'General') && (
+            <Button
+                tooltip='View the differences between the original and edited responses'
+                onClick={toggleDiffView}
+                disabled={!canOpenDiffView}>
+                View Diff
+            </Button>
+            {process === 'STEM' && (
                 <Button
-                    tooltip='View the differences between the original and edited responses'
-                    onClick={toggleDiffView}
-                    disabled={
-                        process === 'Orochi' ? !originalCode : !modelResponseMarkdown
-                    }>
-                    View Diff
+                    tooltip='Open a live-updating LaTeX preview of the edited response'
+                    onClick={toggleLatexView}
+                    disabled={!canOpenLatexView}>
+                    View LaTeX
                 </Button>
             )}
-            {/* TODO: show metadata, click to copy */}
         </ToolbarContainer>
     );
 }

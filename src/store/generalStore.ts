@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 import Logger from '@lib/logging';
-import { CopyButton, WordCounter } from '@handlers/general/utils';
+import { CopyButton } from '@handlers/general/utils';
 
 import { createLogStore } from './storeMiddleware';
 import { globalStore } from './globalStore';
@@ -11,12 +11,8 @@ export type State = {
         operatorResponseMarkdown: string | undefined;
         modelResponseMarkdown: string | undefined;
         modelResponseHtml: string | undefined;
-        selection: string | undefined;
         elements: {
             controlsContainer: HTMLElement | undefined;
-            operatorResponseWordCounter: WordCounter | undefined;
-            modelResponseWordCounter: WordCounter | undefined;
-            selectionWordCounter: WordCounter | undefined;
             copyEdited: CopyButton | undefined;
             copyOriginal: CopyButton | undefined;
         };
@@ -24,15 +20,11 @@ export type State = {
     prompt: {
         text: string | undefined;
         elements: {
-            wordCounter: WordCounter | undefined;
             copy: CopyButton | undefined;
         };
     };
     unselectedResponse: {
         textContent: string | undefined;
-        elements: {
-            wordCounter: WordCounter | undefined;
-        };
     };
 };
 
@@ -45,12 +37,8 @@ const initialState: State = {
         operatorResponseMarkdown: undefined,
         modelResponseMarkdown: undefined,
         modelResponseHtml: undefined,
-        selection: undefined,
         elements: {
             controlsContainer: undefined,
-            operatorResponseWordCounter: undefined,
-            modelResponseWordCounter: undefined,
-            selectionWordCounter: undefined,
             copyEdited: undefined,
             copyOriginal: undefined
         }
@@ -58,15 +46,11 @@ const initialState: State = {
     prompt: {
         text: undefined,
         elements: {
-            wordCounter: undefined,
             copy: undefined
         }
     },
     unselectedResponse: {
-        textContent: undefined,
-        elements: {
-            wordCounter: undefined
-        }
+        textContent: undefined
     }
 };
 

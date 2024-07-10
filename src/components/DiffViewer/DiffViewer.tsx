@@ -2,21 +2,18 @@ import React, { useState } from 'react';
 import { DiffMethod } from 'react-diff-viewer-continued';
 import { useGlobalStore } from '@src/store/globalStore';
 import useKeyPress from '@hooks/useKeyPress';
-
-import Button from '../shared/Button';
+import { useDiffView } from '@hooks/useDiffView';
+import Button from '@components/shared/Button';
+import { Toggle } from '@components/Toggle';
 
 import { DiffBackground, DiffForeground, DiffControls } from './DiffLayout';
 import { DiffMethodSelector } from './DiffMethodSelector';
 import { OrochiDiff } from './OrochiDiff';
 import { GeneralDiff } from './GeneralDiff';
-import { Toggle } from './Toggle';
 
-type DiffViewerProps = {
-    toggleDiffView: () => void;
-};
-
-export const DiffViewer: React.FC<DiffViewerProps> = ({ toggleDiffView }) => {
+export const DiffViewer = () => {
     const { process } = useGlobalStore();
+    const { toggleDiffView } = useDiffView();
     const [diffMethod, setDiffMethod] = useState<DiffMethod>(
         process === 'General' ? DiffMethod.WORDS : DiffMethod.LINES
     );
@@ -37,7 +34,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ toggleDiffView }) => {
                         disableWordDiff={disableWordDiff}
                     />
                 )}
-                {process === 'General' && (
+                {process !== 'Orochi' && (
                     <GeneralDiff
                         diffMethod={diffMethod}
                         disableWordDiff={disableWordDiff}

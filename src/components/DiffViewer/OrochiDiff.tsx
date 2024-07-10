@@ -15,10 +15,6 @@ export const OrochiDiff = ({ diffMethod, disableWordDiff }: OrochiDiffProps) => 
     const { editedCode, originalCode, operatorResponse, modelResponse } =
         useOrochiStore();
 
-    if (!editedCode || !originalCode || !operatorResponse || !modelResponse) {
-        return undefined;
-    }
-
     const tabs = [
         {
             label: 'Code',

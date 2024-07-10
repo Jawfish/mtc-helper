@@ -22,7 +22,7 @@ function processModelResponse(
     }
 
     return {
-        modelResponseMarkdown: htmlAsMarkdown,
+        modelResponseMarkdown: htmlAsMarkdown.replaceAll('\\*', '*'),
         modelResponseHtml: modelResponseElement.innerHTML
     };
 }
@@ -52,6 +52,7 @@ export function createModelResponseMutationHandler(
         if (result) {
             Logger.debug('Handling change in general original response state.');
             generalStore.setState(state => ({
+                ...state,
                 selectedResponse: {
                     ...state.selectedResponse,
                     ...result

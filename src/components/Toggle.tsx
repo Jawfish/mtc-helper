@@ -5,9 +5,10 @@ type Props = {
     children: React.ReactNode;
     checked: boolean;
     onCheckedChange: (checked: boolean) => void;
+    variant?: 'strong' | 'soft';
 };
 
-export const Toggle: React.FC<Props> = ({ children, checked, onCheckedChange }) => (
+export const Toggle = ({ children, checked, onCheckedChange, variant }: Props) => (
     <div className='flex items-center gap-2'>
         <Checkbox
             id='diff-highlight-enabled'
@@ -17,7 +18,7 @@ export const Toggle: React.FC<Props> = ({ children, checked, onCheckedChange }) 
         />
         <label
             htmlFor='diff-highlight-enabled'
-            className='text-mtc-primary text-sm'>
+            className={`${variant === 'soft' ? 'text-mtc-primary' : 'text-mtc-primary-strong'} text-sm`}>
             {children}
         </label>
     </div>
