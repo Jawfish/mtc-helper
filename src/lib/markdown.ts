@@ -43,6 +43,13 @@ class HTMLToMarkdown {
         return HTMLToMarkdown._instance;
     }
 
+    /**
+     * Converts HTML to markdown, taking into account the input string to determine
+     * what style of markdown to convert to.
+     *
+     * @param html - The HTML to convert to markdown (such as the model's response)
+     * @param inputString - The markdown string (such as the operator's edited response)
+     */
     public htmlToMarkdown(html: string | HTMLElement, inputString: string): string {
         const options = this.analyzeInput(inputString);
         this.updateTurndownOptions(options);
@@ -52,6 +59,13 @@ class HTMLToMarkdown {
         return markdown;
     }
 
+    /**
+     * Analyzes the input string (intended to be the markdown written by the operator)
+     * to determine how to format the markdown conversion of the HTML from the model
+     * response. This prevents issues where the model response uses e.g. _emphasis_, but
+     * the operator uses *emphasis*, resulting in the diff view showing a difference
+     * where there functionally is none.
+     */
     private analyzeInput(input: string): Options {
         const options: Options = {
             emDelimiter: '*',
@@ -69,11 +83,6 @@ class HTMLToMarkdown {
         const headingMatch = input.match(/^#+\s.+(\n*)/m);
         if (headingMatch) {
             options.emptyLinesAfterHeading = headingMatch[1].length - 1;
-        }
-
-        const listItemMatch = input.match(/^(-|\d+\.)\s+/m);
-        if (listItemMatch) {
-            options.listItemSpaces = listItemMatch[0].length - 1;
         }
 
         return options;

@@ -95,22 +95,37 @@ export const isValidUUID = (uuid: string): boolean => {
 
     return uuidRegex.test(uuid);
 };
-export const getWordCount = (text: string): number => {
-    const WORD_PATTERN = /(?<!^|\n)\d+\.|\S+/gu;
-    const IGNORE_PATTERN = /^[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]+$/;
-    const LATEX_NUMBER_PATTERN = /^\$\$\d+(?:\.\d+)?\$\$$/;
 
-    const matches = text.match(WORD_PATTERN);
+export const isRTL = (text: string): boolean => {
+    const rtlRegex = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+
+    return rtlRegex.test(text);
+};
+
+export const getWordCount = (text: string): number => {
+    // Remove any numbering at the start of each line (e.g. "1. "; LTR only)
+    const PREPROCESS_PATTERN = /^\d+\. /gm;
+
+    // What to count as a word
+    const WORD_PATTERN = /(?<!^|\n)\d+\.|\S+/gu;
+
+    // If a string is made of entirely these characters, don't count it as a word
+    const IGNORE_PATTERN = /^[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~“”]+$/;
+
+    // Use the preprocessed text for LTR languages, otherwise use the original text
+    const preprocessedText = isRTL(text) ? text : text.replace(PREPROCESS_PATTERN, '');
+    const matches = preprocessedText.match(WORD_PATTERN);
     if (!matches) return 0;
 
     return matches
-        .filter(match => !/^\d+\.$/.test(match))
         .flatMap(word => {
-            if (LATEX_NUMBER_PATTERN.test(word)) {
-                return [word, word]; // Count LaTeX numbers as two words
+            // Count decimal numbers as two words
+            if (/^.\d+\.?$/.test(word)) {
+                return word.replace(/\.$/, '').split('.');
             }
 
-            return word.split(/[/:—–,]/);
+            // Split on delimiters
+            return word.split(/[[\]/:—–,.^(){}]/);
         })
         .filter(word => word.length > 0 && !IGNORE_PATTERN.test(word)).length;
 };

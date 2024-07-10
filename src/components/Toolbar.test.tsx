@@ -35,7 +35,7 @@ describe('Toolbar', () => {
     const mockToggleDiffView = vi.fn();
 
     beforeEach(() => {
-        globalStore.setState({ process: 'Unknown' });
+        globalStore.setState({ process: 'General' });
         orochiStore.getState().reset();
         vi.clearAllMocks();
     });
@@ -44,7 +44,7 @@ describe('Toolbar', () => {
         render(
             <Toolbar
                 toggleDiffView={mockToggleDiffView}
-                process='Unknown'
+                process='General'
             />
         );
     });
@@ -53,7 +53,7 @@ describe('Toolbar', () => {
         render(
             <Toolbar
                 toggleDiffView={mockToggleDiffView}
-                process='Unknown'
+                process='General'
             />
         );
         expect(screen.getByText('Copy')).toBeInTheDocument();
@@ -83,7 +83,12 @@ describe('Toolbar', () => {
             if (process === 'Orochi') {
                 orochiStore.setState({ originalCode: 'some code' });
             } else if (process === 'General') {
-                generalStore.setState({ originalResponseMarkdown: 'some markdown' });
+                generalStore.setState(state => ({
+                    selectedResponse: {
+                        ...state.selectedResponse,
+                        modelResponseMarkdown: 'some markdown'
+                    }
+                }));
             }
 
             render(
@@ -116,7 +121,7 @@ describe('Toolbar', () => {
         }
     );
 
-    it.each(['Orochi', 'General', 'Unknown'] as Process[])(
+    it.each(['Orochi', 'General'] as Process[])(
         'displays Check Response button only for Orochi process',
         process => {
             render(

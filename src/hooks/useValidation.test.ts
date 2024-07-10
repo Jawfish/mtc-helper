@@ -73,7 +73,8 @@ describe('response validation', () => {
         orochiStore.setState({
             editedCode: 'def valid_python():',
             score: 85,
-            rework: false
+            rework: false,
+            language: 'python'
         });
 
         const { result } = renderHook(() => useValidation());

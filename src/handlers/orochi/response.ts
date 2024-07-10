@@ -1,4 +1,4 @@
-import { MutHandler } from '@handlers/types';
+import { MutHandler } from '@handlers/index';
 import Logger from '@lib/logging';
 import { orochiStore } from '@src/store/orochiStore';
 
@@ -6,10 +6,10 @@ import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..
 
 type ResponseElement = {
     element: HTMLDivElement;
-    isOriginal: boolean;
+    isModelResponse: boolean;
 };
 
-const selectResponseElement = (): HTMLDivElement | undefined => {
+const selectOperatorResponseElement = (): HTMLDivElement | undefined => {
     const taskElements = Array.from(document.querySelectorAll('div.rounded-xl'));
 
     return taskElements.length >= 2 && taskElements[1] instanceof HTMLDivElement
@@ -17,66 +17,76 @@ const selectResponseElement = (): HTMLDivElement | undefined => {
         : undefined;
 };
 
-const selectOriginalContentElement = (): HTMLDivElement | undefined => {
+const selectModelResponseElement = (): HTMLDivElement | undefined => {
     const element = document.querySelector("div[data-cy='tab'] > div");
 
     return element instanceof HTMLDivElement &&
+        // the tab with 'contenteditable="true"' is the edited response tab, not the
+        // original response tab
         element.getAttribute('contenteditable') !== 'true'
         ? element
         : undefined;
 };
 
 const getResponseElement = (): ResponseElement | undefined => {
-    const originalElement = selectOriginalContentElement();
-    if (originalElement) return { element: originalElement, isOriginal: true };
+    const modelResponseElement = selectModelResponseElement();
+    if (modelResponseElement)
+        return { element: modelResponseElement, isModelResponse: true };
 
-    const editedElement = selectResponseElement();
-    if (editedElement) return { element: editedElement, isOriginal: false };
+    const operatorResponseElement = selectOperatorResponseElement();
+    if (operatorResponseElement)
+        return { element: operatorResponseElement, isModelResponse: false };
 
     return undefined;
 };
 
 const extractContent = (
     element: HTMLDivElement,
-    isOriginal: boolean
+    isModelResponse: boolean
 ): string | undefined => {
     const content = element.textContent || undefined;
 
-    return isOriginal ? content : content?.slice(1) || undefined;
+    return isModelResponse ? content : content?.slice(1) || undefined;
 };
 
 const extractCode = (element: HTMLDivElement): string | undefined =>
     element.querySelector('pre code')?.textContent || undefined;
 
 const hasContentChanged = (
-    isOriginal: boolean,
+    isModelResponse: boolean,
     content: string | undefined,
     code: string | undefined,
     state: ReturnType<typeof orochiStore.getState>
 ): boolean => {
-    const { originalResponse, originalCode, editedResponse, editedCode } = state;
-    const responseChanged = isOriginal
-        ? content !== originalResponse
-        : content !== editedResponse;
-    const codeChanged = isOriginal ? code !== originalCode : code !== editedCode;
+    const { modelResponse, originalCode, operatorResponse, editedCode } = state;
+    const responseChanged = isModelResponse
+        ? content !== modelResponse
+        : content !== operatorResponse;
+    const codeChanged = isModelResponse ? code !== originalCode : code !== editedCode;
 
     return responseChanged || codeChanged;
 };
 
+/**
+ * This handles mutations in the following elements:
+ * - The element that contains the operator's edited response content (the element with
+ *   the pink background), before opening it in edit mode.
+ * - The element that contains the model's response (the "Original" tab).
+ */
 export const handleResponseMutation: MutHandler = (_target: Element) => {
     const responseElement = getResponseElement();
     if (!responseElement) return;
 
-    const { element, isOriginal } = responseElement;
+    const { element, isModelResponse } = responseElement;
     const seen = elementHasMtcHelperAttribute(element);
-    const content = extractContent(element, isOriginal);
+    const content = extractContent(element, isModelResponse);
     const code = extractCode(element);
 
     const state = orochiStore.getState();
-    if (seen && !hasContentChanged(isOriginal, content, code, state)) return;
+    if (seen && !hasContentChanged(isModelResponse, content, code, state)) return;
 
     Logger.debug(
-        `Handling change in ${isOriginal ? 'original' : 'edited'} response element state.`
+        `Handling change in ${isModelResponse ? 'original' : 'edited'} response element state.`
     );
 
     if (!seen) {
@@ -84,8 +94,8 @@ export const handleResponseMutation: MutHandler = (_target: Element) => {
     }
 
     orochiStore.setState(
-        isOriginal
-            ? { originalResponse: content, originalCode: code }
-            : { editedResponse: content, editedCode: code }
+        isModelResponse
+            ? { modelResponse: content, originalCode: code }
+            : { operatorResponse: content, editedCode: code }
     );
 };

@@ -1,52 +1,15 @@
 import {
     injectScriptDest,
-    isMonacoMessage,
-    isURLMessage,
-    MonacoMessage,
-    URLMessage
+    isMessageFromInjectScript,
+    Message
 } from '@src/types/injectTypes';
-import { handlers } from '@handlers/index';
+import { Handlers, handlers } from '@handlers/index';
 import { selectGlobalObserverTarget } from '@lib/selectors';
 import { orochiStore } from '@src/store/orochiStore';
 import { globalStore } from '@src/store/globalStore';
-import { Handlers } from '@handlers/types';
+import { initializeTitleObserver } from '@handlers/global/title';
 
 import Logger from './logging';
-import { updateProcess } from './process';
-
-/**
- * Initializes the URL observer which listens for changes to the URL from
- * window.postMessage events where `type: url-changed` and updates the store
- * accordingly.
- */
-export function initializeUrlObserver() {
-    updateProcess(window.location.href);
-
-    Logger.debug('Initializing URL change observer');
-    try {
-        window.addEventListener('message', event => {
-            if (!isURLMessage(event.data)) {
-                return;
-            }
-
-            const message = event.data as URLMessage;
-
-            if (message.type !== 'url-changed') {
-                Logger.warn('Message type was not url-changed');
-
-                return;
-            }
-
-            Logger.debug(`URL observer: URL changed to ${message.url}`);
-
-            updateProcess(message.url);
-        });
-
-        Logger.debug('URL change observer initialized');
-    } catch (e) {
-        Logger.error(`Error initializing URL change observer: ${(e as Error).message}`);
-    }
-}
 
 /**
  * Initializes the Monaco editor observer which listens for changes to the Monaco editor
@@ -57,15 +20,11 @@ export function initializeMonacoObserver() {
     Logger.debug('Initializing Monaco editor observer');
     try {
         window.addEventListener('message', event => {
-            if (!isMonacoMessage(event.data)) {
+            if (!isMessageFromInjectScript(event.data)) {
                 return;
             }
 
-            const message = event.data as MonacoMessage;
-
-            if (message.type !== 'test-editor-changed') {
-                return;
-            }
+            const message = event.data as Message;
 
             Logger.debug(
                 `Monaco editor observer received payload of ${message.content.length} characters`
@@ -84,12 +43,12 @@ export function initializeMonacoObserver() {
 
 /**
  * Initializes the MutationObserver, which listens for changes to the DOM and updates.
- * The observer is external to the React app. It updates the store based on the state of
- * important elements in the DOM so that the React app can respond accordingly. Utilizes
- * an async IIFE to wait for the target to exist (MTC's Next.js root element). The
- * observer does not observe changes to the extension's own elements.
+ * The observer is external to the extension's React app. It updates the store based on
+ * the state of important elements in the DOM so that the React app can respond
+ * accordingly. Utilizes an async IIFE to wait for the target to exist (MTC's Next.js
+ * root element). The observer does not observe changes to the extension's own elements.
  */
-export function initializeMutationObserver(handlers: Handlers, target: HTMLDivElement) {
+function initializeMutationObserver(handlers: Handlers, target: HTMLDivElement) {
     Logger.debug('Creating MutationObserver');
     const observer = new MutationObserver(mutations => {
         const { process, taskIsOpen } = globalStore.getState();
@@ -141,6 +100,8 @@ export function initializeMutationObserver(handlers: Handlers, target: HTMLDivEl
 }
 
 export function initializeObservers() {
+    initializeTitleObserver();
+
     /**
      * This is an async IIFE because it needs to wait for the observer target element to
      * exist for the extension to work at all. In the future this can probably done within
@@ -155,7 +116,6 @@ export function initializeObservers() {
 
             initializeMutationObserver(handlers, observerTarget);
 
-            initializeUrlObserver();
             initializeMonacoObserver();
 
             Logger.debug('Injecting extension onto page');

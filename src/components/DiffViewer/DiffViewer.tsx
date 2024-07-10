@@ -9,7 +9,7 @@ import { DiffBackground, DiffForeground, DiffControls } from './DiffLayout';
 import { DiffMethodSelector } from './DiffMethodSelector';
 import { OrochiDiff } from './OrochiDiff';
 import { GeneralDiff } from './GeneralDiff';
-import { HighlightToggle } from './WordDiffToggle';
+import { Toggle } from './Toggle';
 
 type DiffViewerProps = {
     toggleDiffView: () => void;
@@ -44,10 +44,11 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ toggleDiffView }) => {
                     />
                 )}
                 <DiffControls>
-                    <HighlightToggle
+                    <Toggle
                         checked={!disableWordDiff}
-                        onCheckedChange={handleHighlightToggle}
-                    />
+                        onCheckedChange={handleHighlightToggle}>
+                        Highlight
+                    </Toggle>
                     <DiffMethodSelector
                         value={diffMethod}
                         onChange={value => setDiffMethod(value as DiffMethod)}

@@ -20,7 +20,7 @@ describe('useDiffView', () => {
         vi.mocked(Logger.debug).mockImplementation(() => {});
         generalStore.getState().reset();
         orochiStore.getState().reset();
-        globalStore.setState({ process: 'Unknown' });
+        globalStore.setState({ process: 'General' });
     });
 
     it('should initialize with diffViewOpen as false', () => {
@@ -32,8 +32,8 @@ describe('useDiffView', () => {
     it('should toggle diffViewOpen when conditions are met for Orochi', () => {
         globalStore.setState({ process: 'Orochi' });
         orochiStore.setState({
-            originalResponse: 'original',
-            editedResponse: 'edited'
+            modelResponse: 'original',
+            operatorResponse: 'edited'
         });
 
         const { result } = renderHook(() => useDiffView());
@@ -55,9 +55,12 @@ describe('useDiffView', () => {
 
     it('should toggle diffViewOpen when conditions are met for General', () => {
         globalStore.setState({ process: 'General' });
-        generalStore.setState({
-            originalResponseMarkdown: 'original'
-        });
+        generalStore.setState(state => ({
+            selectedResponse: {
+                ...state.selectedResponse,
+                modelResponseMarkdown: 'original'
+            }
+        }));
 
         const { result } = renderHook(() => useDiffView());
 
@@ -72,8 +75,8 @@ describe('useDiffView', () => {
     it('should not toggle diffViewOpen and show error for Orochi when original response is missing', () => {
         globalStore.setState({ process: 'Orochi' });
         orochiStore.setState({
-            originalResponse: undefined,
-            editedResponse: 'edited'
+            modelResponse: undefined,
+            operatorResponse: 'edited'
         });
 
         const { result } = renderHook(() => useDiffView());
@@ -92,8 +95,8 @@ describe('useDiffView', () => {
     it('should not toggle diffViewOpen and show error for Orochi when edited response is missing', () => {
         globalStore.setState({ process: 'Orochi' });
         orochiStore.setState({
-            originalResponse: 'original',
-            editedResponse: undefined
+            modelResponse: 'original',
+            operatorResponse: undefined
         });
 
         const { result } = renderHook(() => useDiffView());
@@ -111,10 +114,13 @@ describe('useDiffView', () => {
 
     it('should not toggle diffViewOpen and show error for General when original response is missing', () => {
         globalStore.setState({ process: 'General' });
-        generalStore.setState({
-            originalResponseMarkdown: undefined,
-            editedResponseMarkdown: 'edited'
-        });
+        generalStore.setState(state => ({
+            selectedResponse: {
+                ...state.selectedResponse,
+                modelResponseMarkdown: undefined,
+                operatorResponseMarkdown: 'edited'
+            }
+        }));
 
         const { result } = renderHook(() => useDiffView());
 
@@ -131,9 +137,12 @@ describe('useDiffView', () => {
 
     it('should not toggle diffViewOpen and show error for General when edited response is missing', () => {
         globalStore.setState({ process: 'General' });
-        generalStore.setState({
-            originalResponseMarkdown: undefined
-        });
+        generalStore.setState(state => ({
+            selectedResponse: {
+                ...state.selectedResponse,
+                modelResponseMarkdown: undefined
+            }
+        }));
 
         const { result } = renderHook(() => useDiffView());
 
@@ -149,7 +158,7 @@ describe('useDiffView', () => {
     });
 
     it('should not toggle diffViewOpen for unknown process', () => {
-        globalStore.setState({ process: 'Unknown' });
+        globalStore.setState({ process: 'General' });
 
         const { result } = renderHook(() => useDiffView());
 

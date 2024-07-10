@@ -11,7 +11,7 @@ vi.mock('./useClipboard');
 vi.mock('@src/contexts/ToastContext');
 vi.mock('@src/store/orochiStore');
 
-describe('useOrochiActions', () => {
+describe('The React hook for using Orochi-specific actions', () => {
     const mockCopy = vi.fn();
     const mockNotify = vi.fn();
     const mockStore = {

@@ -21,12 +21,12 @@ type DiffTabsProps = {
     >;
 };
 
-export const DiffTabs: React.FC<DiffTabsProps> = ({
+export const DiffTabs = ({
     tabs,
     activeTab,
     setActiveTab,
     containerComponent: ContainerComponent
-}) => (
+}: DiffTabsProps) => (
     <Tabs
         defaultValue={`tab-${activeTab}`}
         onValueChange={value => setActiveTab(parseInt(value.split('-')[1]))}>

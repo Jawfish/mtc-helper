@@ -1,4 +1,4 @@
-import { MutHandler } from '@handlers/types';
+import { MutHandler } from '@handlers/index';
 import { getTextFromElement } from '@lib/textProcessing';
 import { orochiStore } from '@src/store/orochiStore';
 
@@ -12,6 +12,10 @@ const selectUsefulMetadataSection = (): HTMLDivElement | undefined => {
         | undefined;
 };
 
+/**
+ * This is the handler for the metadata such as operator notes, conversation title, and
+ * error labels.
+ */
 export const handleUsefulMetadataSection: MutHandler = (_target: Element) => {
     const metadataElement = selectUsefulMetadataSection();
 

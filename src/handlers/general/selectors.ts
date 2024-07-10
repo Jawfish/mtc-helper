@@ -1,8 +1,6 @@
 import { selectTaskWindowElement } from '@lib/selectors';
 
-export const selectGeneralSelectedResponseSaveButton = ():
-    | HTMLButtonElement
-    | undefined => {
+export const selectSelectedResponseSaveButton = (): HTMLButtonElement | undefined => {
     const taskWindow = selectTaskWindowElement();
     const selectedResponseSaveButton = Array.from(
         taskWindow?.querySelectorAll('button') || []
@@ -17,15 +15,15 @@ export const selectGeneralSelectedResponseSaveButton = ():
         : undefined;
 };
 
-export const selectGeneralSelectedResponse = (): HTMLDivElement | undefined => {
-    const saveButton = selectGeneralSelectedResponseSaveButton();
+export const selectSelectedResponse = (): HTMLDivElement | undefined => {
+    const saveButton = selectSelectedResponseSaveButton();
 
     const selectedResponse = saveButton?.parentElement?.parentElement;
 
     return selectedResponse instanceof HTMLDivElement ? selectedResponse : undefined;
 };
 
-export const selectAllGeneralEditResponseButtons = (): HTMLButtonElement[] | [] => {
+export const selectAllEditResponseButtons = (): HTMLButtonElement[] | [] => {
     const editButtons = Array.from(
         document.querySelectorAll('button[title="Edit"]')
     ).filter(button => button.querySelector('svg'));

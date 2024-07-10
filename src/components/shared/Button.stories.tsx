@@ -63,24 +63,3 @@ export const Ghost: Story = {
         variant: 'ghost'
     }
 };
-
-export const Link: Story = {
-    args: {
-        ...Default.args,
-        variant: 'link'
-    }
-};
-
-export const Outline: Story = {
-    args: {
-        ...Default.args,
-        variant: 'outline'
-    }
-};
-
-export const Secondary: Story = {
-    args: {
-        ...Default.args,
-        variant: 'secondary'
-    }
-};

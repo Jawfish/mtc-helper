@@ -1,4 +1,4 @@
-import { MutHandler } from '@handlers/types';
+import { MutHandler } from '@handlers/index';
 import Logger from '@lib/logging';
 import { selectSubmitButtonElement } from '@lib/selectors';
 import { globalStore } from '@src/store/globalStore';

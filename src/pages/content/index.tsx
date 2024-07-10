@@ -1,6 +1,5 @@
 import './style.css';
 import { createRoot } from 'react-dom/client';
-import Watermark from '@src/components/Watermark';
 import Toasts from '@src/components/Toasts';
 import { Tooltip } from 'react-tooltip';
 import { DiffViewer } from '@components/DiffViewer/DiffViewer';
@@ -22,7 +21,7 @@ const App = () => {
     const { diffViewOpen, toggleDiffView } = useDiffView();
     const { taskIsOpen: taskOpen, process } = useGlobalStore();
 
-    if (!taskOpen) return <Watermark version='1.0.0' />;
+    if (!taskOpen) return null;
 
     return (
         <>
@@ -42,7 +41,6 @@ const App = () => {
                 process={process}
             />
             {diffViewOpen && <DiffViewer toggleDiffView={toggleDiffView} />}
-            <Watermark version='1.0.0' />
         </>
     );
 };

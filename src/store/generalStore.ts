@@ -8,15 +8,15 @@ import { isStateEqual } from './utils';
 
 export type State = {
     selectedResponse: {
-        editedMarkdown: string | undefined;
-        originalMarkdown: string | undefined;
-        originalHtml: string | undefined;
+        operatorResponseMarkdown: string | undefined;
+        modelResponseMarkdown: string | undefined;
+        modelResponseHtml: string | undefined;
         selection: string | undefined;
         elements: {
             controlsContainer: HTMLElement | undefined;
-            editedWordCounter: WordCounter | undefined;
-            originalWordCounter: WordCounter | undefined;
-            selectedWordCounter: WordCounter | undefined;
+            operatorResponseWordCounter: WordCounter | undefined;
+            modelResponseWordCounter: WordCounter | undefined;
+            selectionWordCounter: WordCounter | undefined;
             copyEdited: CopyButton | undefined;
             copyOriginal: CopyButton | undefined;
         };
@@ -28,15 +28,12 @@ export type State = {
             copy: CopyButton | undefined;
         };
     };
-    // unselectedResponse: {
-    //     unselectedResponsePlaintext: string | undefined;
-    //     unselectedResponseMarkdown: string | undefined;
-    //     elements: {
-    //         copyEdited: HTMLButtonElement | undefined;
-    //         copyOriginal: HTMLButtonElement | undefined;
-    //         wordCount: HTMLSpanElement | undefined;
-    //     };
-    // };
+    unselectedResponse: {
+        textContent: string | undefined;
+        elements: {
+            wordCounter: WordCounter | undefined;
+        };
+    };
 };
 
 type Actions = {
@@ -45,15 +42,15 @@ type Actions = {
 
 const initialState: State = {
     selectedResponse: {
-        editedMarkdown: undefined,
-        originalMarkdown: undefined,
-        originalHtml: undefined,
+        operatorResponseMarkdown: undefined,
+        modelResponseMarkdown: undefined,
+        modelResponseHtml: undefined,
         selection: undefined,
         elements: {
             controlsContainer: undefined,
-            editedWordCounter: undefined,
-            originalWordCounter: undefined,
-            selectedWordCounter: undefined,
+            operatorResponseWordCounter: undefined,
+            modelResponseWordCounter: undefined,
+            selectionWordCounter: undefined,
             copyEdited: undefined,
             copyOriginal: undefined
         }
@@ -64,16 +61,13 @@ const initialState: State = {
             wordCounter: undefined,
             copy: undefined
         }
+    },
+    unselectedResponse: {
+        textContent: undefined,
+        elements: {
+            wordCounter: undefined
+        }
     }
-    // unselectedResponse: {
-    //     unselectedResponsePlaintext: undefined,
-    //     unselectedResponseMarkdown: undefined,
-    //     elements: {
-    //         copyEdited: undefined,
-    //         copyOriginal: undefined,
-    //         wordCount: undefined
-    //     }
-    // }
 };
 
 export const generalStore = createLogStore<State & Actions>('General store')(set => ({

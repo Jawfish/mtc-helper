@@ -1,6 +1,9 @@
 import { orochiStore } from '@src/store/orochiStore';
-import { MutHandler } from '@handlers/types';
+import { MutHandler } from '@handlers/index';
 
+/**
+ * This handler retrieves the rework status from the DOM.
+ */
 export const handleReturnTargetMutation: MutHandler = (_target: Element) => {
     const element =
         Array.from(document.querySelectorAll('button')).find(

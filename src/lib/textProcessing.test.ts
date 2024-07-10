@@ -171,6 +171,8 @@ describe('Word counting', () => {
 
         it('ignores list numbers', () => {
             expect(textUtils.getWordCount('1. word')).toBe(1);
+            expect(textUtils.getWordCount('10. word')).toBe(1);
+            expect(textUtils.getWordCount('100. word')).toBe(1);
         });
 
         it("doesn't count a list number as a word when the list spans multiple lines", () => {
@@ -212,8 +214,56 @@ describe('Word counting', () => {
                 )
             ).toBe(0);
         });
+    });
 
-        it('counts latex numbers as two words to keep parity with Google Docs', () => {
+    describe('STEM', () => {
+        it('counts a LaTeX function the same way as Google Docs', () => {
+            expect(textUtils.getWordCount('$$f(10) = (10^3)/3 = 1000/3$$')).toBe(7);
+        });
+
+        it('counts multi-line LaTeX the same way as Google Docs', () => {
+            const latex = `$$
+\\begin{align*}
+f(x) &= \\int f'(x) \\, \\mathrm{d}x \\\\
+    &= \\int x^2 \\, \\mathrm{d}x  \\\\
+    &= \\frac{x^3}{3} + C \\, .
+\\end{align*}
+$$`;
+
+            expect(textUtils.getWordCount(latex)).toBe(23);
+        });
+
+        it('counts additional multi-line LaTeX the same way as Google Docs', () => {
+            const latex = `$$
+\\begin{align*}
+f(0) &= 0\\\\
+\\frac{0^3}{3} + C  &= 0  \\\\
+  C  &= 0 \\, .
+\\end{align*}
+$$
+
+So, $$f(x) =\\frac{x^3}{3}\\, ,$$ and
+
+$$
+\\begin{align*}
+f(10) &= \\frac{10^3}{3} \\\\
+		&= \\frac{1 000}{3} \\\\
+		& \\approx 333.33 \\, .
+\\end{align*}
+$$`;
+
+            expect(textUtils.getWordCount(latex)).toBe(40);
+        });
+
+        it('counts a sentence with math the same way as Google Docs', () => {
+            expect(
+                textUtils.getWordCount(
+                    "If F(x) is the definite integral of f(x), then F'(x) = f(x)."
+                )
+            ).toBe(15);
+        });
+
+        it('counts LaTeX numbers as two words to keep parity with Google Docs', () => {
             expect(textUtils.getWordCount('$$99.2$$')).toBe(2);
         });
     });
@@ -234,6 +284,15 @@ describe('Word counting', () => {
         it('counts Japanese words', () => {
             expect(textUtils.getWordCount('こんにちは 世界')).toBe(2);
         });
+
+        it('counts RTL words', () => {
+            const phraseOne =
+                '10. بريتوريا (العاصمة التنفيذية) بلومفونتين (العاصمة القضائية) كيب تاون (العاصمة التشريعية)، جنوب أفريقيا';
+            expect(textUtils.getWordCount(phraseOne)).toBe(14);
+
+            const phraseTwo = '5. أنتاناناريفو، مدغشقر';
+            expect(textUtils.getWordCount(phraseTwo)).toBe(3);
+        });
     });
 
     describe('Special formatting', () => {
@@ -242,7 +301,11 @@ describe('Word counting', () => {
         });
 
         it('counts alphanumeric combinations as single words', () => {
-            expect(textUtils.getWordCount('COVID-19 A1 B-52 3D-printed')).toBe(4);
+            expect(textUtils.getWordCount('COVID-19')).toBe(1);
+            expect(textUtils.getWordCount('A1')).toBe(1);
+            expect(textUtils.getWordCount('3D-printed')).toBe(1);
+            expect(textUtils.getWordCount('COVID-19 A1')).toBe(2);
+            expect(textUtils.getWordCount('COVID-19 A1 3D-printed')).toBe(3);
         });
 
         it('treats slash-separated items as separate words', () => {
@@ -267,6 +330,14 @@ describe('Word counting', () => {
             expect(textUtils.getWordCount('An advance of $20,000 upon signing.')).toBe(
                 7
             );
+        });
+
+        it('counts decimal values as two words', () => {
+            expect(textUtils.getWordCount('3.14')).toBe(2);
+            expect(textUtils.getWordCount('3.14.')).toBe(2);
+            expect(textUtils.getWordCount('.14')).toBe(1);
+            expect(textUtils.getWordCount('.14.')).toBe(1);
+            expect(textUtils.getWordCount('The value is 3.14.')).toBe(5);
         });
 
         it('treats words separated by en or em dashes as separate', () => {
@@ -312,5 +383,28 @@ describe('UUID validation', () => {
     it('rejects UUIDs with surrounding whitespace', () => {
         const uuidWithWhitespace = '  2df25fda-fa6c-4e1e-bf16-c73ef5bf0759  ';
         expect(textUtils.isValidUUID(uuidWithWhitespace)).toBe(false);
+    });
+});
+
+describe('RTL text detection', () => {
+    it('identifies RTL text', () => {
+        const rtlText = 'مرحبا بالعالم';
+        expect(textUtils.isRTL(rtlText)).toBe(true);
+    });
+
+    it('identifies LTR text', () => {
+        const ltrText = 'Hello, world!';
+        expect(textUtils.isRTL(ltrText)).toBe(false);
+    });
+
+    it('ignores whitespace', () => {
+        const rtlText = 'مرحبا بالعالم';
+        const ltrText = 'Hello, world!';
+        expect(textUtils.isRTL(`  ${rtlText}  `)).toBe(true);
+        expect(textUtils.isRTL(`  ${ltrText}  `)).toBe(false);
+    });
+
+    it('ignores empty input', () => {
+        expect(textUtils.isRTL('')).toBe(false);
     });
 });

@@ -1,6 +1,5 @@
-import { MutHandler } from '@handlers/types';
+import { MutHandler } from '@handlers/index';
 import Logger from '@src/lib/logging';
-import { getWordCount } from '@lib/textProcessing';
 import md from '@lib/markdown';
 import { generalStore } from '@src/store/generalStore';
 
@@ -8,7 +7,7 @@ import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..
 
 import { createWordCountElement, createCopyButtonElement } from './utils';
 
-export const handleGeneralPromptMutation: MutHandler = (mutation: Element) => {
+export const handlePromptMutation: MutHandler = (mutation: Element) => {
     const closeButton = Array.from(mutation.querySelectorAll('button')).find(
         button => button.textContent === 'Close'
     );
@@ -16,6 +15,7 @@ export const handleGeneralPromptMutation: MutHandler = (mutation: Element) => {
         return;
     }
     Logger.debug('Handling general prompt mutation.');
+
     addMtcHelperAttributeToElement(closeButton);
 
     const promptElement = closeButton.parentElement?.parentElement?.children[1];
@@ -25,8 +25,6 @@ export const handleGeneralPromptMutation: MutHandler = (mutation: Element) => {
         return;
     }
 
-    const promptContent = promptElement.textContent || '';
-    const wordCount = getWordCount(promptContent);
     const text = md.instance.htmlToMarkdown(promptElement, '');
     // const plaintext = doubleSpace(markdownToTxt(promptContent));
 
@@ -44,7 +42,6 @@ export const handleGeneralPromptMutation: MutHandler = (mutation: Element) => {
     generalStore.setState(state => ({
         ...state,
         prompt: {
-            wordCount,
             text,
             elements: {
                 controlsContainer: container,

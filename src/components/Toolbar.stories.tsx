@@ -9,18 +9,22 @@ import Toolbar from './Toolbar';
 
 orochiStore.setState({
     originalCode: 'original code',
-    originalResponse: 'original response',
+    modelResponse: 'original response',
     editedCode: 'edited code',
-    editedResponse: 'edited response',
+    operatorResponse: 'edited response',
     prompt: 'prompt',
     tests: 'tests',
     operatorNotes: 'operator notes'
 });
 
-generalStore.setState({
-    originalResponseMarkdown: 'original response',
-    editedResponseMarkdown: 'edited response'
-});
+generalStore.setState(state => ({
+    ...state,
+    selectedResponse: {
+        ...state.selectedResponse,
+        modelResponseMarkdown: 'original response',
+        operatorResponseMarkdown: 'edited response'
+    }
+}));
 
 const meta: Meta<typeof Toolbar> = {
     title: 'Components/Toolbar',
@@ -35,7 +39,7 @@ const meta: Meta<typeof Toolbar> = {
     argTypes: {
         process: {
             control: 'radio',
-            options: ['Orochi', 'General', 'Unknown']
+            options: ['Orochi', 'General']
         }
     }
 };
@@ -56,30 +60,9 @@ export const Orochi: Story = {
     ]
 };
 
-export const OrochiPython: Story = {
-    args: {
-        process: 'Orochi',
-        toggleDiffView: fn().mockName('toggleDiffView')
-    },
-    decorators: [
-        Story => {
-            orochiStore.setState({ language: 'python' });
-
-            return <Story />;
-        }
-    ]
-};
-
 export const General: Story = {
     args: {
         process: 'General',
-        toggleDiffView: fn().mockName('toggleDiffView')
-    }
-};
-
-export const OtherProcess: Story = {
-    args: {
-        process: 'Unknown',
         toggleDiffView: fn().mockName('toggleDiffView')
     }
 };

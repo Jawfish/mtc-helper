@@ -2,7 +2,7 @@ import { useStore } from 'zustand';
 
 import { createLogStore } from './storeMiddleware';
 
-export type Process = 'Unknown' | 'Orochi' | 'General';
+export type Process = 'Orochi' | 'General';
 
 type State = {
     process: Process;
@@ -14,7 +14,7 @@ type Actions = {
 };
 
 const initialState: State = {
-    process: 'Unknown',
+    process: 'General',
     taskIsOpen: false
 };
 
