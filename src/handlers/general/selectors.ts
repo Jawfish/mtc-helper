@@ -23,10 +23,17 @@ export const selectSelectedResponse = (): HTMLDivElement | undefined => {
     return selectedResponse instanceof HTMLDivElement ? selectedResponse : undefined;
 };
 
+// Make sure to exclude the prompt edit button
 export const selectAllEditResponseButtons = (): HTMLButtonElement[] | [] => {
+    // when the button's parent.parent.child[1] has a class of bg-indigo-100, it's a
+    // prompt
     const editButtons = Array.from(
         document.querySelectorAll('button[title="Edit"]')
-    ).filter(button => button.querySelector('svg'));
+    ).filter(button =>
+        button.parentElement?.parentElement?.children[1]?.classList.contains(
+            'bg-indigo-100'
+        )
+    );
 
     return editButtons as HTMLButtonElement[];
 };

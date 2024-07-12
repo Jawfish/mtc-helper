@@ -18,7 +18,7 @@ type NotificationStatus = 'success' | 'warning' | 'error';
 
 export function useValidation() {
     const { notify } = useToast();
-    const { editedCode, language } = useOrochiStore();
+    const { operatorResponseCode, language } = useOrochiStore();
 
     const validateCode = useCallback(
         (code: string | undefined): string[] => {
@@ -51,13 +51,13 @@ export function useValidation() {
     );
 
     const validateResponse = useCallback(() => {
-        const messages = validateCode(editedCode);
+        const messages = validateCode(operatorResponseCode);
         const messageText =
             messages.length > 0 ? messages.join('\n') : ValidationMessage.NO_ISSUES;
         const status: NotificationStatus = messages.length > 0 ? 'warning' : 'success';
 
         notify(`${status === 'warning' ? 'Warning: ' : ''}${messageText}`, status);
-    }, [editedCode, notify, validateCode]);
+    }, [operatorResponseCode, notify, validateCode]);
 
     return { validateResponse, validateCode };
 }

@@ -17,20 +17,18 @@ export function useDiffView(): UseDiffViewReturn {
     const { process, diffViewOpen, toggleDiffView: storeToggle } = useGlobalStore();
     const [canOpenDiffView, setCanOpenDiffView] = useState<boolean>(false);
     const { notify } = useToast();
-    const orochiState = useOrochiStore();
-    const generalState = useGeneralStore();
+    const { modelResponseCode } = useOrochiStore();
+    const { modelResponseMarkdown } = useGeneralStore();
 
     useEffect(() => {
         switch (process) {
             case 'Orochi':
-                setCanOpenDiffView(!!orochiState.originalCode);
+                setCanOpenDiffView(!!modelResponseCode);
                 break;
             default:
-                setCanOpenDiffView(
-                    !!generalState.selectedResponse.modelResponseMarkdown
-                );
+                setCanOpenDiffView(!!modelResponseMarkdown);
         }
-    }, [process, orochiState, generalState]);
+    }, [process, modelResponseCode, modelResponseMarkdown]);
 
     const toggleDiffView = useCallback(() => {
         if (!canOpenDiffView) {

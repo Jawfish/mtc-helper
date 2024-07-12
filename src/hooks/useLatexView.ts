@@ -10,7 +10,7 @@ type UseLatexViewReturn = {
 
 export function useLatexView(): UseLatexViewReturn {
     const { latexViewOpen, toggleLatexView } = useGlobalStore();
-    const { operatorResponseMarkdown } = useGeneralStore().selectedResponse;
+    const { operatorResponseMarkdown } = useGeneralStore();
     const [canOpenLatexView, setCanOpenLatexView] = useState<boolean>(false);
 
     useEffect(() => {

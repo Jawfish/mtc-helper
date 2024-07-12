@@ -1,3 +1,5 @@
+import Logger from './logging';
+
 /**
  * Check for ending HTML tag, since that signifies a broken response. Will have false
  * positives for any code that contains a closing HTML tag as part of the actual code,
@@ -111,6 +113,8 @@ export const getWordCount = (text: string, ignoreListNumbers?: boolean): number 
     // Google Docs. They have external tooling for more precise word counts. Hopefully,
     // that implementation can be integrated here.
     if (isChinese(text.replaceAll(' ', ''))) {
+        Logger.debug('Counting Chinese characters as words');
+
         return text.replace(/\s+/g, '').length;
     }
 

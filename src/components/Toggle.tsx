@@ -6,10 +6,17 @@ type Props = {
     checked: boolean;
     onCheckedChange: (checked: boolean) => void;
     variant?: 'strong' | 'soft';
+    reverse?: boolean;
 };
 
-export const Toggle = ({ children, checked, onCheckedChange, variant }: Props) => (
-    <div className='flex items-center gap-2'>
+export const Toggle = ({
+    children,
+    checked,
+    onCheckedChange,
+    variant,
+    reverse = false
+}: Props) => (
+    <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse' : ''}`}>
         <Checkbox
             id='diff-highlight-enabled'
             className='border-mtc-primary bg-mtc-faded data-[state=checked]:bg-mtc-primary data-[state=checked]:border-mtc-primary-strong size-5 rounded-md cursor-pointer flex items-center justify-center'

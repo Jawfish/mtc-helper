@@ -7,23 +7,19 @@ import { generalStore } from '@src/store/generalStore';
 import Toolbar from './Toolbar';
 
 orochiStore.setState({
-    originalCode: 'original code',
+    modelResponseCode: 'original code',
     modelResponse: 'original response',
-    editedCode: 'edited code',
+    operatorResponseCode: 'edited code',
     operatorResponse: 'edited response',
     prompt: 'prompt',
     tests: 'tests',
     operatorNotes: 'operator notes'
 });
 
-generalStore.setState(state => ({
-    ...state,
-    selectedResponse: {
-        ...state.selectedResponse,
-        modelResponseMarkdown: 'original response',
-        operatorResponseMarkdown: 'edited response'
-    }
-}));
+generalStore.setState({
+    modelResponseMarkdown: 'original response',
+    operatorResponseMarkdown: 'edited response'
+});
 
 const meta: Meta<typeof Toolbar> = {
     title: 'Components/Toolbar',

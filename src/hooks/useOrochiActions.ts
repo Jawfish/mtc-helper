@@ -14,7 +14,8 @@ type CopyAction =
 export function useOrochiActions() {
     const { copy } = useClipboard();
     const { notify } = useToast();
-    const { editedCode, originalCode, tests, prompt, operatorNotes } = useOrochiStore();
+    const { operatorResponseCode, modelResponseCode, tests, prompt, operatorNotes } =
+        useOrochiStore();
 
     const copyContent = useCallback(
         async (content: string | undefined, action: CopyAction) => {
@@ -37,12 +38,12 @@ export function useOrochiActions() {
     );
 
     const copyEditedCode = useCallback(
-        () => copyContent(editedCode, 'Edited Code'),
-        [copyContent, editedCode]
+        () => copyContent(operatorResponseCode, 'Edited Code'),
+        [copyContent, operatorResponseCode]
     );
     const copyOriginalCode = useCallback(
-        () => copyContent(originalCode, 'Original Code'),
-        [copyContent, originalCode]
+        () => copyContent(modelResponseCode, 'Original Code'),
+        [copyContent, modelResponseCode]
     );
     const copyPrompt = useCallback(
         () => copyContent(prompt, 'Prompt'),
@@ -60,7 +61,7 @@ export function useOrochiActions() {
     const copyAllAsPython = useCallback(async () => {
         const content = {
             prompt: prompt || 'prompt could not be found',
-            code: editedCode || 'code could not be found',
+            code: operatorResponseCode || 'code could not be found',
             tests: tests || 'tests could not be found',
             operatorNotes: operatorNotes || 'operator notes could not be found'
         };
@@ -88,7 +89,7 @@ export function useOrochiActions() {
         } catch (err) {
             notify(`Error copying task: ${(err as Error).message}`, 'error');
         }
-    }, [prompt, editedCode, tests, operatorNotes, copy, notify]);
+    }, [prompt, operatorResponseCode, tests, operatorNotes, copy, notify]);
 
     return {
         copyAllAsPython,

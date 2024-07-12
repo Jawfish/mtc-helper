@@ -78,3 +78,13 @@ export const selectSubmitButtonElement = (): HTMLButtonElement | undefined => {
  */
 export const selectResponseCodeElement = () =>
     document.querySelector('div.rounded-xl.bg-pink-100 pre code');
+
+/**
+ * Returns whether the given element is a response element (not while editing).
+ *
+ * @param element The element to check.
+ * @returns `true` if the element is a response element, otherwise `false`.
+ */
+export const isResponseElement = (element: Element | undefined): boolean =>
+    // if the target.parent.parent.child[0] is a div with a class of bg-pink-100, it's a response element
+    element?.classList.contains('bg-pink-100') ?? false;

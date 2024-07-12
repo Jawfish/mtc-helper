@@ -27,39 +27,40 @@ const selectUnselectedResponse = (): HTMLDivElement | undefined => {
     return undefined;
 };
 
-export const handleUnselectedResponseMutation: MutHandler = (_target: Element) => {
-    const operatorResponseElement = selectUnselectedResponse();
+export const updateUnselectedResponseState: MutHandler = (_target: Element) => {
+    const unselectedResponseElement = selectUnselectedResponse();
+
+    if (!unselectedResponseElement) {
+        generalStore.setState({ unselectedResponse: undefined });
+
+        return;
+    }
 
     if (
-        !operatorResponseElement ||
-        elementHasMtcHelperAttribute(operatorResponseElement)
+        !unselectedResponseElement ||
+        elementHasMtcHelperAttribute(unselectedResponseElement)
     ) {
         return;
     }
 
-    addMtcHelperAttributeToElement(operatorResponseElement);
+    addMtcHelperAttributeToElement(unselectedResponseElement);
 
-    const textContentFromDOM = operatorResponseElement.textContent || undefined;
+    const textContentFromDOM = unselectedResponseElement.textContent || undefined;
 
     if (!textContentFromDOM) {
         return;
     }
 
-    const store = generalStore.getState();
+    const { unselectedResponse: unselectedResponseContentInStore } =
+        generalStore.getState();
 
-    const { textContent } = store.unselectedResponse;
-
-    if (textContentFromDOM === textContent) {
+    if (textContentFromDOM === unselectedResponseContentInStore) {
         return;
     }
 
     Logger.debug('Handling change in general edited response state.');
 
-    generalStore.setState(state => ({
-        ...state,
-        unselectedResponse: {
-            ...state.unselectedResponse,
-            textContent: textContentFromDOM
-        }
-    }));
+    generalStore.setState({
+        unselectedResponse: textContentFromDOM
+    });
 };

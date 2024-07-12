@@ -24,15 +24,15 @@ export default meta;
 type Story = StoryObj<typeof OrochiDiff>;
 
 const setupStores = (
-    originalCode: string,
-    editedCode: string,
+    modelResponseCode: string,
+    operatorResponseCode: string,
     modelResponse: string,
     operatorResponse: string
 ) => {
     globalStore.setState({ process: 'Orochi' });
     orochiStore.setState({
-        originalCode,
-        editedCode,
+        modelResponseCode,
+        operatorResponseCode,
         modelResponse,
         operatorResponse
     });

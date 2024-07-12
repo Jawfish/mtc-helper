@@ -15,8 +15,8 @@ describe('The React hook for using Orochi-specific actions', () => {
     const mockCopy = vi.fn();
     const mockNotify = vi.fn();
     const mockStore = {
-        editedCode: 'edited code',
-        originalCode: 'original code',
+        operatorResponseCode: 'edited code',
+        modelResponseCode: 'original code',
         tests: 'test code',
         prompt: 'prompt text',
         operatorNotes: 'operator notes'
@@ -70,7 +70,7 @@ describe('The React hook for using Orochi-specific actions', () => {
     it('should handle missing content', async () => {
         vi.mocked(useOrochiStore).mockReturnValue({
             ...mockStore,
-            editedCode: undefined
+            operatorResponseCode: undefined
         } as any);
         const { result } = renderHook(() => useOrochiActions());
         await act(async () => {
@@ -116,7 +116,7 @@ test code`;
         vi.mocked(useOrochiStore).mockReturnValue({
             ...mockStore,
             prompt: 'This is a\nmultiline prompt',
-            editedCode: 'def example():\n    return "Hello, World!"',
+            operatorResponseCode: 'def example():\n    return "Hello, World!"',
             tests: 'assert example() == "Hello, World!"',
             operatorNotes: 'Some notes\nfrom the operator'
         } as any);
@@ -156,7 +156,7 @@ assert example() == "Hello, World!"`;
         vi.mocked(useOrochiStore).mockReturnValue({
             ...mockStore,
             prompt: 'This is a\nmultiline prompt',
-            editedCode: 'def example():\n    return "Hello, World!"',
+            operatorResponseCode: 'def example():\n    return "Hello, World!"',
             tests: 'assert example() == "Hello, World!"',
             operatorNotes: 'operator notes could not be found'
         } as any);
@@ -203,8 +203,8 @@ assert example() == "Hello, World!"`;
 
     it('should handle error when all content is missing for copyAllAsPython', async () => {
         vi.mocked(useOrochiStore).mockReturnValue({
-            editedCode: undefined,
-            originalCode: undefined,
+            operatorResponseCode: undefined,
+            modelResponseCode: undefined,
             tests: undefined,
             prompt: undefined,
             operatorNotes: undefined

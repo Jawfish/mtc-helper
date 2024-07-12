@@ -13,12 +13,13 @@ type Props = {
 };
 
 const WordCount = ({ type, children }: Props) => (
-    <span className='whitespace-nowrap'>
-        {children ? children : '?'} {type.charAt(0).toUpperCase() + type.slice(1)}
+    <span className='whitespace-nowrap justify-between flex'>
+        <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+        <span>{children ? children : '?'}</span>
     </span>
 );
 
-export const WordCounter = () => {
+export const Sidebar = () => {
     const {
         operatorWordCount,
         selectionWordCount,
@@ -30,8 +31,8 @@ export const WordCounter = () => {
     } = useWordCount();
 
     return (
-        <div className='flex flex-col fixed top-0 left-0 gap-3 bg-mtc-faded/90 rounded-br-lg shadow-md p-3 w-auto z-[800] text-mtc-primary-strong'>
-            <div className='flex gap-3 flex-row justify-center items-center'>
+        <div className='flex flex-col fixed top-0 left-0 gap-3 bg-mtc-faded border-solid border-r border-b border-t-0 border-l-0 border-mtc-primary rounded-br-lg shadow-md p-3 w-auto z-[800] text-mtc-primary-strong'>
+            <div className='flex gap-3 flex-col'>
                 <WordCount type='prompt'>{promptWordCount}</WordCount>
                 <WordCount type='operator'>{operatorWordCount}</WordCount>
                 <WordCount type='model (selected)'>{selectedModelWordCount}</WordCount>
@@ -42,7 +43,8 @@ export const WordCounter = () => {
                 <Toggle
                     variant='strong'
                     onCheckedChange={toggleIgnoreListNumbers}
-                    checked={ignoreListNumbers}>
+                    checked={ignoreListNumbers}
+                    reverse>
                     Ignore List Numbers
                 </Toggle>
             </div>

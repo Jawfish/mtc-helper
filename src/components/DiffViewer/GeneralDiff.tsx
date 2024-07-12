@@ -15,8 +15,7 @@ type Direction = 'ltr' | 'rtl';
 
 export const GeneralDiff = ({ diffMethod, disableWordDiff }: Props) => {
     const [activeTab, setActiveTab] = useState(0);
-    const store = useGeneralStore();
-    const { operatorResponseMarkdown, modelResponseMarkdown } = store.selectedResponse;
+    const { operatorResponseMarkdown, modelResponseMarkdown } = useGeneralStore();
 
     const direction: Direction = isRTL(modelResponseMarkdown!) ? 'rtl' : 'ltr';
 

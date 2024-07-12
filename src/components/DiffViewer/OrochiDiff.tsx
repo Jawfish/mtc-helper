@@ -12,7 +12,7 @@ type OrochiDiffProps = {
 
 export const OrochiDiff = ({ diffMethod, disableWordDiff }: OrochiDiffProps) => {
     const [activeTab, setActiveTab] = useState(0);
-    const { editedCode, originalCode, operatorResponse, modelResponse } =
+    const { operatorResponseCode, modelResponseCode, operatorResponse, modelResponse } =
         useOrochiStore();
 
     const tabs = [
@@ -20,8 +20,8 @@ export const OrochiDiff = ({ diffMethod, disableWordDiff }: OrochiDiffProps) => 
             label: 'Code',
             content: (
                 <ReactDiffViewer
-                    oldValue={originalCode}
-                    newValue={editedCode}
+                    oldValue={modelResponseCode}
+                    newValue={operatorResponseCode}
                     splitView={true}
                     compareMethod={diffMethod}
                     disableWordDiff={disableWordDiff}

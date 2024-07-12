@@ -58,11 +58,14 @@ const hasContentChanged = (
     code: string | undefined,
     state: ReturnType<typeof orochiStore.getState>
 ): boolean => {
-    const { modelResponse, originalCode, operatorResponse, editedCode } = state;
+    const { modelResponse, modelResponseCode, operatorResponse, operatorResponseCode } =
+        state;
     const responseChanged = isModelResponse
         ? content !== modelResponse
         : content !== operatorResponse;
-    const codeChanged = isModelResponse ? code !== originalCode : code !== editedCode;
+    const codeChanged = isModelResponse
+        ? code !== modelResponseCode
+        : code !== operatorResponseCode;
 
     return responseChanged || codeChanged;
 };
@@ -95,7 +98,7 @@ export const handleResponseMutation: MutHandler = (_target: Element) => {
 
     orochiStore.setState(
         isModelResponse
-            ? { modelResponse: content, originalCode: code }
-            : { operatorResponse: content, editedCode: code }
+            ? { modelResponse: content, modelResponseCode: code }
+            : { operatorResponse: content, operatorResponseCode: code }
     );
 };

@@ -47,7 +47,7 @@ describe('handleResponseMutation', () => {
         expect(orochiStore.getState().modelResponse).toBe(
             'This is the original response intro.def original_code()This is the original response outro.'
         );
-        expect(orochiStore.getState().originalCode).toBe('def original_code()');
+        expect(orochiStore.getState().modelResponseCode).toBe('def original_code()');
     });
 
     it('should handle edited response element', () => {
@@ -70,7 +70,9 @@ describe('handleResponseMutation', () => {
             'This is the edited response intro.def edited_code()This is the edited response outro.'
         );
 
-        expect(orochiStore.getState().editedCode?.trim()).toBe('def edited_code()');
+        expect(orochiStore.getState().operatorResponseCode?.trim()).toBe(
+            'def edited_code()'
+        );
     });
 
     it('should not update state if content has not changed', () => {
@@ -94,8 +96,8 @@ describe('handleResponseMutation', () => {
         handleResponseMutation(document.body);
         expect(orochiStore.getState().modelResponse).toBeUndefined();
         expect(orochiStore.getState().operatorResponse).toBeUndefined();
-        expect(orochiStore.getState().originalCode).toBeUndefined();
-        expect(orochiStore.getState().editedCode).toBeUndefined();
+        expect(orochiStore.getState().modelResponseCode).toBeUndefined();
+        expect(orochiStore.getState().operatorResponseCode).toBeUndefined();
     });
 
     it('should handle response element without code', () => {
@@ -108,6 +110,6 @@ describe('handleResponseMutation', () => {
         expect(orochiStore.getState().modelResponse).toBe(
             'This is a response without code'
         );
-        expect(orochiStore.getState().originalCode).toBeUndefined();
+        expect(orochiStore.getState().modelResponseCode).toBeUndefined();
     });
 });

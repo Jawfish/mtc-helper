@@ -71,7 +71,7 @@ describe('response validation', () => {
 
     it('notifies with success when no issues are found', async () => {
         orochiStore.setState({
-            editedCode: 'def valid_python():',
+            operatorResponseCode: 'def valid_python():',
             score: 85,
             rework: false,
             language: 'python'

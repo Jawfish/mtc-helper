@@ -20,18 +20,14 @@ describe('DiffViewer', () => {
     beforeEach(() => {
         globalStore.setState({ process: 'General' });
         orochiStore.setState({
-            editedCode: 'edited code',
-            originalCode: 'original code',
+            operatorResponseCode: 'edited code',
+            modelResponseCode: 'original code',
             operatorResponse: 'edited response',
             modelResponse: 'original response'
         });
-        generalStore.setState(state => ({
-            ...state,
-            selectedResponse: {
-                ...state.selectedResponse,
-                modelResponseMarkdown: 'original general response'
-            }
-        }));
+        generalStore.setState({
+            modelResponseMarkdown: 'original general response'
+        });
     });
 
     afterEach(() => {

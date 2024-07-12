@@ -6,7 +6,7 @@ import Logger from '@lib/logging';
 import Latex from './Latex';
 
 const LatexViewer = () => {
-    const { selectedResponse } = useGeneralStore();
+    const { operatorResponseMarkdown } = useGeneralStore();
     const initialSize = { width: 600, height: 480 };
 
     const calculateCenterPosition = () => {
@@ -52,9 +52,7 @@ const LatexViewer = () => {
                 className='pointer-events-auto flex flex-col rounded-md shadow-xl cursor-move z-[9998] bg-white shadow-mtc-faded border border-solid border-mtc-primary'>
                 <div className='size-full overflow-auto'>
                     <div className='p-4'>
-                        <Latex
-                            content={selectedResponse.operatorResponseMarkdown || ''}
-                        />
+                        <Latex content={operatorResponseMarkdown || ''} />
                     </div>
                 </div>
             </Rnd>

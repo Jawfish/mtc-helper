@@ -33,14 +33,10 @@ export default meta;
 type Story = StoryObj<typeof GeneralDiff>;
 
 const setupStore = (modelResponse: string, operatorResponse: string) => {
-    generalStore.setState(state => ({
-        ...state,
-        selectedResponse: {
-            ...state.selectedResponse,
-            modelResponseMarkdown: modelResponse,
-            operatorResponseMarkdown: operatorResponse
-        }
-    }));
+    generalStore.setState({
+        modelResponseMarkdown: modelResponse,
+        operatorResponseMarkdown: operatorResponse
+    });
 };
 
 export const Default: Story = {

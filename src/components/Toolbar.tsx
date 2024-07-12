@@ -14,6 +14,8 @@ import { useOrochiStore } from '@src/store/orochiStore';
 import { DropdownMenuItemProps } from '@radix-ui/react-dropdown-menu';
 import { useLatexView } from '@hooks/useLatexView';
 import { useDiffView } from '@hooks/useDiffView';
+import { useGeneralStore } from '@src/store/generalStore';
+import { useGeneralActions } from '@hooks/useGeneralActions';
 
 import Button from './shared/Button';
 
@@ -83,11 +85,12 @@ const Dropdown = ({ process }: { process: Process }) => {
                 </ShadButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-                className='w-36 z-[1300] text-mtc-primary'
+                className='min-w-36 z-[1300] text-mtc-primary'
                 data-testid='dropdown-content'>
                 {process === 'Orochi' && <OrochiDropdownItems />}
                 <Item onClick={copyTaskId}>Task ID</Item>
                 <Item onClick={copyOperatorEmail}>Email</Item>
+                {process !== 'Orochi' && <GeneralDropdownItems />}
             </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -96,14 +99,15 @@ const Dropdown = ({ process }: { process: Process }) => {
 const OrochiDropdownItems = () => {
     const { copyEditedCode, copyOriginalCode, copyTests, copyAllAsPython, copyPrompt } =
         useOrochiActions();
-    const { language, originalCode, editedCode, prompt, tests } = useOrochiStore();
+    const { language, modelResponseCode, operatorResponseCode, prompt, tests } =
+        useOrochiStore();
 
     return (
         <>
             {language === 'python' && (
                 <Item
                     onClick={copyAllAsPython}
-                    disabled={!editedCode || !tests || !prompt}>
+                    disabled={!operatorResponseCode || !tests || !prompt}>
                     Conversation
                 </Item>
             )}
@@ -114,18 +118,44 @@ const OrochiDropdownItems = () => {
             </Item>
             <Item
                 onClick={copyEditedCode}
-                disabled={!editedCode}>
+                disabled={!operatorResponseCode}>
                 Edited Code
             </Item>
             <Item
                 onClick={copyOriginalCode}
-                disabled={!originalCode}>
+                disabled={!modelResponseCode}>
                 Original Code
             </Item>
             <Item
                 onClick={copyTests}
                 disabled={!tests}>
                 Tests
+            </Item>
+        </>
+    );
+};
+
+const GeneralDropdownItems = () => {
+    const { copyModelResponse, copyOperatorResponse, copyPrompt } = useGeneralActions();
+    const { operatorResponseMarkdown, modelResponseMarkdown, prompt } =
+        useGeneralStore();
+
+    return (
+        <>
+            <Item
+                onClick={copyPrompt}
+                disabled={!prompt}>
+                Prompt
+            </Item>
+            <Item
+                onClick={copyOperatorResponse}
+                disabled={!operatorResponseMarkdown}>
+                Operator Response
+            </Item>
+            <Item
+                onClick={copyModelResponse}
+                disabled={!modelResponseMarkdown}>
+                Model Response
             </Item>
         </>
     );

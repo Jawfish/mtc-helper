@@ -29,13 +29,7 @@ type Story = StoryObj<typeof LatexViewer>;
 
 const LatexViewerWithStore: React.FC<{ content: string }> = ({ content }) => {
     React.useEffect(() => {
-        generalStore.setState(state => ({
-            ...state,
-            selectedResponse: {
-                ...state.selectedResponse,
-                operatorResponseMarkdown: content
-            }
-        }));
+        generalStore.setState({ operatorResponseMarkdown: content });
     }, [content]);
 
     return <LatexViewer />;
@@ -45,7 +39,7 @@ const Template: Story = {
     render: args => (
         <LatexViewerWithStore
             content={''}
-            {...args}
+            {...(args as React.PropsWithChildren<object>)}
         />
     )
 };

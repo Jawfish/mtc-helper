@@ -14,7 +14,12 @@ type UseWordCountReturn = {
 };
 
 export const useWordCount = (): UseWordCountReturn => {
-    const { selectedResponse, prompt, unselectedResponse } = useGeneralStore();
+    const {
+        operatorResponseMarkdown,
+        modelResponsePlaintext,
+        prompt,
+        unselectedResponse
+    } = useGeneralStore();
 
     const { ignoreListNumbers, toggleIgnoreListNumbers } = useGlobalStore();
     const [selectionWordCount, setSelectionWordCount] = useState(0);
@@ -34,18 +39,18 @@ export const useWordCount = (): UseWordCountReturn => {
     }, [updateSelectionWordCount]);
 
     const operatorWordCount = getWordCount(
-        selectedResponse.operatorResponseMarkdown || '',
+        operatorResponseMarkdown || '',
         ignoreListNumbers
     );
     const unselectedModelWordCount = getWordCount(
-        unselectedResponse.textContent || '',
+        unselectedResponse || '',
         ignoreListNumbers
     );
     const selectedModelWordCount = getWordCount(
-        selectedResponse.modelResponseMarkdown || '',
+        modelResponsePlaintext || '',
         ignoreListNumbers
     );
-    const promptWordCount = getWordCount(prompt.text || '', ignoreListNumbers);
+    const promptWordCount = getWordCount(prompt || '', ignoreListNumbers);
 
     return {
         operatorWordCount,

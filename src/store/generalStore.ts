@@ -1,62 +1,42 @@
 import { useStore } from 'zustand';
 import Logger from '@lib/logging';
-import { CopyButton } from '@handlers/general/utils';
 
 import { createLogStore } from './storeMiddleware';
 import { globalStore } from './globalStore';
 import { isStateEqual } from './utils';
 
 export type State = {
-    selectedResponse: {
-        operatorResponseMarkdown: string | undefined;
-        modelResponseMarkdown: string | undefined;
-        modelResponseHtml: string | undefined;
-        elements: {
-            controlsContainer: HTMLElement | undefined;
-            copyEdited: CopyButton | undefined;
-            copyOriginal: CopyButton | undefined;
-        };
-    };
-    prompt: {
-        text: string | undefined;
-        elements: {
-            copy: CopyButton | undefined;
-        };
-    };
-    unselectedResponse: {
-        textContent: string | undefined;
-    };
+    modelResponseHtml: string | undefined;
+    modelResponseMarkdown: string | undefined;
+    modelResponsePlaintext: string | undefined;
+    operatorResponseMarkdown: string | undefined;
+    prompt: string | undefined;
+    unselectedResponse: string | undefined;
 };
 
 type Actions = {
     reset: () => void;
+    resetPrompt: () => void;
 };
 
 const initialState: State = {
-    selectedResponse: {
-        operatorResponseMarkdown: undefined,
-        modelResponseMarkdown: undefined,
-        modelResponseHtml: undefined,
-        elements: {
-            controlsContainer: undefined,
-            copyEdited: undefined,
-            copyOriginal: undefined
-        }
-    },
-    prompt: {
-        text: undefined,
-        elements: {
-            copy: undefined
-        }
-    },
-    unselectedResponse: {
-        textContent: undefined
-    }
+    modelResponseHtml: undefined,
+    modelResponseMarkdown: undefined,
+    modelResponsePlaintext: undefined,
+    operatorResponseMarkdown: undefined,
+    prompt: undefined,
+    unselectedResponse: undefined
 };
 
 export const generalStore = createLogStore<State & Actions>('General store')(set => ({
     ...initialState,
-    reset: () => set({ ...initialState })
+    reset: () => set({ ...initialState }),
+
+    resetPrompt: () =>
+        set(state => ({
+            ...state,
+            prompt: undefined
+        }))
 }));
 
 export const useGeneralStore = () => useStore(generalStore);

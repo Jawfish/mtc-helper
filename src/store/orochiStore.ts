@@ -8,8 +8,8 @@ import { isStateEqual } from './utils';
 type Language = 'python' | 'unknown';
 
 type State = {
-    originalCode: string | undefined;
-    editedCode: string | undefined;
+    modelResponseCode: string | undefined;
+    operatorResponseCode: string | undefined;
     conversationTitle: string | undefined;
     operatorResponse: string | undefined;
     errorLabels: string | undefined;
@@ -28,19 +28,19 @@ type Actions = {
 };
 
 const initialState: State = {
-    originalCode: undefined,
-    editedCode: undefined,
     conversationTitle: undefined,
-    operatorResponse: undefined,
     errorLabels: undefined,
-    operatorNotes: undefined,
-    modelResponse: undefined,
-    prompt: undefined,
-    tests: undefined,
-    score: undefined,
-    rework: undefined,
     language: 'unknown',
-    metadataRemoved: false
+    metadataRemoved: false,
+    modelResponse: undefined,
+    modelResponseCode: undefined,
+    operatorNotes: undefined,
+    operatorResponse: undefined,
+    operatorResponseCode: undefined,
+    prompt: undefined,
+    rework: undefined,
+    score: undefined,
+    tests: undefined
 };
 
 export const orochiStore = createLogStore<State & Actions>('Orochi store')(set => ({

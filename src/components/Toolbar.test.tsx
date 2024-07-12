@@ -76,15 +76,10 @@ describe('Toolbar', () => {
             // code in Orochi, model response in General)
             if (process === 'Orochi') {
                 orochiStore.setState({
-                    originalCode: 'some code'
+                    modelResponseCode: 'some code'
                 });
             } else {
-                generalStore.setState(state => ({
-                    selectedResponse: {
-                        ...state.selectedResponse,
-                        modelResponseMarkdown: 'some markdown'
-                    }
-                }));
+                generalStore.setState({ modelResponseMarkdown: 'some markdown' });
             }
 
             renderComponent(process);
@@ -97,7 +92,7 @@ describe('Toolbar', () => {
         "doesn't call toggleDiffView when View Diff button is clicked if it is disabled",
         process => {
             globalStore.setState({ process });
-            orochiStore.setState({ originalCode: undefined });
+            orochiStore.setState({ modelResponseCode: undefined });
             renderComponent(process);
             fireEvent.click(screen.getByText('View Diff'));
             expect(screen.getByText('View Diff')).not.toBeEnabled();
