@@ -5,7 +5,7 @@ import Logger from '@lib/logging';
 
 import Latex from './Latex';
 
-const LatexViewer: React.FC = () => {
+const LatexViewer = () => {
     const { selectedResponse } = useGeneralStore();
     const initialSize = { width: 600, height: 480 };
 

@@ -102,7 +102,13 @@ export const isRTL = (text: string): boolean => {
     return rtlRegex.test(text);
 };
 
+const isChinese = (text: string): boolean => /[\u4e00-\u9fa5]/.test(text);
+
 export const getWordCount = (text: string, ignoreListNumbers?: boolean): number => {
+    if (isChinese(text.replaceAll(' ', ''))) {
+        return text.replace(/\s+/g, '').length;
+    }
+
     // Remove any numbering at the start of each line (e.g. "1. "; LTR only)
     const PREPROCESS_PATTERN = /^\d+\. /gm;
 

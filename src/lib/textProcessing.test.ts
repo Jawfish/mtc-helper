@@ -330,8 +330,30 @@ $$`;
             expect(textUtils.getWordCount('Россия и Україна')).toBe(3);
         });
 
-        it('counts Japanese words', () => {
-            expect(textUtils.getWordCount('こんにちは 世界')).toBe(2);
+        // In the interest of supporting Chinese, support for Japanese was lost. At the
+        // time of writing, there is no need for Japanese support.
+        // it('counts Japanese words', () => {
+        //     expect(textUtils.getWordCount('こんにちは 世界')).toBe(2);
+        // });
+
+        // Currently this is parity with Google Docs with regards to counting
+        // characters, including punctuation.
+        it('counts Chinese words', () => {
+            const chineseLoremIpsum = `平課包吉相草星點瓜兌想事波詞貓牠蝶裝，肖帽第早向身蝴老字事空就；校麼國我再昔千書弓音借、院把品五真燈多兒飛冒知買，扒抄能讀「說幫停」定遠忍重孝面。
+
+安香蝴停樹怎，半眼多實，男音常前呀春魚買歡像穴幸金高棵斗久。姐着小占把休、記會首多吹歌朵實的蝸種羊，三各夕吹出植言意童言還入交黃完八婆大，呢位怕爸圓掃。
+
+孝更色連肖停蝴十消五服古蝸它陽媽几細急，你古爪拉甲很玉色但黑是中，遠豆根五後珠冰隻蝶中？幾根汗外秋木校鴨幫假好吉海新尺良歡黃，害信十可哭把經珠花只讀害頭習直金言。回拉幾里時！們飯福久旦。
+
+力兄山尾學次青菜斤教假，丁請固聽巴松他前紅：校民帶土過常買品訴，回遠丁吉得貫棵平冒、各從力加怎了朋牠候，口布跳北坡支立。
+
+重八對請杯支林夏四呀，玉叫許因蝴，不封申又結躲出；什午言急冰室東可第姊害夕。樹海他候只進北身喜學到？才昔交升申何根目吉品土書，尺房戊，耳中馬坐兔平。
+
+吉視頭月黃河平遠，甲羽各教姊道目何日找坡上書吹祖立夏辛！停瓜民快念己遠冬反山想，過葉色一年尾月快貫吉里。
+
+奶片您口目秋兩？美穿胡哥母原示過，三連苗加馬躲男坐河誰休男訴會，升苗細子，陽金蝴至祖穴節海才旁貝文中住裏筆何記「害乞具只」昔來天；加呢昌士雪院。`;
+
+            expect(textUtils.getWordCount(chineseLoremIpsum)).toBe(500);
         });
 
         it('counts RTL words', () => {
