@@ -102,9 +102,14 @@ export const isRTL = (text: string): boolean => {
     return rtlRegex.test(text);
 };
 
+// Naïve; currently will match if any CJK character is present. Should be fine for 99%
+// of cases.
 const isChinese = (text: string): boolean => /[\u4e00-\u9fa5]/.test(text);
 
 export const getWordCount = (text: string, ignoreListNumbers?: boolean): number => {
+    // This implementation provides parity with how the MTL team is countting words with
+    // Google Docs. They have external tooling for more precise word counts. Hopefully,
+    // that implementation can be integrated here.
     if (isChinese(text.replaceAll(' ', ''))) {
         return text.replace(/\s+/g, '').length;
     }

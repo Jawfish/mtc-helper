@@ -339,7 +339,7 @@ $$`;
         // Currently this is parity with Google Docs with regards to counting
         // characters, including punctuation.
         it('counts Chinese words', () => {
-            const chineseLoremIpsum = `平課包吉相草星點瓜兌想事波詞貓牠蝶裝，肖帽第早向身蝴老字事空就；校麼國我再昔千書弓音借、院把品五真燈多兒飛冒知買，扒抄能讀「說幫停」定遠忍重孝面。
+            const chinese = `平課包吉相草星點瓜兌想事波詞貓牠蝶裝，肖帽第早向身蝴老字事空就；校麼國我再昔千書弓音借、院把品五真燈多兒飛冒知買，扒抄能讀「說幫停」定遠忍重孝面。
 
 安香蝴停樹怎，半眼多實，男音常前呀春魚買歡像穴幸金高棵斗久。姐着小占把休、記會首多吹歌朵實的蝸種羊，三各夕吹出植言意童言還入交黃完八婆大，呢位怕爸圓掃。
 
@@ -353,7 +353,7 @@ $$`;
 
 奶片您口目秋兩？美穿胡哥母原示過，三連苗加馬躲男坐河誰休男訴會，升苗細子，陽金蝴至祖穴節海才旁貝文中住裏筆何記「害乞具只」昔來天；加呢昌士雪院。`;
 
-            expect(textUtils.getWordCount(chineseLoremIpsum)).toBe(500);
+            expect(textUtils.getWordCount(chinese)).toBe(500);
         });
 
         it('counts RTL words', () => {
