@@ -1,5 +1,4 @@
 import Logger from '@lib/logging';
-import { selectGlobalObserverTarget } from '@lib/selectors';
 import { useGlobalStore } from '@src/store/globalStore';
 import { useEffect, useRef, useState } from 'react';
 
@@ -10,6 +9,17 @@ interface Handlers {
     orochi: Handler[];
     general: Handler[];
 }
+
+const selectGlobalObserverTarget = async () => {
+    let element = document.getElementById('__next');
+
+    while (!element) {
+        await new Promise(resolve => setTimeout(resolve, 100)); // wait for 100ms before checking again
+        element = document.getElementById('__next');
+    }
+
+    return element as HTMLDivElement;
+};
 
 /**
  * Initializes and manages a MutationObserver to watch for DOM changes on the MTC app.

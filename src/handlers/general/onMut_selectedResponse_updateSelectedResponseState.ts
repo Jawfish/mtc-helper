@@ -1,3 +1,9 @@
+/**
+ * Contains handlers that update state based on changes in the selected response (the
+ * model response that the operator chose and their changes to that response). This
+ * includes resetting the state when the response is deselected.
+ */
+
 import { MutHandler } from '@handlers/index';
 import Logger from '@src/lib/logging';
 import { generalStore } from '@src/store/generalStore';
@@ -39,7 +45,9 @@ const selectModelResponse = (): HTMLDivElement | undefined => {
     return element instanceof HTMLDivElement ? element : undefined;
 };
 
-export const updateOperatorResponseState: MutHandler = (_target: Element) => {
+export const onMut_operatorResponse_updateOperatorResponseState: MutHandler = (
+    _target: Element
+) => {
     const operatorResponseElement = selectOperatorResponse();
 
     if (!operatorResponseElement) {
@@ -83,7 +91,9 @@ function processModelResponse(
     };
 }
 
-export const updateModelResponseState: MutHandler = (_target: Element) => {
+export const onMut_modelResponse_updateModelResponseState: MutHandler = (
+    _target: Element
+) => {
     const modelResponseElement = selectModelResponse();
     if (!modelResponseElement) {
         return;
@@ -104,7 +114,9 @@ export const updateModelResponseState: MutHandler = (_target: Element) => {
     });
 };
 
-export const resetSelectedResponseState: MutHandler = (_target: Element) => {
+export const onMut_selectedResponse_resetSelectedResponseState: MutHandler = (
+    _target: Element
+) => {
     // if no tab with id 0 can be found, there is no selected response, so reset the
     // store to prevent stale data
     if (!document.querySelector('div[id="0"]')) {

@@ -29,22 +29,10 @@ const isPythonLanguage = (element: Element): boolean => {
 };
 
 /**
- * Checks if the response code element is missing a language class, indicating that the
- * operator did not specify the language in the opening of the markdown code fence.
- */
-export const responseCodeMissingLanguage = (element: Element | null) => {
-    const hasLanguageClass = Array.from(element?.classList || []).some(className =>
-        className.startsWith('language-')
-    );
-
-    return !hasLanguageClass;
-};
-
-/**
  * This handler sets the language state to 'python' if the response is in Python. It
  * currently doesn't handle any other languages; they all default to 'unknown'.
  */
-export const handleLanguageMutation: MutHandler = (target: Element) => {
+export const onMut_languageMetadata_updateLanguage: MutHandler = (target: Element) => {
     if (isPythonLanguage(target)) {
         orochiStore.setState({ language: 'python' });
     }

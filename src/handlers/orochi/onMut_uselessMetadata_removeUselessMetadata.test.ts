@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { orochiStore } from '@src/store/orochiStore';
 
-import { handleUselessMetadataSection } from './uselessMetadata';
+import { onMut_uselessMetadata_removeUselessMetadata } from './onMut_uselessMetadata_removeUselessMetadata';
 
 describe('handleUselessMetadataSection', () => {
     beforeEach(() => {
@@ -18,7 +18,7 @@ describe('handleUselessMetadataSection', () => {
             </div>
         `;
 
-        handleUselessMetadataSection(document.body);
+        onMut_uselessMetadata_removeUselessMetadata(document.body);
 
         expect(document.body.innerHTML.trim()).toBe('');
     });
@@ -31,7 +31,7 @@ describe('handleUselessMetadataSection', () => {
             </div>
         `;
 
-        handleUselessMetadataSection(document.body);
+        onMut_uselessMetadata_removeUselessMetadata(document.body);
 
         expect(document.body.innerHTML.trim()).not.toBe('');
     });
@@ -46,7 +46,7 @@ describe('handleUselessMetadataSection', () => {
 
         orochiStore.setState({ metadataRemoved: true });
 
-        handleUselessMetadataSection(document.body);
+        onMut_uselessMetadata_removeUselessMetadata(document.body);
 
         expect(document.body.innerHTML.trim()).not.toBe('');
     });
@@ -59,7 +59,7 @@ describe('handleUselessMetadataSection', () => {
             </div>
         `;
 
-        handleUselessMetadataSection(document.body);
+        onMut_uselessMetadata_removeUselessMetadata(document.body);
 
         expect(document.body.innerHTML.trim()).not.toBe('');
     });

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import React from 'react';
 import { DiffMethod } from 'react-diff-viewer-continued';
 
 import { DiffMethodSelector } from './DiffMethodSelector';
@@ -51,6 +50,7 @@ export const WithCallback: Story = {
     args: {
         value: DiffMethod.WORDS,
         onChange: (newValue: DiffMethod) => {
+            // eslint-disable-next-line no-console
             console.log(`New diff method selected: ${newValue}`);
         }
     }

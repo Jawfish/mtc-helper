@@ -1,11 +1,22 @@
 import { MutHandler } from '@handlers/index';
 import Logger from '@lib/logging';
-import { selectTaskWindowElement } from '@lib/selectors';
 import { globalStore } from '@src/store/globalStore';
 
 import { elementHasMtcHelperAttribute, addMtcHelperAttributeToElement } from '..';
 
-export const handleAnyTaskWindowMutation: MutHandler = (_target: Element) => {
+/**
+ * Select the task window element that contains the conversation.
+ * @returns The task window element if found, otherwise `undefined`.
+ */
+const selectTaskWindowElement = (): HTMLDivElement | undefined => {
+    const taskWindow = document.querySelector(
+        '#__next > div > div > div > div > div.fixed.top-0.left-0.flex.h-screen.w-screen.items-center.justify-center'
+    );
+
+    return taskWindow instanceof HTMLDivElement ? taskWindow : undefined;
+};
+
+export const onMut_taskWindow_updateTaskOpenState: MutHandler = (_target: Element) => {
     const windowElement = selectTaskWindowElement();
 
     if (windowElement) {

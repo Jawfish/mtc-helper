@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { orochiStore } from '@src/store/orochiStore';
 
-import { handleUsefulMetadataSection } from './usefulMetadata';
+import { onMut_usefulMetadata_updateMetadataState } from './onMut_usefulMetadata_updateMetadataState';
 
 describe('handleUsefulMetadataSection', () => {
     beforeEach(() => {
@@ -42,7 +42,7 @@ describe('handleUsefulMetadataSection', () => {
   </div>
 </div>`;
 
-        handleUsefulMetadataSection(document.body);
+        onMut_usefulMetadata_updateMetadataState(document.body);
 
         expect(orochiStore.getState().errorLabels?.trim()).toBe(
             'Dependency Error,Fails Unit Test'
@@ -58,7 +58,7 @@ describe('handleUsefulMetadataSection', () => {
 
     it('should handle empty document body', () => {
         document.body.innerHTML = '';
-        handleUsefulMetadataSection(document.body);
+        onMut_usefulMetadata_updateMetadataState(document.body);
         expect(orochiStore.getState().errorLabels).toBeUndefined();
         expect(orochiStore.getState().conversationTitle).toBeUndefined();
         expect(orochiStore.getState().operatorNotes).toBeUndefined();
@@ -77,7 +77,7 @@ describe('handleUsefulMetadataSection', () => {
         </div>
       </div>`;
 
-        handleUsefulMetadataSection(document.body);
+        onMut_usefulMetadata_updateMetadataState(document.body);
 
         expect(orochiStore.getState().errorLabels).toBeUndefined();
         expect(orochiStore.getState().conversationTitle?.trim()).toBe('some_title');
@@ -91,7 +91,7 @@ describe('handleUsefulMetadataSection', () => {
         <p>some_title</p>
       </div>`;
 
-        handleUsefulMetadataSection(document.body);
+        onMut_usefulMetadata_updateMetadataState(document.body);
 
         expect(orochiStore.getState().errorLabels).toBeUndefined();
         expect(orochiStore.getState().conversationTitle).toBeUndefined();

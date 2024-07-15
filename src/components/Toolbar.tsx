@@ -16,6 +16,7 @@ import { useLatexView } from '@hooks/useLatexView';
 import { useDiffView } from '@hooks/useDiffView';
 import { useGeneralStore } from '@src/store/generalStore';
 import { useGeneralActions } from '@hooks/useGeneralActions';
+import { useWordCount } from '@hooks/useWordCount';
 
 import Button from './shared/Button';
 
@@ -27,6 +28,7 @@ export default function Toolbar({ process }: Props) {
     const { validateResponse } = useValidation();
     const { canOpenLatexView, toggleLatexView } = useLatexView();
     const { canOpenDiffView, toggleDiffView } = useDiffView();
+    const { toggleWordCountView } = useWordCount();
 
     return (
         <ToolbarContainer>
@@ -50,6 +52,13 @@ export default function Toolbar({ process }: Props) {
                     onClick={toggleLatexView}
                     disabled={!canOpenLatexView}>
                     View LaTeX
+                </Button>
+            )}
+            {process !== 'Orochi' && (
+                <Button
+                    tooltip='Toggle the word count sidebar'
+                    onClick={toggleWordCountView}>
+                    View Word Count
                 </Button>
             )}
         </ToolbarContainer>

@@ -12,11 +12,13 @@ export type State = {
     operatorResponseMarkdown: string | undefined;
     prompt: string | undefined;
     unselectedResponse: string | undefined;
+    wordCountViewOpen: boolean;
 };
 
 type Actions = {
     reset: () => void;
     resetPrompt: () => void;
+    toggleWordCountView: () => void;
 };
 
 const initialState: State = {
@@ -25,7 +27,8 @@ const initialState: State = {
     modelResponsePlaintext: undefined,
     operatorResponseMarkdown: undefined,
     prompt: undefined,
-    unselectedResponse: undefined
+    unselectedResponse: undefined,
+    wordCountViewOpen: false
 };
 
 export const generalStore = createLogStore<State & Actions>('General store')(set => ({
@@ -36,7 +39,10 @@ export const generalStore = createLogStore<State & Actions>('General store')(set
         set(state => ({
             ...state,
             prompt: undefined
-        }))
+        })),
+
+    toggleWordCountView: () =>
+        set(state => ({ wordCountViewOpen: !state.wordCountViewOpen }))
 }));
 
 export const useGeneralStore = () => useStore(generalStore);

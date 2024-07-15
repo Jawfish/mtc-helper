@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { orochiStore } from '@src/store/orochiStore';
 
-import { handleResponseMutation } from './response';
+import { onMut_response_updateResponseState } from './onMut_response_updateResponseState';
 
 function createElement(
     tag: string,
@@ -43,7 +43,7 @@ describe('handleResponseMutation', () => {
         ]);
         document.body.appendChild(tab);
 
-        handleResponseMutation(document.body);
+        onMut_response_updateResponseState(document.body);
         expect(orochiStore.getState().modelResponse).toBe(
             'This is the original response intro.def original_code()This is the original response outro.'
         );
@@ -62,7 +62,7 @@ describe('handleResponseMutation', () => {
         ]);
         document.body.appendChild(operatorResponse);
 
-        handleResponseMutation(document.body);
+        onMut_response_updateResponseState(document.body);
 
         // The first character is cut off because in the real DOM it's the number of the
         // response
@@ -82,9 +82,9 @@ describe('handleResponseMutation', () => {
         document.body.appendChild(tab);
         document.body.appendChild(createCodeBlock('def original_code():\n    pass'));
 
-        handleResponseMutation(document.body);
+        onMut_response_updateResponseState(document.body);
         const initialState = orochiStore.getState();
-        handleResponseMutation(document.body);
+        onMut_response_updateResponseState(document.body);
         const newState = orochiStore.getState();
         expect(newState).toEqual(initialState);
     });
@@ -93,7 +93,7 @@ describe('handleResponseMutation', () => {
         document.body.appendChild(
             createElement('div', {}, ['No response element here'])
         );
-        handleResponseMutation(document.body);
+        onMut_response_updateResponseState(document.body);
         expect(orochiStore.getState().modelResponse).toBeUndefined();
         expect(orochiStore.getState().operatorResponse).toBeUndefined();
         expect(orochiStore.getState().modelResponseCode).toBeUndefined();
@@ -106,7 +106,7 @@ describe('handleResponseMutation', () => {
         ]);
         document.body.appendChild(tab);
 
-        handleResponseMutation(document.body);
+        onMut_response_updateResponseState(document.body);
         expect(orochiStore.getState().modelResponse).toBe(
             'This is a response without code'
         );

@@ -6,13 +6,19 @@ import {
 import Logger from '@lib/logging';
 import md from '@lib/markdown';
 
+/**
+ * Updates the prompt state in the generTal store when there are mutations to the prompt
+ * element in the DOM.
+ */
 export const updatePromptState = (target: Element) => {
     const closeButton = Array.from(target.querySelectorAll('button')).find(
         button => button?.textContent === 'Close'
     );
 
     if (!closeButton || elementHasMtcHelperAttribute(closeButton)) {
-        return;
+        generalStore.getState().resetPrompt();
+
+return;
     }
 
     addMtcHelperAttributeToElement(closeButton);

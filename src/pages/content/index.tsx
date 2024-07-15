@@ -10,11 +10,11 @@ import { useGlobalStore } from '@src/store/globalStore';
 import { useLatexView } from '@hooks/useLatexView';
 import LatexViewer from '@components/Latex/LatexViewer';
 import useAppObserver from '@hooks/useAppObserver';
-import { clickHandlers, mutHandlers } from '@handlers/index';
+import { mutHandlers } from '@handlers/index';
 import useMonacoObserver from '@hooks/useMonacoObserver';
 import useTitleObserver from '@hooks/useTitleObserver';
 import { Sidebar } from '@components/Sidebar';
-import useClickObserver from '@hooks/useClickObserver';
+import { useWordCount } from '@hooks/useWordCount';
 
 const div = document.createElement('div');
 div.id = 'mtc-helper-root';
@@ -26,12 +26,12 @@ const root = createRoot(rootContainer);
 
 const App = () => {
     useAppObserver(mutHandlers);
-    useClickObserver(clickHandlers);
     useMonacoObserver();
     useTitleObserver();
 
     const { diffViewOpen } = useDiffView();
     const { latexViewOpen } = useLatexView();
+    const { wordCountViewOpen } = useWordCount();
     const { taskIsOpen, process } = useGlobalStore();
 
     if (!taskIsOpen) return null;
@@ -48,11 +48,12 @@ const App = () => {
                 border={'1px solid lightgray'}
                 openEvents={{ focus: false, mouseover: true, mouseenter: true }}
             />
+
             <Toasts />
             <Toolbar process={process} />
             {diffViewOpen && <DiffViewer />}
             {latexViewOpen && <LatexViewer />}
-            {process !== 'Orochi' && <Sidebar />}
+            {process !== 'Orochi' && wordCountViewOpen && <Sidebar />}
         </>
     );
 };

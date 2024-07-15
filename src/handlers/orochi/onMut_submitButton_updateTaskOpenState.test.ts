@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { orochiStore } from '@src/store/orochiStore';
 
-import { handleLanguageMutation } from './language';
+import { onMut_languageMetadata_updateLanguage } from './onMut_orochiLanguageMetadata_updateOrochiLanguageState';
 
 describe('handleLanguageMutation', () => {
     beforeEach(() => {
@@ -15,7 +15,7 @@ describe('handleLanguageMutation', () => {
                 <div>Programming Language:Python</div>
             </div>
         `;
-        handleLanguageMutation(document.body);
+        onMut_languageMetadata_updateLanguage(document.body);
         // expect(orochiStore.setState).toHaveBeenCalledWith({ language: 'python' });
         expect(orochiStore.getState().language).toBe('python');
     });
@@ -26,7 +26,7 @@ describe('handleLanguageMutation', () => {
                 <div>Programming Language*Python</div>
             </div>
         `;
-        handleLanguageMutation(document.body);
+        onMut_languageMetadata_updateLanguage(document.body);
         // expect(orochiStore.setState).toHaveBeenCalledWith({ language: 'python' });
         expect(orochiStore.getState().language).toBe('python');
     });
@@ -41,7 +41,7 @@ describe('handleLanguageMutation', () => {
                 </div>
             </div>
         `;
-        handleLanguageMutation(document.body);
+        onMut_languageMetadata_updateLanguage(document.body);
         // expect(orochiStore.setState).toHaveBeenCalledWith({ language: 'python' });
         expect(orochiStore.getState().language).toBe('python');
     });
@@ -55,7 +55,7 @@ describe('handleLanguageMutation', () => {
                 </div>
             </div>
         `;
-        handleLanguageMutation(document.body);
+        onMut_languageMetadata_updateLanguage(document.body);
         // expect(orochiStore.setState).toHaveBeenCalledWith({ language: 'python' });
         expect(orochiStore.getState().language).toBe('python');
     });
@@ -66,13 +66,13 @@ describe('handleLanguageMutation', () => {
                 <div>Programming Language: JavaScript</div>
             </div>
         `;
-        handleLanguageMutation(document.body);
+        onMut_languageMetadata_updateLanguage(document.body);
         expect(orochiStore.getState().language).toBe('unknown');
     });
 
     it('should handle empty container', () => {
         document.body.innerHTML = '';
-        handleLanguageMutation(document.body);
+        onMut_languageMetadata_updateLanguage(document.body);
         expect(orochiStore.getState().language).toBe('unknown');
     });
 
@@ -83,7 +83,7 @@ describe('handleLanguageMutation', () => {
                 <div>More unrelated content</div>
             </div>
         `;
-        handleLanguageMutation(document.body);
+        onMut_languageMetadata_updateLanguage(document.body);
         expect(orochiStore.getState().language).toBe('unknown');
     });
 });

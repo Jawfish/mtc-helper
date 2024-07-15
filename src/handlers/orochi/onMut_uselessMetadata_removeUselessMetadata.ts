@@ -19,7 +19,9 @@ const selectUselessMetadataSection = (): HTMLDivElement | undefined => {
  * This handler removes the empty metadata section with the non-functioning save button
  * at the bottom of a response while editing it.
  */
-export const handleUselessMetadataSection: MutHandler = (_target: Element) => {
+export const onMut_uselessMetadata_removeUselessMetadata: MutHandler = (
+    _target: Element
+) => {
     const { metadataRemoved } = orochiStore.getState();
     if (metadataRemoved) {
         return;

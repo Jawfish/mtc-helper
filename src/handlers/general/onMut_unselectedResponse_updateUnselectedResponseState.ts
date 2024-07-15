@@ -27,7 +27,9 @@ const selectUnselectedResponse = (): HTMLDivElement | undefined => {
     return undefined;
 };
 
-export const updateUnselectedResponseState: MutHandler = (_target: Element) => {
+export const onMut_unselectedResponse_updateUnselectedResponseState: MutHandler = (
+    _target: Element
+) => {
     const unselectedResponseElement = selectUnselectedResponse();
 
     if (!unselectedResponseElement) {

@@ -76,7 +76,7 @@ const hasContentChanged = (
  *   the pink background), before opening it in edit mode.
  * - The element that contains the model's response (the "Original" tab).
  */
-export const handleResponseMutation: MutHandler = (_target: Element) => {
+export const onMut_response_updateResponseState: MutHandler = (_target: Element) => {
     const responseElement = getResponseElement();
     if (!responseElement) return;
 

@@ -59,4 +59,7 @@ type CreateLogStore = <T extends object>(
     name?: string | undefined
 ) => (f: StateCreator<T, [], []>) => StoreApi<T>;
 
+/**
+ * Create a Zustand store that automatically logs state changes.
+ */
 export const createLogStore: CreateLogStore = name => f => create(logger(f, name));
