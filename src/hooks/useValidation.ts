@@ -3,7 +3,6 @@ import { useToast } from '@src/contexts/ToastContext';
 import { codeContainsMarkdownFence, codeContainsHtml } from '@lib/textProcessing';
 import { validatePython } from '@lib/validatePython';
 import { useOrochiStore } from '@src/store/orochiStore';
-import { responseCodeMissingLanguage } from '@handlers/orochi/language';
 import { selectResponseCodeElement } from '@lib/selectors';
 
 enum ValidationMessage {
@@ -19,6 +18,18 @@ type NotificationStatus = 'success' | 'warning' | 'error';
 export function useValidation() {
     const { notify } = useToast();
     const { operatorResponseCode, language } = useOrochiStore();
+
+    /**
+     * Checks if the response code element is missing a language class, indicating that the
+     * operator did not specify the language in the opening of the markdown code fence.
+     */
+    const responseCodeMissingLanguage = (element: Element | undefined) => {
+        const hasLanguageClass = Array.from(element?.classList || []).some(className =>
+            className.startsWith('language-')
+        );
+
+        return !hasLanguageClass;
+    };
 
     const validateCode = useCallback(
         (code: string | undefined): string[] => {

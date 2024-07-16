@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { generalStore } from '@src/store/generalStore';
 
 import {
-    updateModelResponseState,
-    updateOperatorResponseState
+    onMut_modelResponse_updateModelResponseState,
+    onMut_operatorResponse_updateOperatorResponseState
 } from './onMut_selectedResponse_updateSelectedResponseState';
 
 describe("a change in the operator's response in a non-Orochi process", () => {
@@ -15,7 +15,7 @@ describe("a change in the operator's response in a non-Orochi process", () => {
     it('should not update the store if the operator response element is not found', () => {
         const initialState = generalStore.getInitialState();
 
-        updateOperatorResponseState(document.body);
+        onMut_operatorResponse_updateOperatorResponseState(document.body);
 
         expect(generalStore.getState()).toEqual(initialState);
     });
@@ -24,7 +24,7 @@ describe("a change in the operator's response in a non-Orochi process", () => {
         document.body.innerHTML = '<div contenteditable="true"></div>';
         const initialState = generalStore.getInitialState();
 
-        updateOperatorResponseState(document.body);
+        onMut_operatorResponse_updateOperatorResponseState(document.body);
 
         expect(generalStore.getState()).toEqual(initialState);
     });
@@ -32,16 +32,16 @@ describe("a change in the operator's response in a non-Orochi process", () => {
     it('should not update the store if the operator text has not been changed', () => {
         document.body.innerHTML = '<div contenteditable="true">test</div>';
 
-        updateOperatorResponseState(document.body);
+        onMut_operatorResponse_updateOperatorResponseState(document.body);
 
         expect(generalStore.getState().operatorResponseMarkdown).toEqual('test');
     });
 
     it('should update store with new markdown when the content changes', () => {
         document.body.innerHTML = '<div contenteditable="true">old</div>';
-        updateOperatorResponseState(document.body);
+        onMut_operatorResponse_updateOperatorResponseState(document.body);
         document.body.innerHTML = '<div contenteditable="true">- new</div>';
-        updateOperatorResponseState(document.body);
+        onMut_operatorResponse_updateOperatorResponseState(document.body);
 
         const newState = generalStore.getState();
 
@@ -71,7 +71,7 @@ describe("a change in the visibility of the model's response in a non-Orochi pro
 
     it('should not update the store if the model response element is not found', () => {
         document.body.innerHTML = '<div data-cy="tab">No save button</div>';
-        updateModelResponseState(document.body);
+        onMut_modelResponse_updateModelResponseState(document.body);
 
         expect(generalStore.getState().modelResponseHtml).toBeUndefined();
         expect(generalStore.getState().modelResponseMarkdown).toBeUndefined();
@@ -79,7 +79,7 @@ describe("a change in the visibility of the model's response in a non-Orochi pro
 
     it('should update the store with markdown and HTML when content is present', () => {
         document.body.innerHTML = createModelResponseElement('<p>Test content</p>');
-        updateModelResponseState(document.body);
+        onMut_modelResponse_updateModelResponseState(document.body);
 
         const newState = generalStore.getState();
 
@@ -98,7 +98,7 @@ describe("a change in the visibility of the model's response in a non-Orochi pro
         `;
         document.body.innerHTML = createModelResponseElement(complexContent);
 
-        updateModelResponseState(document.body);
+        onMut_modelResponse_updateModelResponseState(document.body);
 
         const newState = generalStore.getState();
         expect(newState.modelResponseMarkdown).toBe(
@@ -113,7 +113,7 @@ describe("a change in the visibility of the model's response in a non-Orochi pro
         `;
         document.body.innerHTML = createModelResponseElement(codeContent);
 
-        updateModelResponseState(document.body);
+        onMut_modelResponse_updateModelResponseState(document.body);
 
         const newState = generalStore.getState();
 
@@ -130,7 +130,7 @@ describe("a change in the visibility of the model's response in a non-Orochi pro
         `;
         document.body.innerHTML = createModelResponseElement(content);
 
-        updateModelResponseState(document.body);
+        onMut_modelResponse_updateModelResponseState(document.body);
 
         const newState = generalStore.getState();
         expect(newState.modelResponseMarkdown).toBe(
@@ -144,7 +144,7 @@ describe("a change in the visibility of the model's response in a non-Orochi pro
         `;
         document.body.innerHTML = createModelResponseElement(content);
 
-        updateModelResponseState(document.body);
+        onMut_modelResponse_updateModelResponseState(document.body);
 
         const newState = generalStore.getState();
 
@@ -156,7 +156,7 @@ describe("a change in the visibility of the model's response in a non-Orochi pro
             <div contenteditable="true">Operator content</div>
             ${createModelResponseElement('<p>Model content</p>')}
         `;
-        updateModelResponseState(document.body);
+        onMut_modelResponse_updateModelResponseState(document.body);
         expect(generalStore.getState().modelResponseHtml).toBeUndefined();
         expect(generalStore.getState().modelResponseMarkdown).toBeUndefined();
     });
@@ -171,7 +171,7 @@ describe("a change in the visibility of the model's response in a non-Orochi pro
             </div>
             ${createModelResponseElement('<p>Correct tab</p>')}
         `;
-        updateModelResponseState(document.body);
+        onMut_modelResponse_updateModelResponseState(document.body);
 
         const newState = generalStore.getState();
         expect(newState.modelResponseMarkdown).toBe('Correct tab');

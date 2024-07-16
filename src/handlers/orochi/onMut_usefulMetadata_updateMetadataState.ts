@@ -16,7 +16,9 @@ const selectUsefulMetadataSection = (): HTMLDivElement | undefined => {
  * This is the handler for the metadata such as operator notes, conversation title, and
  * error labels.
  */
-export const handleUsefulMetadataSection: MutHandler = (_target: Element) => {
+export const onMut_usefulMetadata_updateMetadataState: MutHandler = (
+    _target: Element
+) => {
     const metadataElement = selectUsefulMetadataSection();
 
     if (!metadataElement) {

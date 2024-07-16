@@ -17,8 +17,6 @@ type State = {
     modelResponse: string | undefined;
     prompt: string | undefined;
     tests: string | undefined;
-    score: number | undefined;
-    rework: boolean | undefined;
     metadataRemoved: boolean;
     language: Language;
 };
@@ -38,8 +36,6 @@ const initialState: State = {
     operatorResponse: undefined,
     operatorResponseCode: undefined,
     prompt: undefined,
-    rework: undefined,
-    score: undefined,
     tests: undefined
 };
 
@@ -50,6 +46,7 @@ export const orochiStore = createLogStore<State & Actions>('Orochi store')(set =
 
 export const useOrochiStore = () => useStore(orochiStore);
 
+// Reset the Orochi store if the task is closed
 globalStore.subscribe(({ taskIsOpen: taskOpen }) => {
     if (!taskOpen && !isStateEqual(orochiStore.getState(), initialState)) {
         Logger.debug(

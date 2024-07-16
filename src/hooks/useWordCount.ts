@@ -11,6 +11,8 @@ type UseWordCountReturn = {
     promptWordCount: number;
     ignoreListNumbers: boolean;
     toggleIgnoreListNumbers: () => void;
+    toggleWordCountView: () => void;
+    wordCountViewOpen: boolean;
 };
 
 export const useWordCount = (): UseWordCountReturn => {
@@ -18,11 +20,17 @@ export const useWordCount = (): UseWordCountReturn => {
         operatorResponseMarkdown,
         modelResponsePlaintext,
         prompt,
-        unselectedResponse
+        unselectedResponse,
+        wordCountViewOpen,
+        toggleWordCountView: storeToggle
     } = useGeneralStore();
 
     const { ignoreListNumbers, toggleIgnoreListNumbers } = useGlobalStore();
     const [selectionWordCount, setSelectionWordCount] = useState(0);
+
+    const toggleWordCountView = useCallback(() => {
+        storeToggle();
+    }, [storeToggle]);
 
     const updateSelectionWordCount = useCallback(() => {
         const selection = window.getSelection();
@@ -59,6 +67,8 @@ export const useWordCount = (): UseWordCountReturn => {
         selectedModelWordCount,
         promptWordCount,
         ignoreListNumbers,
-        toggleIgnoreListNumbers
+        toggleIgnoreListNumbers,
+        toggleWordCountView,
+        wordCountViewOpen
     };
 };

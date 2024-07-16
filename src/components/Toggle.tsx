@@ -1,4 +1,3 @@
-import React from 'react';
 import { Checkbox } from '@src/external/components/ui/checkbox';
 
 type Props = {

@@ -37,7 +37,8 @@ export const globalStore = createLogStore<State & Actions>('Global store')(
             set({
                 ...initialState,
                 process: get().process,
-                ignoreListNumbers: get().ignoreListNumbers
+                ignoreListNumbers: get().ignoreListNumbers,
+                taskIsOpen: false
             }),
         toggleDiffView: () => set(state => ({ diffViewOpen: !state.diffViewOpen })),
         toggleLatexView: () => set(state => ({ latexViewOpen: !state.latexViewOpen })),

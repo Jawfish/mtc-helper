@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { useGeneralStore } from '@src/store/generalStore';
 import Logger from '@lib/logging';

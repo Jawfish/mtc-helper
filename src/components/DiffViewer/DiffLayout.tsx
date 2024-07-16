@@ -34,20 +34,23 @@ export const DiffBackground = ({ children, onClick }: Props) => {
     );
 };
 
-export const DiffForeground: React.FC<React.PropsWithChildren> = ({ children }) => (
+export const DiffForeground = ({ children }: { children: React.ReactNode }) => (
     <div className='relative flex w-[90%] max-w-[116rem] flex-col rounded-md bg-white shadow-lg'>
         {children}
     </div>
 );
 
-export const DiffControls: React.FC<React.PropsWithChildren> = ({ children }) => (
+export const DiffControls = ({ children }: { children: React.ReactNode }) => (
     <div className='my-4 flex justify-center gap-4 items-center'>{children}</div>
 );
 
-export const DiffContainer: React.FC<
-    React.PropsWithChildren<{ roundTop?: boolean }>
-> = ({ roundTop = false, children }) => (
-    <div className={clsx(roundTop && 'overflow-x-hidden rounded-t-md')}>
+export const DiffContainer = ({
+    children
+}: {
+    roundTop?: boolean;
+    children: React.ReactNode;
+}) => (
+    <div className={'overflow-x-hidden rounded-t-md'}>
         <div className='overflow-auto max-h-[80vh]'>{children}</div>
     </div>
 );

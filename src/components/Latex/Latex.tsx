@@ -31,7 +31,9 @@ export const adjustLatexDelimiters = (content: string): string => {
 export default function Latex({ content }: Props) {
     return (
         <div className='whitespace-pre-wrap break-words font-sans'>
-            <LatexComponent>{adjustLatexDelimiters(content)}</LatexComponent>
+            <LatexComponent strict={false}>
+                {adjustLatexDelimiters(content)}
+            </LatexComponent>
         </div>
     );
 }

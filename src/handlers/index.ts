@@ -6,23 +6,19 @@
  * passed to the MutationObserver and run only when a relevant mutation is detected.
  */
 
-import { handleAnyCloseButtonMutation } from './global/closeButton';
-import { handleAnySubmitButtonMutation } from './global/submitButton';
-import { handleAnyTaskWindowMutation } from './global/taskWindow';
-import { handleLanguageMutation } from './orochi/language';
-import { handleResponseMutation } from './orochi/response';
-import { handlePromptMutation as handleOrochiPromptMutation } from './orochi/prompt';
-import { handleReturnTargetMutation } from './orochi/rework';
-import { handleScoreMutation } from './orochi/score';
-import { handleUsefulMetadataSection } from './orochi/usefulMetadata';
-import { handleUselessMetadataSection } from './orochi/uselessMetadata';
+import { onMut_submitButton_updateTaskOpenState } from './global/onMut_submitButton_updateTaskOpenState';
+import { onMut_taskWindow_updateTaskOpenState } from './global/onMut_taskWindow_updateTaskOpenState';
+import { onMut_languageMetadata_updateLanguage } from './orochi/onMut_orochiLanguageMetadata_updateOrochiLanguageState';
+import { onMut_response_updateResponseState } from './orochi/onMut_response_updateResponseState';
+import { onMut_prompt_updatePromptState as handleOrochiPromptMutation } from './orochi/onMut_prompt_updatePromptState';
+import { onMut_usefulMetadata_updateMetadataState } from './orochi/onMut_usefulMetadata_updateMetadataState';
+import { onMut_uselessMetadata_removeUselessMetadata } from './orochi/onMut_uselessMetadata_removeUselessMetadata';
 import {
-    resetSelectedResponseState,
-    updateModelResponseState,
-    updateOperatorResponseState
+    onMut_selectedResponse_resetSelectedResponseState,
+    onMut_modelResponse_updateModelResponseState,
+    onMut_operatorResponse_updateOperatorResponseState
 } from './general/onMut_selectedResponse_updateSelectedResponseState';
-import { updateUnselectedResponseState } from './general/onMut_unselectedResponse_updateUnselectedResponseState';
-import { resetPromptState } from './general/onClick_promptCloseButton_resetPromptState';
+import { onMut_unselectedResponse_updateUnselectedResponseState } from './general/onMut_unselectedResponse_updateUnselectedResponseState';
 import { updatePromptState } from './general/onMut_selectedPrompt_updatePromptState';
 
 export type MutHandler = (target: Element) => void;
@@ -58,31 +54,22 @@ export const elementHasMtcHelperAttribute = (element: Element) => {
 
 export const mutHandlers: MutHandlers = {
     global: [
-        handleAnyTaskWindowMutation,
-        handleAnyCloseButtonMutation,
-        handleAnySubmitButtonMutation
+        onMut_taskWindow_updateTaskOpenState,
+        onMut_submitButton_updateTaskOpenState
     ],
     orochi: [
-        handleLanguageMutation,
-        updateModelResponseState,
+        onMut_languageMetadata_updateLanguage,
+        onMut_modelResponse_updateModelResponseState,
         handleOrochiPromptMutation,
-        handleResponseMutation,
-        handleReturnTargetMutation,
-        handleScoreMutation,
-        handleUsefulMetadataSection,
-        handleUselessMetadataSection
+        onMut_response_updateResponseState,
+        onMut_usefulMetadata_updateMetadataState,
+        onMut_uselessMetadata_removeUselessMetadata
     ],
     general: [
-        updateOperatorResponseState,
-        updateModelResponseState,
-        updateUnselectedResponseState,
+        onMut_operatorResponse_updateOperatorResponseState,
+        onMut_modelResponse_updateModelResponseState,
+        onMut_unselectedResponse_updateUnselectedResponseState,
         updatePromptState,
-        resetSelectedResponseState
+        onMut_selectedResponse_resetSelectedResponseState
     ]
-};
-
-export const clickHandlers: ClickHandlers = {
-    global: [],
-    orochi: [],
-    general: [resetPromptState]
 };

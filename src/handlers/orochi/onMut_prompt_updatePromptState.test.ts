@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { orochiStore } from '@src/store/orochiStore';
 
-import { handlePromptMutation } from './prompt';
+import { onMut_prompt_updatePromptState } from './onMut_prompt_updatePromptState';
 
 describe('handlePromptMutation', () => {
     beforeEach(() => {
@@ -17,7 +17,7 @@ describe('handlePromptMutation', () => {
                 </div>
             </div>
         `;
-        handlePromptMutation(document.body);
+        onMut_prompt_updatePromptState(document.body);
         expect(orochiStore.getState().prompt).toContain('This is the prompt text');
     });
 
@@ -29,13 +29,13 @@ describe('handlePromptMutation', () => {
                 </div>
             </div>
         `;
-        handlePromptMutation(document.body);
+        onMut_prompt_updatePromptState(document.body);
         expect(orochiStore.getState().prompt).toBeUndefined();
     });
 
     it('should handle empty container', () => {
         document.body.innerHTML = '';
-        handlePromptMutation(document.body);
+        onMut_prompt_updatePromptState(document.body);
         expect(orochiStore.getState().prompt).toBeUndefined();
     });
 
@@ -46,7 +46,7 @@ describe('handlePromptMutation', () => {
                 <div>More unrelated content</div>
             </div>
         `;
-        handlePromptMutation(document.body);
+        onMut_prompt_updatePromptState(document.body);
         expect(orochiStore.getState().prompt).toBeUndefined();
     });
 
@@ -61,7 +61,7 @@ describe('handlePromptMutation', () => {
                 </div>
             </div>
         `;
-        handlePromptMutation(document.body);
+        onMut_prompt_updatePromptState(document.body);
         expect(orochiStore.getState().prompt).toContain('First prompt text');
     });
 });

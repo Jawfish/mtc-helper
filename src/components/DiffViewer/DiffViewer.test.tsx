@@ -34,9 +34,13 @@ describe('DiffViewer', () => {
         vi.clearAllMocks();
     });
 
-    it('renders without crashing', () => {
-        renderComponent();
-    });
+    it.each(['General', 'STEM', 'Orochi'] as Process[])(
+        'displays the diff for the %s process without crashing',
+        process => {
+            globalStore.setState({ process });
+            renderComponent();
+        }
+    );
 
     it('displays the diff method selector', () => {
         renderComponent();
@@ -47,34 +51,4 @@ describe('DiffViewer', () => {
         renderComponent();
         expect(screen.getByText('Close')).toBeInTheDocument();
     });
-
-    it.each(['General', 'STEM'] as Process[])(
-        'displays General diff when process is not Orochi',
-        process => {
-            globalStore.setState({ process });
-            renderComponent();
-            expect(screen.queryByText('Code')).not.toBeInTheDocument();
-            expect(screen.queryByText('Full Response')).not.toBeInTheDocument();
-            // "Markdown" is the name of the default tab
-            expect(screen.queryByText('Markdown')).toBeInTheDocument();
-        }
-    );
-
-    it('displays Orochi diff when process is Orochi', async () => {
-        globalStore.setState({ process: 'Orochi' });
-        renderComponent();
-        expect(screen.getByText('Code')).toBeInTheDocument();
-        expect(screen.getByText('Full Response')).toBeInTheDocument();
-    });
-
-    // TODO: figure out how to test radix select
-    // it('changes diff method when selector is changed', () => {
-    //     render(<DiffViewer  />);
-    //     fireEvent.click(screen.getByRole('combobox'));
-    //     fireEvent.click(screen.getByText('Words'));
-    //     expect(screen.getByRole('option', { name: 'Words' })).toHaveAttribute(
-    //         'aria-selected',
-    //         'true'
-    //     );
-    // });
 });

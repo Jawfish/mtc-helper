@@ -1,4 +1,3 @@
-import React from 'react';
 import { DiffMethod } from 'react-diff-viewer-continued';
 import {
     Select,
@@ -20,10 +19,7 @@ const diffMethodOptions = [
     { value: DiffMethod.SENTENCES, label: 'Sentences' }
 ];
 
-export const DiffMethodSelector: React.FC<DiffMethodSelectorProps> = ({
-    value,
-    onChange
-}) => (
+export const DiffMethodSelector = ({ value, onChange }: DiffMethodSelectorProps) => (
     <Select
         onValueChange={newValue => onChange(newValue as DiffMethod)}
         defaultValue={value}>
