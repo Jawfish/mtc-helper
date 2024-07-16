@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { globalStore, Process } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
-import { generalStore } from '@src/store/generalStore';
+import { genericProcessStore } from '@src/store/genericProcessStore';
 import { useToast } from '@src/contexts/ToastContext';
 import Logger from '@lib/logging';
 
@@ -11,7 +11,7 @@ import { useDiffView } from './useDiffView';
 vi.mock('@src/contexts/ToastContext');
 vi.mock('@lib/logging');
 
-const processes: Process[] = ['Orochi', 'General', 'STEM'];
+const processes: Process[] = ['Orochi', 'Generic', 'STEM'];
 
 describe('Diff view react hook', () => {
     const mockNotify = vi.fn();
@@ -20,9 +20,9 @@ describe('Diff view react hook', () => {
         vi.resetAllMocks();
         vi.mocked(useToast).mockReturnValue({ notify: mockNotify });
         vi.mocked(Logger.debug).mockImplementation(() => {});
-        generalStore.getState().reset();
+        genericProcessStore.getState().reset();
         orochiStore.getState().reset();
-        globalStore.setState({ process: 'General', diffViewOpen: false });
+        globalStore.setState({ process: 'Generic', diffViewOpen: false });
     });
 
     it.each(processes)('should initialize with diffViewOpen as false', process => {
@@ -40,7 +40,7 @@ describe('Diff view react hook', () => {
                     modelResponseCode: 'original'
                 });
             } else {
-                generalStore.setState({ modelResponseMarkdown: 'response' });
+                genericProcessStore.setState({ modelResponseMarkdown: 'response' });
             }
         });
 
@@ -114,9 +114,9 @@ describe('Diff view react hook', () => {
         );
     });
 
-    it('should not toggle diffViewOpen and show error for General when original response is missing', () => {
-        globalStore.setState({ process: 'General' });
-        generalStore.setState({
+    it('should not toggle diffViewOpen and show error for Generic when original response is missing', () => {
+        globalStore.setState({ process: 'Generic' });
+        genericProcessStore.setState({
             modelResponseMarkdown: undefined,
             operatorResponseMarkdown: 'edited'
         });
@@ -134,9 +134,9 @@ describe('Diff view react hook', () => {
         );
     });
 
-    it('should not toggle diffViewOpen and show error for General when edited response is missing', () => {
-        globalStore.setState({ process: 'General' });
-        generalStore.setState({
+    it('should not toggle diffViewOpen and show error for Generic when edited response is missing', () => {
+        globalStore.setState({ process: 'Generic' });
+        genericProcessStore.setState({
             modelResponseMarkdown: undefined
         });
 
@@ -154,7 +154,7 @@ describe('Diff view react hook', () => {
     });
 
     it('should not toggle diffViewOpen for unknown process', () => {
-        globalStore.setState({ process: 'General' });
+        globalStore.setState({ process: 'Generic' });
 
         const { result } = renderHook(() => useDiffView());
 

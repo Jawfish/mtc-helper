@@ -18,7 +18,7 @@ function useTitleObserver() {
             const title = document.title.toLowerCase();
             Logger.debug(`Title changed to: ${title}`);
 
-            let process: Process = 'General';
+            let process: Process = 'Generic';
             for (const [key, value] of Object.entries(titleToProcessMap)) {
                 if (title.includes(key)) {
                     process = value;

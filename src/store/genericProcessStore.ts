@@ -5,8 +5,7 @@ import { createLogStore } from './storeMiddleware';
 import { globalStore } from './globalStore';
 import { isStateEqual } from './utils';
 
-export type State = {
-    modelResponseHtml: string | undefined;
+export type GenericProcessStoreState = {
     modelResponseMarkdown: string | undefined;
     modelResponsePlaintext: string | undefined;
     operatorResponseMarkdown: string | undefined;
@@ -17,12 +16,10 @@ export type State = {
 
 type Actions = {
     reset: () => void;
-    resetPrompt: () => void;
     toggleWordCountView: () => void;
 };
 
-const initialState: State = {
-    modelResponseHtml: undefined,
+const initialState: GenericProcessStoreState = {
     modelResponseMarkdown: undefined,
     modelResponsePlaintext: undefined,
     operatorResponseMarkdown: undefined,
@@ -31,27 +28,23 @@ const initialState: State = {
     wordCountViewOpen: false
 };
 
-export const generalStore = createLogStore<State & Actions>('General store')(set => ({
+export const genericProcessStore = createLogStore<GenericProcessStoreState & Actions>(
+    'Generic store'
+)(set => ({
     ...initialState,
     reset: () => set({ ...initialState }),
-
-    resetPrompt: () =>
-        set(state => ({
-            ...state,
-            prompt: undefined
-        })),
 
     toggleWordCountView: () =>
         set(state => ({ wordCountViewOpen: !state.wordCountViewOpen }))
 }));
 
-export const useGeneralStore = () => useStore(generalStore);
+export const useGenericProcessStore = () => useStore(genericProcessStore);
 
 globalStore.subscribe(({ taskIsOpen: taskOpen }) => {
-    if (!taskOpen && !isStateEqual(generalStore.getState(), initialState)) {
+    if (!taskOpen && !isStateEqual(genericProcessStore.getState(), initialState)) {
         Logger.debug(
-            'Resetting General store due to state change from subscription to global store'
+            'Resetting Generic store due to state change from subscription to global store'
         );
-        generalStore.getState().reset();
+        genericProcessStore.getState().reset();
     }
 });

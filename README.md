@@ -1,94 +1,80 @@
 # MTC Helper
 
-## Development
+## Design
 
-### Design
+The core of the design is `MutationHandler` (`src/mtc/MutationHandler.ts`) listening to
+MTC's Next.js root element which will run actions. Actions take in the current state and
+the target element and return new state (basically a reducer). The actions and
+initialization can be found in `src/hooks/useMutationHandler.ts`.
 
-The core of the design is a `MutationObserver` (`src/lib/init.ts`) listening to MTC's
-Next.js root element which will run handlers based on the process. The handlers are
-imported into `src/handlers/index.ts` where they are added to a unified object and
-exported again for the `MutationObserver` to use. The flow is as follows:
+DOM changes -> `MutationHandler` calls actions -> actions return state ->
+`MutationHandler` applies state to the Zustand store -> React components update
 
-From MTC to the extension:
+Most of the particularly bad legacy code from the pre-extension days is isolated in
+React hooks.
 
-- DOM changes -> MutationObserver calls handlers -> handlers update Zustand store state
-
-Within the extension:
-
-- Reacting to state changes: Zustand store updates -> React hook performs logic ->
-  Component renders
-- Reacting to input: User does something -> Component calls React hook -> Zustand store
-  updates
-
-Most of the particularly bad legacy code from the pre-extension days is isolated in React hooks.
-
-### Adding functionality
+## Adding functionality
 
 The basics of adding functionality:
 
-1. Create a new handler (`type MutHandler = (target: Element) => void`)
-2. Add it to the object in `src/handlers/index.ts`. It will be automatically run by the
-   `MutationObserver`, passing the mutation target in as the `target` parameter.
+1. Create a new function that takes `SomeState` (see `src/store`) and the target element
+   as parameters and returns `SomeState`. This should be in `src/mtc/actions`.
+2. Create a new selector or selectors for the element(s) to monitor.
+3. In `src/hooks/useMutationHandler.ts`, add your action and selector:
 
-At the time of writing, most handlers don't use the `target` parameter because there
-were some issues presumably related to the use of a virtual DOM in MTC. As a result,
-most handlers just use `document.querySelector` calls to find the elements they need to
-interact with. To prevent performance issues, there are some conditionals in the
-`MutationObserver` to prevent the handlers from running when they don't need to.
+```ts
+mutationHandler.addAction(
+    mySelector,
+    myAction,
+    someStoreAction<OrochiStoreState>,
+    {
+        markElement: 'my-seen-indicator',
+        runIfElementMissing: false,
+        processes: ['STEM', 'Orochi']
+    }
+);
+```
 
-### State management
+- `markElement` tells `MutationHandler` not to run the action if the mark is detected on
+the element and to add that mark if it is not present. This can be used to prevent
+handlers from running multiple times.
+
+- `runIfElementMissing` tells `MutationHandler` to run the action whether the element is
+ present or not. This is useful for triggering actions that need to be taken when an
+ element is removed.
+
+## State management
 
 State is managed in [Zustand](https://github.com/pmndrs/zustand) stores (`src/store`).
-They should be fairly self-explanatory. [Avoid adding nested objects to
-the stores](https://github.com/pmndrs/zustand/blob/33cd0c0dd15307a98d859b7993c4160fa6f98b0b/docs/guides/updating-state.md#deeply-nested-object).
+They should be fairly self-explanatory. [Avoid adding nested objects to the
+stores](https://github.com/pmndrs/zustand/blob/33cd0c0dd15307a98d859b7993c4160fa6f98b0b/docs/guides/updating-state.md#deeply-nested-object).
 
 The stores use a logging middleware (`src/store/storeMiddleware.ts`) so that state can
 be easily observed in the browser console. This logging middleware, along with all other
 logging in this extension, uses the logging functions in `src/lib/logging.ts`.
 
-### Injected script
+## Injected script
 
 There is a script injected on the page (`inject/inject.ts`) that passes mutations from
 the page's Monaco editor object to the extension by way of `window.postMessage`. This is
 because there is sandboxing in place that prevents the extension from accessing the
 page's Monaco editor object directly.
 
-### Known issues
+## Known issues
 
 - KaTeX fonts get automatically packaged with the extension but the app encounters
   errors trying to load them on MTC.
 - Text that can't be parsed as LaTeX being passed to the LaTeX parser will cause
-  warnings, but it still functions fine.
+  warnings, but it still functions fine. The previous problem can be solved by only
+  passing LaTeX into the LaTeX component. Currently, the entire text is being passed in.
+  My recommendation is to render markdown first, then pass LaTeX into the LaTeX
+  component by looki## Development ng for LaTeX delimiters.
 
-### Troubleshooting
-
-- Make sure you are exporting handlers in `src/handlers/index.ts`.
-
-### Future
+## Future
 
 - Look into react-markdown, remark, and rehype for improving LaTeX and markdown
   rendering/processing.
-- If performance ever becomes an issue, create mini mutation observers that are narrower
-  in scope and call only the relevant handlers when only the relevant elements mutate
-  rather than acting on the entire Next.js root element.
-
-### Additional notes
-
-Since this started as a bookmarklet that was never intended to become this
-comprehensive, some of the code is messy and there are more side effects and coupling
-than I would like. It has not caused significant headaches yet - mostly just difficulty
-in testing.
-
-The tests aren't super consistent since the first few iterations were much less
-ambitious. Thoughtful design wasn't really a consideration. I never found a satisfying
-way to test functionality that relies on the DOM, but I have found it to be least
-fragile to mock selectors rather than mocking the DOM. The tradeoff there is that you
-are putting more trust in the selectors, but those are trivial to tweak.
-
-### Confidentiality
-
-There is no confidential information contained within the code. No clients are
-mentioned, code names are being used for processes (like "Orochi"), tests based on real
-content are sanitized to test the same issue with different data, and selectors are
-using generic class names and attributes. MTC Helper does not interact with the backend
-at all, only the DOM.
+- It would be really nice to be able to pass the mutation target to actions. There are
+  currently issues with elements being detected when doing this for reasons I don't
+  fully understand, but presumably it has to do with the virtual DOM. Read the comments
+  in `src/mtc/MutationHandler.ts` for more information.

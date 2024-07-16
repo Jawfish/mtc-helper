@@ -1,14 +1,22 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { copyToClipboard } from '@lib/clipboard';
-import { act, renderHook } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
 
 import { useClipboard } from './useClipboard';
 
-vi.mock('@lib/clipboard');
-
 describe('useClipboard', () => {
+    let clipboardContent: string | undefined;
+
     beforeEach(() => {
-        vi.resetAllMocks();
+        clipboardContent = undefined;
+        Object.defineProperty(navigator, 'clipboard', {
+            value: {
+                writeText: async (text: string) => {
+                    clipboardContent = text;
+                },
+                readText: async () => clipboardContent
+            },
+            configurable: true
+        });
     });
 
     afterEach(() => {
@@ -16,67 +24,68 @@ describe('useClipboard', () => {
     });
 
     it('should copy text to clipboard successfully', async () => {
-        const testText = 'Test text';
         const { result } = renderHook(() => useClipboard());
+        const testText = 'Test text';
 
         await act(async () => {
             const success = await result.current.copy(testText);
             expect(success).toBe(true);
         });
 
-        expect(copyToClipboard).toHaveBeenCalledWith(testText);
+        expect(await navigator.clipboard.readText()).toBe(testText);
+    });
+
+    it('should handle undefined input', async () => {
+        const { result } = renderHook(() => useClipboard());
+
+        await act(async () => {
+            const success = await result.current.copy(undefined);
+            expect(success).toBe(false);
+        });
+
+        expect(await navigator.clipboard.readText()).toBe(undefined);
+    });
+
+    it('should handle empty string input', async () => {
+        const { result } = renderHook(() => useClipboard());
+
+        await act(async () => {
+            const success = await result.current.copy('');
+            expect(success).toBe(false);
+        });
+
+        expect(await navigator.clipboard.readText()).toBe(undefined);
+    });
+
+    it('should clean text before copying', async () => {
+        const { result } = renderHook(() => useClipboard());
+        const dirtyText = 'Text with&nbsp;nbsp and\u00A0nbsp';
+        const expectedCleanText = 'Text withnbsp andnbsp';
+
+        await act(async () => {
+            const success = await result.current.copy(dirtyText);
+            expect(success).toBe(true);
+        });
+
+        expect(await navigator.clipboard.readText()).toBe(expectedCleanText);
     });
 
     it('should handle errors when copying fails', async () => {
-        const testText = 'Test text';
-        const error = new Error('Clipboard error');
-        vi.mocked(copyToClipboard).mockRejectedValueOnce(error);
-
-        const { result } = renderHook(() => useClipboard());
-
-        await expect(
-            act(async () => {
-                await result.current.copy(testText);
-            })
-        ).rejects.toThrow('Clipboard operation failed: Clipboard error');
-
-        expect(copyToClipboard).toHaveBeenCalledWith(testText);
-    });
-
-    it('should handle undefined input', async () => {
-        const { result } = renderHook(() => useClipboard());
-
-        await act(async () => {
-            const success = await result.current.copy(undefined);
-            expect(success).toBe(false);
+        // Simulate a clipboard error
+        Object.defineProperty(navigator, 'clipboard', {
+            value: {
+                writeText: async () => {
+                    throw new Error('Clipboard error');
+                }
+            },
+            configurable: true
         });
 
-        expect(copyToClipboard).not.toHaveBeenCalled();
-    });
-
-    it('should handle undefined input', async () => {
         const { result } = renderHook(() => useClipboard());
+        const testText = 'Test text';
 
         await act(async () => {
-            const success = await result.current.copy(undefined);
-            expect(success).toBe(false);
+            await expect(result.current.copy(testText)).rejects.toThrow();
         });
-
-        expect(copyToClipboard).not.toHaveBeenCalled();
-    });
-
-    it('should handle non-Error objects thrown by copyToClipboard', async () => {
-        const testText = 'Test text';
-        vi.mocked(copyToClipboard).mockRejectedValueOnce('String error');
-
-        const { result } = renderHook(() => useClipboard());
-
-        await expect(
-            act(async () => {
-                await result.current.copy(testText);
-            })
-        ).rejects.toThrow('Clipboard operation failed: String error');
-
-        expect(copyToClipboard).toHaveBeenCalledWith(testText);
     });
 });

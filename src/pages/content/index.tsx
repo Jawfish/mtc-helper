@@ -9,12 +9,11 @@ import Toolbar from '@components/Toolbar';
 import { useGlobalStore } from '@src/store/globalStore';
 import { useLatexView } from '@hooks/useLatexView';
 import LatexViewer from '@components/Latex/LatexViewer';
-import useAppObserver from '@hooks/useAppObserver';
-import { mutHandlers } from '@handlers/index';
 import useMonacoObserver from '@hooks/useMonacoObserver';
 import useTitleObserver from '@hooks/useTitleObserver';
 import { Sidebar } from '@components/Sidebar';
 import { useWordCount } from '@hooks/useWordCount';
+import useMutationHandler from '@hooks/useMutationHandler';
 
 const div = document.createElement('div');
 div.id = 'mtc-helper-root';
@@ -25,9 +24,9 @@ if (!rootContainer) throw new Error("Can't find Content root element");
 const root = createRoot(rootContainer);
 
 const App = () => {
-    useAppObserver(mutHandlers);
     useMonacoObserver();
     useTitleObserver();
+    useMutationHandler();
 
     const { diffViewOpen } = useDiffView();
     const { latexViewOpen } = useLatexView();

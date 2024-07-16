@@ -5,12 +5,12 @@ import { describe, it, vi, beforeEach } from 'vitest';
 import { globalStore, Process } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
 import { expect } from '@storybook/test';
-import { generalStore } from '@src/store/generalStore';
+import { genericProcessStore } from '@src/store/genericProcessStore';
 import { ToastProvider } from '@src/contexts/ToastContext';
 
 vi.mock('@hooks/useOrochiActions', () => ({
     useOrochiActions: () => ({
-        copyEditedCode: vi.fn(),
+        copyOperatorCode: vi.fn(),
         copyOriginalCode: vi.fn(),
         copyTests: vi.fn(),
         copyAllAsPython: vi.fn(),
@@ -42,21 +42,21 @@ const renderComponent = (process: Process): RenderResult => {
 // TODO: figure out how to test the radix dropdown
 describe('Toolbar', () => {
     beforeEach(() => {
-        globalStore.setState({ process: 'General' });
+        globalStore.setState({ process: 'Generic' });
         orochiStore.getState().reset();
         vi.clearAllMocks();
     });
 
     it('renders without crashing', () => {
-        renderComponent('General');
+        renderComponent('Generic');
     });
 
     it('displays the Copy dropdown', () => {
-        renderComponent('General');
+        renderComponent('Generic');
         expect(screen.getByText('Copy')).toBeInTheDocument();
     });
 
-    it.each(['Orochi', 'General', 'STEM'] as Process[])(
+    it.each(['Orochi', 'Generic', 'STEM'] as Process[])(
         'displays the View Diff button for %s process',
         process => {
             globalStore.setState({ process });
@@ -65,7 +65,7 @@ describe('Toolbar', () => {
         }
     );
 
-    it.each(['Orochi', 'General', 'STEM'] as Process[])(
+    it.each(['Orochi', 'Generic', 'STEM'] as Process[])(
         'calls toggleDiffView when View Diff button is clicked if it is enabled',
         process => {
             globalStore.setState({ process });
@@ -73,13 +73,15 @@ describe('Toolbar', () => {
             // These must run after setting global store state due a subscription to
             // state changes in the global store. The trigger for whether or not the
             // diff view can be opened is if the model's content is present (original
-            // code in Orochi, model response in General)
+            // code in Orochi, model response in Generic)
             if (process === 'Orochi') {
                 orochiStore.setState({
                     modelResponseCode: 'some code'
                 });
             } else {
-                generalStore.setState({ modelResponseMarkdown: 'some markdown' });
+                genericProcessStore.setState({
+                    modelResponseMarkdown: 'some markdown'
+                });
             }
 
             renderComponent(process);
@@ -88,7 +90,7 @@ describe('Toolbar', () => {
         }
     );
 
-    it.each(['Orochi', 'General', 'STEM'] as Process[])(
+    it.each(['Orochi', 'Generic', 'STEM'] as Process[])(
         "doesn't call toggleDiffView when View Diff button is clicked if it is disabled",
         process => {
             globalStore.setState({ process });
@@ -99,7 +101,7 @@ describe('Toolbar', () => {
         }
     );
 
-    it.each(['Orochi', 'General', 'STEM'] as Process[])(
+    it.each(['Orochi', 'Generic', 'STEM'] as Process[])(
         'displays Check Response button only for Orochi process',
         process => {
             renderComponent(process);

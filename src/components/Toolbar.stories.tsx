@@ -2,21 +2,21 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { ToastProvider } from '@src/contexts/ToastContext';
 import { orochiStore } from '@src/store/orochiStore';
-import { generalStore } from '@src/store/generalStore';
+import { genericProcessStore } from '@src/store/genericProcessStore';
 
 import Toolbar from './Toolbar';
 
 orochiStore.setState({
     modelResponseCode: 'original code',
     modelResponse: 'original response',
-    operatorResponseCode: 'edited code',
+    operatorResponseCode: 'operator code',
     operatorResponse: 'edited response',
     prompt: 'prompt',
     tests: 'tests',
     operatorNotes: 'operator notes'
 });
 
-generalStore.setState({
+genericProcessStore.setState({
     modelResponseMarkdown: 'original response',
     operatorResponseMarkdown: 'edited response'
 });
@@ -34,7 +34,7 @@ const meta: Meta<typeof Toolbar> = {
     argTypes: {
         process: {
             control: 'radio',
-            options: ['Orochi', 'General']
+            options: ['Orochi', 'Generic']
         }
     }
 };
@@ -54,8 +54,8 @@ export const Orochi: Story = {
     ]
 };
 
-export const General: Story = {
+export const Generic: Story = {
     args: {
-        process: 'General'
+        process: 'Generic'
     }
 };

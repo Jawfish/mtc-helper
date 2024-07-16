@@ -1,16 +1,28 @@
-import { copyToClipboard } from '@lib/clipboard';
 import Logger from '@lib/logging';
 import { useCallback } from 'react';
 
-type ClipboardContent = string | undefined;
+class ClipboardError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'ClipboardError';
+    }
+}
 
-/**
- * Custom hook for copying content to the clipboard.
- */
-export function useClipboard() {
-    const copy = useCallback(async (content: ClipboardContent): Promise<boolean> => {
-        if (content === undefined) {
-            Logger.warn('Attempted to copy undefined content to clipboard');
+const cleanText = (text: string): string =>
+    text.replace(/&nbsp;/g, '').replace(/\u00A0/g, '');
+
+const copyToClipboard = async (text: string): Promise<void> => {
+    try {
+        await navigator.clipboard.writeText(cleanText(text));
+    } catch (error) {
+        throw new ClipboardError(`Error copying text to clipboard: ${error}`);
+    }
+};
+
+export const useClipboard = () => {
+    const copy = useCallback(async (content: string | undefined): Promise<boolean> => {
+        if (!content) {
+            Logger.warn('Attempted to copy undefined or empty content to clipboard');
 
             return false;
         }
@@ -21,11 +33,10 @@ export function useClipboard() {
 
             return true;
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            Logger.error(`Failed to copy content to clipboard: ${errorMessage}`);
-            throw new Error(`Clipboard operation failed: ${errorMessage}`);
+            Logger.error('Failed to copy content to clipboard:', error);
+            throw error;
         }
     }, []);
 
     return { copy };
-}
+};

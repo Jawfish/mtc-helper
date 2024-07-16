@@ -15,7 +15,7 @@ describe('The React hook for using Orochi-specific actions', () => {
     const mockCopy = vi.fn();
     const mockNotify = vi.fn();
     const mockStore = {
-        operatorResponseCode: 'edited code',
+        operatorResponseCode: 'operator code',
         modelResponseCode: 'original code',
         tests: 'test code',
         prompt: 'prompt text',
@@ -48,7 +48,7 @@ describe('The React hook for using Orochi-specific actions', () => {
     };
 
     it.each([
-        ['copyEditedCode', 'edited code', 'Edited Code'],
+        ['copyOperatorCode', 'operator code', 'Operator code'],
         ['copyOriginalCode', 'original code', 'Original Code'],
         ['copyTests', 'test code', 'Tests'],
         ['copyPrompt', 'prompt text', 'Prompt'],
@@ -59,10 +59,10 @@ describe('The React hook for using Orochi-specific actions', () => {
         mockCopy.mockRejectedValueOnce(new Error('Copy failed'));
         const { result } = renderHook(() => useOrochiActions());
         await act(async () => {
-            await result.current.copyEditedCode();
+            await result.current.copyOperatorCode();
         });
         expect(mockNotify).toHaveBeenCalledWith(
-            'Error copying edited code: Error: Copy failed',
+            'Error copying operator code: Error: Copy failed',
             'error'
         );
     });
@@ -74,10 +74,10 @@ describe('The React hook for using Orochi-specific actions', () => {
         } as any);
         const { result } = renderHook(() => useOrochiActions());
         await act(async () => {
-            await result.current.copyEditedCode();
+            await result.current.copyOperatorCode();
         });
         expect(mockNotify).toHaveBeenCalledWith(
-            'No edited code found. The edited code must be viewed before it can be copied.',
+            'No operator code found. The operator code must be viewed before it can be copied.',
             'error'
         );
     });
@@ -102,7 +102,7 @@ operator notes
 
 ####################################### RESPONSE #######################################
 
-edited code
+operator code
 
 ######################################## TESTS #########################################
 

@@ -1,16 +1,16 @@
 import { useCallback } from 'react';
 import { useToast } from '@src/contexts/ToastContext';
-import { useGeneralStore } from '@src/store/generalStore';
+import { useGenericProcessStore } from '@src/store/genericProcessStore';
 
 import { useClipboard } from './useClipboard';
 
 type CopyAction = 'Operator Response' | 'Model Response' | 'Prompt';
 
-export function useGeneralActions() {
+export function useGenericProcessActions() {
     const { copy } = useClipboard();
     const { notify } = useToast();
     const { operatorResponseMarkdown, modelResponseMarkdown, prompt } =
-        useGeneralStore();
+        useGenericProcessStore();
 
     const copyContent = useCallback(
         async (content: string | undefined, action: CopyAction) => {

@@ -25,7 +25,7 @@ TODO.md
 .nfs*
 
 ### macOS ###
-# General
+# Generic
 .DS_Store
 .AppleDouble
 .LSOverride

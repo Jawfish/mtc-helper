@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Rnd } from 'react-rnd';
-import { useGeneralStore } from '@src/store/generalStore';
+import { useGenericProcessStore } from '@src/store/genericProcessStore';
 import Logger from '@lib/logging';
 
 import Latex from './Latex';
 
 const LatexViewer = () => {
-    const { operatorResponseMarkdown } = useGeneralStore();
+    const { operatorResponseMarkdown } = useGenericProcessStore();
     const initialSize = { width: 600, height: 480 };
 
     const calculateCenterPosition = () => {

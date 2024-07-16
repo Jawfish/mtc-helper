@@ -55,7 +55,7 @@ const storeLoggerImpl: StoreLoggerImpl = (f, name) => (set, get, store) => {
 
 const logger = storeLoggerImpl as unknown as StoreLogger;
 
-type CreateLogStore = <T extends object>(
+type CreateLogStore = <T>(
     name?: string | undefined
 ) => (f: StateCreator<T, [], []>) => StoreApi<T>;
 

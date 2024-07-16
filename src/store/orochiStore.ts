@@ -5,9 +5,7 @@ import { createLogStore } from './storeMiddleware';
 import { globalStore } from './globalStore';
 import { isStateEqual } from './utils';
 
-type Language = 'python' | 'unknown';
-
-type State = {
+export type OrochiStoreState = {
     modelResponseCode: string | undefined;
     operatorResponseCode: string | undefined;
     conversationTitle: string | undefined;
@@ -17,19 +15,17 @@ type State = {
     modelResponse: string | undefined;
     prompt: string | undefined;
     tests: string | undefined;
-    metadataRemoved: boolean;
-    language: Language;
+    language: 'python' | 'unknown';
 };
 
-type Actions = {
+export type OrochiStoreActions = {
     reset: () => void;
 };
 
-const initialState: State = {
+const initialState: OrochiStoreState = {
     conversationTitle: undefined,
     errorLabels: undefined,
     language: 'unknown',
-    metadataRemoved: false,
     modelResponse: undefined,
     modelResponseCode: undefined,
     operatorNotes: undefined,
@@ -39,7 +35,9 @@ const initialState: State = {
     tests: undefined
 };
 
-export const orochiStore = createLogStore<State & Actions>('Orochi store')(set => ({
+export const orochiStore = createLogStore<OrochiStoreState & OrochiStoreActions>(
+    'Orochi store'
+)(set => ({
     ...initialState,
     reset: () => set({ ...initialState })
 }));

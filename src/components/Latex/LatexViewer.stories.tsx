@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { generalStore } from '@src/store/generalStore';
+import { genericProcessStore } from '@src/store/genericProcessStore';
 import { useEffect } from 'react';
 
 import LatexViewer from './LatexViewer';
@@ -29,7 +29,7 @@ type Story = StoryObj<typeof LatexViewer>;
 
 const LatexViewerWithStore = ({ content }: { content: string }) => {
     useEffect(() => {
-        generalStore.setState({ operatorResponseMarkdown: content });
+        genericProcessStore.setState({ operatorResponseMarkdown: content });
     }, [content]);
 
     return <LatexViewer />;
