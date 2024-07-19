@@ -60,6 +60,7 @@ const useMutationHandler = () => {
         };
         // Don't add mutationHandler to the dependencies array or it will cause an
         // infinite loop. Could also use useRef to avoid this.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const initializeActions = (mutationHandler: MutationHandler) => {
