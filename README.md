@@ -26,7 +26,7 @@ The basics of adding functionality:
 mutationHandler.addAction(
     mySelector,
     myAction,
-    someStoreAction<OrochiStoreState>,
+    someStore,
     {
         markElement: 'my-seen-indicator',
         runIfElementMissing: false,
