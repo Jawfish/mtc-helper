@@ -67,8 +67,7 @@ page's Monaco editor object directly.
 - Text that can't be parsed as LaTeX being passed to the LaTeX parser will cause
   warnings, but it still functions fine. This can be solved by only passing LaTeX into
   the LaTeX component. Currently, the entire text is being passed in. My recommendation
-  is to render markdown first, then pass LaTeX into the LaTeX component by looki##
-  Development ng for LaTeX delimiters.
+  is to render markdown first, then pass LaTeX into the LaTeX component by looking for LaTeX delimiters.
 
 ## Future
 
