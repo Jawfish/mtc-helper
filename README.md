@@ -65,10 +65,10 @@ page's Monaco editor object directly.
 - KaTeX fonts get automatically packaged with the extension but the app encounters
   errors trying to load them on MTC.
 - Text that can't be parsed as LaTeX being passed to the LaTeX parser will cause
-  warnings, but it still functions fine. The previous problem can be solved by only
-  passing LaTeX into the LaTeX component. Currently, the entire text is being passed in.
-  My recommendation is to render markdown first, then pass LaTeX into the LaTeX
-  component by looki## Development ng for LaTeX delimiters.
+  warnings, but it still functions fine. This can be solved by only passing LaTeX into
+  the LaTeX component. Currently, the entire text is being passed in. My recommendation
+  is to render markdown first, then pass LaTeX into the LaTeX component by looki##
+  Development ng for LaTeX delimiters.
 
 ## Future
 
