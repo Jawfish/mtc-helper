@@ -4,7 +4,7 @@ import { DiffViewer } from '@components/DiffViewer/DiffViewer';
 import { describe, it, vi, beforeEach, afterEach } from 'vitest';
 import { globalStore, Process } from '@src/store/globalStore';
 import { orochiStore } from '@src/store/orochiStore';
-import { generalStore } from '@src/store/generalStore';
+import { genericProcessStore } from '@src/store/genericProcessStore';
 import { expect } from '@storybook/test';
 import { ToastProvider } from '@src/contexts/ToastContext';
 
@@ -18,15 +18,15 @@ const renderComponent = (): RenderResult => {
 
 describe('DiffViewer', () => {
     beforeEach(() => {
-        globalStore.setState({ process: 'General' });
+        globalStore.setState({ process: 'Generic' });
         orochiStore.setState({
-            operatorResponseCode: 'edited code',
+            operatorResponseCode: 'operator code',
             modelResponseCode: 'original code',
             operatorResponse: 'edited response',
             modelResponse: 'original response'
         });
-        generalStore.setState({
-            modelResponseMarkdown: 'original general response'
+        genericProcessStore.setState({
+            modelResponseMarkdown: 'original generic process response'
         });
     });
 
@@ -34,7 +34,7 @@ describe('DiffViewer', () => {
         vi.clearAllMocks();
     });
 
-    it.each(['General', 'STEM', 'Orochi'] as Process[])(
+    it.each(['Generic', 'STEM', 'Orochi'] as Process[])(
         'displays the diff for the %s process without crashing',
         process => {
             globalStore.setState({ process });

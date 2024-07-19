@@ -5,7 +5,7 @@ import { useOrochiStore } from '@src/store/orochiStore';
 import { useClipboard } from './useClipboard';
 
 type CopyAction =
-    | 'Edited Code'
+    | 'Operator code'
     | 'Original Code'
     | 'Tests'
     | 'Prompt'
@@ -37,8 +37,8 @@ export function useOrochiActions() {
         [copy, notify]
     );
 
-    const copyEditedCode = useCallback(
-        () => copyContent(operatorResponseCode, 'Edited Code'),
+    const copyOperatorCode = useCallback(
+        () => copyContent(operatorResponseCode, 'Operator code'),
         [copyContent, operatorResponseCode]
     );
     const copyOriginalCode = useCallback(
@@ -93,7 +93,7 @@ export function useOrochiActions() {
 
     return {
         copyAllAsPython,
-        copyEditedCode,
+        copyOperatorCode,
         copyOperatorNotes,
         copyPrompt,
         copyTests,

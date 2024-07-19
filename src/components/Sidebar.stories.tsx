@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { generalStore } from '@src/store/generalStore';
+import { genericProcessStore } from '@src/store/genericProcessStore';
 import { globalStore } from '@src/store/globalStore';
 
 import { Sidebar } from './Sidebar';
@@ -14,7 +14,7 @@ const meta: Meta<typeof Sidebar> = {
     decorators: [
         Story => {
             // Reset stores to initial state before each story
-            generalStore.getState().reset();
+            genericProcessStore.getState().reset();
             globalStore.setState({ ignoreListNumbers: false });
 
             return <Story />;
@@ -30,7 +30,7 @@ export const Default: Story = {};
 export const WithCustomWordCounts: Story = {
     decorators: [
         Story => {
-            generalStore.setState({
+            genericProcessStore.setState({
                 operatorResponseMarkdown:
                     'This is the operator response. It has some words.',
                 modelResponseMarkdown:
@@ -48,7 +48,7 @@ export const WithCustomWordCounts: Story = {
 export const WithIgnoreListNumbers: Story = {
     decorators: [
         Story => {
-            generalStore.setState({
+            genericProcessStore.setState({
                 operatorResponseMarkdown:
                     '1. First item\n2. Second item\n3. Third item',
                 modelResponseMarkdown:

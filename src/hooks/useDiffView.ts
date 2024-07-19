@@ -1,7 +1,7 @@
 import { useToast } from '@src/contexts/ToastContext';
 import { useGlobalStore } from '@src/store/globalStore';
 import { useOrochiStore } from '@src/store/orochiStore';
-import { useGeneralStore } from '@src/store/generalStore';
+import { useGenericProcessStore } from '@src/store/genericProcessStore';
 import { useCallback, useEffect, useState } from 'react';
 
 const DIFF_VIEW_ERROR =
@@ -18,7 +18,7 @@ export function useDiffView(): UseDiffViewReturn {
     const [canOpenDiffView, setCanOpenDiffView] = useState<boolean>(false);
     const { notify } = useToast();
     const { modelResponseCode } = useOrochiStore();
-    const { modelResponseMarkdown } = useGeneralStore();
+    const { modelResponseMarkdown } = useGenericProcessStore();
 
     useEffect(() => {
         switch (process) {

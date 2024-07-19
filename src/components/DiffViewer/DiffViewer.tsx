@@ -5,28 +5,28 @@ import useKeyPress from '@hooks/useKeyPress';
 import { useDiffView } from '@hooks/useDiffView';
 import Button from '@components/shared/Button';
 import { Toggle } from '@components/Toggle';
+import { useGenericProcessStore } from '@src/store/genericProcessStore';
+import { useOrochiStore } from '@src/store/orochiStore';
+import { isRTL } from '@lib/textProcessing';
 
+import { DiffMethodSelector } from './DiffMethodSelector';
 import {
     DiffBackground,
     DiffForeground,
     DiffControls,
     DiffContainer
 } from './DiffLayout';
-import { DiffMethodSelector } from './DiffMethodSelector';
-import { useGeneralStore } from '@src/store/generalStore';
-import { useOrochiStore } from '@src/store/orochiStore';
-import { isRTL } from '@lib/textProcessing';
 
 export const DiffViewer = () => {
     const { process } = useGlobalStore();
     const { toggleDiffView } = useDiffView();
     const [diffMethod, setDiffMethod] = useState<DiffMethod>(
-        process === 'General' ? DiffMethod.WORDS : DiffMethod.LINES
+        process === 'Generic' ? DiffMethod.WORDS : DiffMethod.LINES
     );
     const [disableWordDiff, setDisableWordDiff] = useState(false);
     const [codeOnly, setCodeOnly] = useState(true);
 
-    const generalStore = useGeneralStore();
+    const genericProcessStore = useGenericProcessStore();
     const orochiStore = useOrochiStore();
 
     useKeyPress('Escape', toggleDiffView);
@@ -34,7 +34,7 @@ export const DiffViewer = () => {
     return (
         <DiffBackground onClick={toggleDiffView}>
             <DiffForeground>
-                {process !== 'General' && (
+                {process !== 'Generic' && (
                     <Diff
                         diffMethod={diffMethod}
                         disableWordDiff={disableWordDiff}
@@ -54,8 +54,8 @@ export const DiffViewer = () => {
                     <Diff
                         diffMethod={diffMethod}
                         disableWordDiff={disableWordDiff}
-                        operatorResponse={generalStore.operatorResponseMarkdown!}
-                        modelResponse={generalStore.modelResponseMarkdown!}
+                        operatorResponse={genericProcessStore.operatorResponseMarkdown!}
+                        modelResponse={genericProcessStore.modelResponseMarkdown!}
                     />
                 )}
                 <DiffControls>

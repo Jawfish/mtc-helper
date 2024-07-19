@@ -13,18 +13,18 @@ import pkg from './package.json';
 import { injectScriptDest, injectScriptSrc } from './src/types/injectTypes';
 
 const root = resolve(__dirname, 'src');
-const pagesDir = resolve(root, 'pages');
-const libDir = resolve(root, 'lib');
+
 const assetsDir = resolve(root, 'assets');
-const outDir = resolve(__dirname, 'dist');
 const componentsDir = resolve(root, 'components');
-const hooksDir = resolve(root, 'hooks');
-const storeDir = resolve(root, 'store');
-const selectorsDir = resolve(root, 'selectors');
-const publicDir = resolve(__dirname, 'public');
-const injectDir = resolve(__dirname, 'inject');
 const externalDir = resolve(root, 'external');
-const handlersDir = resolve(root, 'handlers');
+const hooksDir = resolve(root, 'hooks');
+const injectDir = resolve(__dirname, 'inject');
+const libDir = resolve(root, 'lib');
+const mtcDir = resolve(root, 'mtc');
+const outDir = resolve(__dirname, 'dist');
+const pagesDir = resolve(root, 'pages');
+const publicDir = resolve(__dirname, 'public');
+const storeDir = resolve(root, 'store');
 
 const isDev = process.env.__DEV__ === 'true' || process.env.NODE_ENV === 'development';
 
@@ -93,17 +93,16 @@ function compileInjectScript() {
 export default defineConfig({
     resolve: {
         alias: {
-            '@src': root,
             '@assets': assetsDir,
-            '@pages': pagesDir,
-            '@lib': libDir,
             '@components': componentsDir,
-            '@store': storeDir,
-            '@hooks': hooksDir,
-            '@selectors': selectorsDir,
-            '@inject': injectDir,
             '@external': externalDir,
-            '@handlers': handlersDir
+            '@hooks': hooksDir,
+            '@inject': injectDir,
+            '@lib': libDir,
+            '@mtc': mtcDir,
+            '@pages': pagesDir,
+            '@src': root,
+            '@store': storeDir
         }
     },
     plugins: [

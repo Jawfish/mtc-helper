@@ -15,12 +15,11 @@
             "@assets/*": ["src/assets/*"],
             "@components/*": ["src/components/*"],
             "@external/*": ["src/external/*"],
-            "@handlers/*": ["src/handlers/*"],
             "@hooks/*": ["src/hooks/*"],
             "@inject/*": ["inject/*"],
             "@lib/*": ["src/lib/*"],
+            "@mtc/*": ["src/mtc/*"],
             "@pages/*": ["src/pages/*"],
-            "@selectors/*": ["src/selectors/*"],
             "@src/*": ["src/*"],
             "@store/*": ["src/store/*"]
         },

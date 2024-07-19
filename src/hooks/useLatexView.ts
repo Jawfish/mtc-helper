@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useGlobalStore } from '@src/store/globalStore';
-import { useGeneralStore } from '@src/store/generalStore';
+import { useGenericProcessStore } from '@src/store/genericProcessStore';
 
 type UseLatexViewReturn = {
     latexViewOpen: boolean;
@@ -10,7 +10,7 @@ type UseLatexViewReturn = {
 
 export function useLatexView(): UseLatexViewReturn {
     const { latexViewOpen, toggleLatexView } = useGlobalStore();
-    const { operatorResponseMarkdown } = useGeneralStore();
+    const { operatorResponseMarkdown } = useGenericProcessStore();
     const [canOpenLatexView, setCanOpenLatexView] = useState<boolean>(false);
 
     useEffect(() => {

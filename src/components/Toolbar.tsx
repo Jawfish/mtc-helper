@@ -14,8 +14,8 @@ import { useOrochiStore } from '@src/store/orochiStore';
 import { DropdownMenuItemProps } from '@radix-ui/react-dropdown-menu';
 import { useLatexView } from '@hooks/useLatexView';
 import { useDiffView } from '@hooks/useDiffView';
-import { useGeneralStore } from '@src/store/generalStore';
-import { useGeneralActions } from '@hooks/useGeneralActions';
+import { useGenericProcessStore } from '@src/store/genericProcessStore';
+import { useGenericProcessActions } from '@hooks/useGenericProcessActions';
 import { useWordCount } from '@hooks/useWordCount';
 
 import Button from './shared/Button';
@@ -99,15 +99,20 @@ const Dropdown = ({ process }: { process: Process }) => {
                 {process === 'Orochi' && <OrochiDropdownItems />}
                 <Item onClick={copyTaskId}>Task ID</Item>
                 <Item onClick={copyOperatorEmail}>Email</Item>
-                {process !== 'Orochi' && <GeneralDropdownItems />}
+                {process !== 'Orochi' && <GenericDropdownItems />}
             </DropdownMenuContent>
         </DropdownMenu>
     );
 };
 
 const OrochiDropdownItems = () => {
-    const { copyEditedCode, copyOriginalCode, copyTests, copyAllAsPython, copyPrompt } =
-        useOrochiActions();
+    const {
+        copyOperatorCode,
+        copyOriginalCode,
+        copyTests,
+        copyAllAsPython,
+        copyPrompt
+    } = useOrochiActions();
     const { language, modelResponseCode, operatorResponseCode, prompt, tests } =
         useOrochiStore();
 
@@ -126,14 +131,14 @@ const OrochiDropdownItems = () => {
                 Prompt
             </Item>
             <Item
-                onClick={copyEditedCode}
+                onClick={copyOperatorCode}
                 disabled={!operatorResponseCode}>
-                Edited Code
+                Operator Code
             </Item>
             <Item
                 onClick={copyOriginalCode}
                 disabled={!modelResponseCode}>
-                Original Code
+                Model Code
             </Item>
             <Item
                 onClick={copyTests}
@@ -144,10 +149,11 @@ const OrochiDropdownItems = () => {
     );
 };
 
-const GeneralDropdownItems = () => {
-    const { copyModelResponse, copyOperatorResponse, copyPrompt } = useGeneralActions();
+const GenericDropdownItems = () => {
+    const { copyModelResponse, copyOperatorResponse, copyPrompt } =
+        useGenericProcessActions();
     const { operatorResponseMarkdown, modelResponseMarkdown, prompt } =
-        useGeneralStore();
+        useGenericProcessStore();
 
     return (
         <>
