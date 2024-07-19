@@ -37,7 +37,7 @@ mutationHandler.addAction(
 
 - `markElement` tells `MutationHandler` not to run the action if the mark is detected on
 the element and to add that mark if it is not present. This can be used to prevent
-handlers from running multiple times.
+handlers from running multiple times for the same element.
 
 - `runIfElementMissing` tells `MutationHandler` to run the action whether the element is
  present or not. This is useful for triggering actions that need to be taken when an
