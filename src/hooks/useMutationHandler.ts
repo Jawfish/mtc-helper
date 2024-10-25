@@ -257,6 +257,16 @@ const useMutationHandler = () => {
             }
         );
 
+        mutationHandler.addAction(
+            mathSelectors.finalAnswer,
+            genericProcessActions.updateUnselectedModelResponse,
+            genericProcessStore,
+            {
+                runIfElementMissing: false,
+                processes: ['Math']
+            }
+        );
+
         Logger.debug('Actions added to mutation handler');
     };
 

@@ -41,6 +41,11 @@ export default function Toolbar({ process }: Props) {
         toggleLatexView();
     };
 
+    const handleLatexFinalAnswerView = () => {
+        genericProcessStore.setLatexContentType('final');
+        toggleLatexView();
+    };
+
     return (
         <ToolbarContainer>
             <Dropdown process={process} />
@@ -79,6 +84,13 @@ export default function Toolbar({ process }: Props) {
                     tooltip='Open a live-updating LaTeX preview of the scratchpad'
                     onClick={handleLatexScratchpadView}>
                     View LaTeX (Scratchpad)
+                </Button>
+            )}
+            {process === 'Math' && (
+                <Button
+                    tooltip='Open a live-updating LaTeX preview of the final answer'
+                    onClick={handleLatexFinalAnswerView}>
+                    View LaTeX (Final Answer)
                 </Button>
             )}
             {process !== 'Orochi' && (

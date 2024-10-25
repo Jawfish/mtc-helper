@@ -7,7 +7,7 @@ import Latex from './Latex';
 
 const LatexViewer = () => {
     const { latexContentType } = useGenericProcessStore();
-    const { operatorResponseMarkdown, modelResponsePlaintext } =
+    const { operatorResponseMarkdown, modelResponsePlaintext, unselectedResponse } =
         useGenericProcessStore();
     const initialSize = { width: 600, height: 480 };
 
@@ -21,15 +21,22 @@ const LatexViewer = () => {
     const [size, setSize] = useState(initialSize);
     const [position, setPosition] = useState(calculateCenterPosition);
 
-    // Format content to preserve line breaks
-    const formatContent = (content: string) => {
-        return content;
-    };
+    let content: string | undefined;
 
-    const content =
-        latexContentType === 'prompt' || latexContentType === undefined
-            ? operatorResponseMarkdown
-            : modelResponsePlaintext;
+    switch (latexContentType) {
+        case 'prompt':
+            content = operatorResponseMarkdown;
+            break;
+        case 'scratchpad':
+            content = modelResponsePlaintext;
+            break;
+        case 'final':
+            content = unselectedResponse;
+            break;
+        default:
+            content = '';
+            break;
+    }
 
     Logger.debug('Rendering LaTeX viewer');
 
@@ -64,7 +71,7 @@ const LatexViewer = () => {
                 className='pointer-events-auto flex flex-col rounded-md shadow-xl cursor-move z-[9998] bg-white shadow-mtc-faded border border-solid border-mtc-primary'>
                 <div className='size-full overflow-auto'>
                     <div className='p-4 whitespace-pre-wrap'>
-                        <Latex content={content ? formatContent(content) : ''} />
+                        <Latex content={content ? content : ''} />
                     </div>
                 </div>
             </Rnd>

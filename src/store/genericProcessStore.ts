@@ -12,13 +12,13 @@ export type GenericProcessStoreState = {
     prompt: string | undefined;
     unselectedResponse: string | undefined;
     wordCountViewOpen: boolean;
-    latexContentType: 'prompt' | 'scratchpad' | undefined;
+    latexContentType: 'prompt' | 'scratchpad' | 'final' | undefined;
 };
 
 type Actions = {
     reset: () => void;
     toggleWordCountView: () => void;
-    setLatexContentType: (type: 'prompt' | 'scratchpad') => void;
+    setLatexContentType: (type: 'prompt' | 'scratchpad' | 'final') => void;
 };
 
 const initialState: GenericProcessStoreState = {
@@ -40,7 +40,7 @@ export const genericProcessStore = createLogStore<GenericProcessStoreState & Act
     toggleWordCountView: () =>
         set(state => ({ wordCountViewOpen: !state.wordCountViewOpen })),
 
-    setLatexContentType: (type: 'prompt' | 'scratchpad') =>
+    setLatexContentType: (type: 'prompt' | 'scratchpad' | 'final') =>
         set({ latexContentType: type })
 }));
 
