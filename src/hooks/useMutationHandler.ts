@@ -4,6 +4,7 @@ import * as globalActions from '@mtc/actions/global';
 import * as globalSelectors from '@mtc/selectors/global';
 import * as orochiActions from '@mtc/actions/orochi';
 import * as orochiSelectors from '@mtc/selectors/orochi';
+import * as mathSelectors from '@mtc/selectors/math';
 import * as genericProcessActions from '@mtc/actions/genericProcess';
 import * as genericProcessSelectors from '@mtc/selectors/genericProcess';
 import { globalStore } from '@src/store/globalStore';
@@ -70,7 +71,10 @@ const useMutationHandler = () => {
             globalSelectors.taskWindow,
             globalActions.updateTaskOpenState,
             globalStore,
-            { runIfElementMissing: true, processes: ['Generic', 'STEM', 'Orochi'] }
+            {
+                runIfElementMissing: true,
+                processes: ['Generic', 'STEM', 'Orochi', 'Math']
+            }
         );
 
         mutationHandler.addAction(
@@ -229,6 +233,27 @@ const useMutationHandler = () => {
                 markElement: 'conversation-title-seen',
                 runIfElementMissing: false,
                 processes: ['Orochi']
+            }
+        );
+
+        mutationHandler.addAction(
+            mathSelectors.prompt,
+            genericProcessActions.updateOperatorResponse,
+            genericProcessStore,
+            {
+                markElement: 'math-prompt-seen',
+                runIfElementMissing: false,
+                processes: ['Math']
+            }
+        );
+
+        mutationHandler.addAction(
+            mathSelectors.scratchpad,
+            genericProcessActions.updateSelectedModelResponse,
+            genericProcessStore,
+            {
+                runIfElementMissing: false,
+                processes: ['Math']
             }
         );
 

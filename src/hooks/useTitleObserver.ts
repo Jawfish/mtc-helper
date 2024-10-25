@@ -11,7 +11,8 @@ function useTitleObserver() {
     useEffect(() => {
         const titleToProcessMap: Record<string, Process> = {
             orochi: 'Orochi',
-            stem: 'STEM'
+            stem: 'STEM',
+            math: 'Math'
         };
 
         const handleTitleMutation = () => {
@@ -21,6 +22,11 @@ function useTitleObserver() {
             let process: Process = 'Generic';
             for (const [key, value] of Object.entries(titleToProcessMap)) {
                 if (title.includes(key)) {
+                    if (key === 'stem' && title.includes('math')) {
+                        process = 'Math';
+                        break;
+                    }
+
                     process = value;
                     break;
                 }

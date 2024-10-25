@@ -2,7 +2,7 @@ import { useStore } from 'zustand';
 
 import { createLogStore } from './storeMiddleware';
 
-export type Process = 'Orochi' | 'Generic' | 'STEM';
+export type Process = 'Orochi' | 'Generic' | 'STEM' | 'Math';
 
 export type GlobalStoreState = {
     process: Process;

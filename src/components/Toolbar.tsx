@@ -29,6 +29,17 @@ export default function Toolbar({ process }: Props) {
     const { canOpenLatexView, toggleLatexView } = useLatexView();
     const { canOpenDiffView, toggleDiffView } = useDiffView();
     const { toggleWordCountView } = useWordCount();
+    const genericProcessStore = useGenericProcessStore();
+
+    const handleLatexPromptView = () => {
+        genericProcessStore.setLatexContentType('prompt');
+        toggleLatexView();
+    };
+
+    const handleLatexScratchpadView = () => {
+        genericProcessStore.setLatexContentType('scratchpad');
+        toggleLatexView();
+    };
 
     return (
         <ToolbarContainer>
@@ -40,18 +51,34 @@ export default function Toolbar({ process }: Props) {
                     Check Response
                 </Button>
             )}
-            <Button
-                tooltip='View the differences between the original and edited responses'
-                onClick={toggleDiffView}
-                disabled={!canOpenDiffView}>
-                View Diff
-            </Button>
+            {process !== 'Math' && (
+                <Button
+                    tooltip='View the differences between the original and edited responses'
+                    onClick={toggleDiffView}
+                    disabled={!canOpenDiffView}>
+                    View Diff
+                </Button>
+            )}
             {process === 'STEM' && (
                 <Button
                     tooltip='Open a live-updating LaTeX preview of the edited response'
                     onClick={toggleLatexView}
                     disabled={!canOpenLatexView}>
                     View LaTeX
+                </Button>
+            )}
+            {process === 'Math' && (
+                <Button
+                    tooltip='Open a live-updating LaTeX preview of the prompt'
+                    onClick={handleLatexPromptView}>
+                    View LaTeX (Prompt)
+                </Button>
+            )}
+            {process === 'Math' && (
+                <Button
+                    tooltip='Open a live-updating LaTeX preview of the scratchpad'
+                    onClick={handleLatexScratchpadView}>
+                    View LaTeX (Scratchpad)
                 </Button>
             )}
             {process !== 'Orochi' && (

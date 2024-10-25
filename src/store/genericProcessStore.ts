@@ -12,11 +12,13 @@ export type GenericProcessStoreState = {
     prompt: string | undefined;
     unselectedResponse: string | undefined;
     wordCountViewOpen: boolean;
+    latexContentType: 'prompt' | 'scratchpad' | undefined;
 };
 
 type Actions = {
     reset: () => void;
     toggleWordCountView: () => void;
+    setLatexContentType: (type: 'prompt' | 'scratchpad') => void;
 };
 
 const initialState: GenericProcessStoreState = {
@@ -25,7 +27,8 @@ const initialState: GenericProcessStoreState = {
     operatorResponseMarkdown: undefined,
     prompt: undefined,
     unselectedResponse: undefined,
-    wordCountViewOpen: false
+    wordCountViewOpen: false,
+    latexContentType: undefined
 };
 
 export const genericProcessStore = createLogStore<GenericProcessStoreState & Actions>(
@@ -35,7 +38,10 @@ export const genericProcessStore = createLogStore<GenericProcessStoreState & Act
     reset: () => set({ ...initialState }),
 
     toggleWordCountView: () =>
-        set(state => ({ wordCountViewOpen: !state.wordCountViewOpen }))
+        set(state => ({ wordCountViewOpen: !state.wordCountViewOpen })),
+
+    setLatexContentType: (type: 'prompt' | 'scratchpad') =>
+        set({ latexContentType: type })
 }));
 
 export const useGenericProcessStore = () => useStore(genericProcessStore);
